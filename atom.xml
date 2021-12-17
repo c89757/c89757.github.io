@@ -6,7 +6,7 @@
   <link href="http://c89757.gitee.io/colinstar/atom.xml" rel="self"/>
   
   <link href="http://c89757.gitee.io/colinstar/"/>
-  <updated>2021-12-17T11:14:37.786Z</updated>
+  <updated>2021-12-16T15:13:33.573Z</updated>
   <id>http://c89757.gitee.io/colinstar/</id>
   
   <author>
@@ -15,30 +15,6 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title></title>
-    <link href="http://c89757.gitee.io/colinstar/2021/12/17/Sychronized%E5%85%B3%E9%94%AE%E5%AD%97-monitorenter%E4%B8%8Emonitorexit/"/>
-    <id>http://c89757.gitee.io/colinstar/2021/12/17/Sychronized%E5%85%B3%E9%94%AE%E5%AD%97-monitorenter%E4%B8%8Emonitorexit/</id>
-    <published>2021-12-17T11:14:37.785Z</published>
-    <updated>2021-12-17T11:14:37.786Z</updated>
-    
-    <content type="html"><![CDATA[<blockquote><p>title: Sychronized关键字-monitorenter与monitorexit<br>date: 2021-12-16 13:57:35<br>tags: 多线程，JUC</p></blockquote><blockquote><p>每个对象都有一个Monitor与之关联，当Monitor被持有后，它将处于锁定状态。Synchronized在JVM里的实现都是 基于进入和退出Monitor对象来实现方法同步和代码块同步，都可以通过成对的MonitorEnter和MonitorExit指令来实现。</p></blockquote><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">synchronized</span>(<span class="keyword">this</span>) &#123;</span><br><span class="line">           System.out.println(<span class="string">&quot;hello world&quot;</span>);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure><p>经过javap解析后</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method</span><span class="params">()</span></span>;</span><br><span class="line">   Code:</span><br><span class="line">      <span class="number">0</span>: aload_0</span><br><span class="line">      <span class="number">1</span>: dup</span><br><span class="line">      <span class="number">2</span>: astore_1</span><br><span class="line">      <span class="number">3</span>: monitorenter</span><br><span class="line">      <span class="number">4</span>: getstatic     #<span class="number">2</span>                  <span class="comment">// Field java/lang/System.out:Ljava/io/PrintStream;</span></span><br><span class="line">      <span class="number">7</span>: ldc           #<span class="number">3</span>                  <span class="comment">// String hello world</span></span><br><span class="line">      <span class="number">9</span>: invokevirtual #<span class="number">4</span>                  <span class="comment">// Method java/io/PrintStream.println:(Ljava/lang/String;)V</span></span><br><span class="line">     <span class="number">12</span>: aload_1</span><br><span class="line">     <span class="number">13</span>: monitorexit</span><br><span class="line">     <span class="number">14</span>: goto          <span class="number">22</span></span><br><span class="line">     <span class="number">17</span>: astore_2</span><br><span class="line">     <span class="number">18</span>: aload_1</span><br><span class="line">     <span class="number">19</span>: monitorexit</span><br><span class="line">     <span class="number">20</span>: aload_2</span><br><span class="line">     <span class="number">21</span>: athrow</span><br><span class="line">     <span class="number">22</span>: <span class="keyword">return</span></span><br><span class="line">   Exception table:</span><br><span class="line">      from    to  target type</span><br><span class="line">          <span class="number">4</span>    <span class="number">14</span>    <span class="number">17</span>   any</span><br><span class="line">         <span class="number">17</span>    <span class="number">20</span>    <span class="number">17</span>   any</span><br><span class="line"></span><br></pre></td></tr></table></figure><p>此处会发现有一个monitorenter，却有两个monitorexit；<br>这是JVM的补偿机制，保证你的同步代码块中出现异常，能正常释放锁</p><p>如字节码行号4-13可能会出现异常，则会走17进行异常处理，在此处进行锁的释放</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;blockquote&gt;
-&lt;p&gt;title: Sychronized关键字-monitorenter与monitorexit&lt;br&gt;date: 2021-12-16 13:57:35&lt;br&gt;tags: 多线程，JUC&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;blockquote&gt;
-</summary>
-      
-    
-    
-    
-    
-  </entry>
   
   <entry>
     <title>MySql性能调优</title>
