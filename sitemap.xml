@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://c89757.gitee.io/colinstar/2021/12/16/gitee+hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</loc>
+    
+    <lastmod>2021-12-17</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://c89757.gitee.io/colinstar/2021/12/17/Sychronized%E5%85%B3%E9%94%AE%E5%AD%97-monitorenter%E4%B8%8Emonitorexit/</loc>
     
     <lastmod>2021-12-17</lastmod>
@@ -11,18 +20,9 @@
   </url>
   
   <url>
-    <loc>http://c89757.gitee.io/colinstar/2021/12/16/gitee+hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</loc>
-    
-    <lastmod>2021-12-16</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>http://c89757.gitee.io/colinstar/2021/12/16/MySql%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/</loc>
     
-    <lastmod>2021-12-16</lastmod>
+    <lastmod>2021-12-17</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -47,7 +47,7 @@
   </url>
   
   <url>
-    <loc>http://c89757.gitee.io/colinstar/categories/index.html</loc>
+    <loc>http://c89757.gitee.io/colinstar/links/index.html</loc>
     
     <lastmod>2021-12-16</lastmod>
     
@@ -56,7 +56,7 @@
   </url>
   
   <url>
-    <loc>http://c89757.gitee.io/colinstar/links/index.html</loc>
+    <loc>http://c89757.gitee.io/colinstar/categories/index.html</loc>
     
     <lastmod>2021-12-16</lastmod>
     
@@ -101,6 +101,13 @@
 
   
   <url>
+    <loc>http://c89757.gitee.io/colinstar/tags/mysql/</loc>
+    <lastmod>2021-12-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>http://c89757.gitee.io/colinstar/tags/JUC/</loc>
     <lastmod>2021-12-17</lastmod>
     <changefreq>weekly</changefreq>
@@ -115,13 +122,6 @@
   </url>
   
   <url>
-    <loc>http://c89757.gitee.io/colinstar/tags/mysql/</loc>
-    <lastmod>2021-12-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>http://c89757.gitee.io/colinstar/tags/others/</loc>
     <lastmod>2021-12-17</lastmod>
     <changefreq>weekly</changefreq>
@@ -129,5 +129,26 @@
   </url>
   
 
+  
+  <url>
+    <loc>http://c89757.gitee.io/colinstar/categories/mysql/</loc>
+    <lastmod>2021-12-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://c89757.gitee.io/colinstar/categories/juc/</loc>
+    <lastmod>2021-12-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://c89757.gitee.io/colinstar/categories/others/</loc>
+    <lastmod>2021-12-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
   
 </urlset>
