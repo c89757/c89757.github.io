@@ -17,16 +17,26 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>标签: nio | Colin</title>
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://c89757.gitee.io/colinstar/tags/nio/index.html">
+  <title>restTemplate | Colin</title>
+  <meta name="description" content="概述  最近项目有个新需求，需要将原来的接口支持https，虽然之前也有用过restTemplate，但一直未对其进行过深入了解，今天便来看一看 官方文档：https:&#x2F;&#x2F;docs.spring.io&#x2F;spring-framework&#x2F;docs&#x2F;current&#x2F;reference&#x2F;html&#x2F;integration.html#rest-client-accessRestTemplate">
+<meta property="og:type" content="article">
+<meta property="og:title" content="restTemplate">
+<meta property="og:url" content="http://c89757.gitee.io/colinstar/2022/06/01/restTemplate/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="概述  最近项目有个新需求，需要将原来的接口支持https，虽然之前也有用过restTemplate，但一直未对其进行过深入了解，今天便来看一看 官方文档：https:&#x2F;&#x2F;docs.spring.io&#x2F;spring-framework&#x2F;docs&#x2F;current&#x2F;reference&#x2F;html&#x2F;integration.html#rest-client-accessRestTemplate">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://c89757.gitee.io/colinstar/2022/06/01/restTemplate/image-20220601203121291.png">
+<meta property="og:image" content="http://c89757.gitee.io/colinstar/2022/06/01/restTemplate/image-20220601211450632.png">
+<meta property="og:image" content="http://c89757.gitee.io/colinstar/colinstar/2022/06/01/restTemplate/git_repository/hexo_workspace/blog/source_posts/restTemplate/image-20220601233400136.png">
+<meta property="og:image" content="http://c89757.gitee.io/colinstar/2022/06/01/restTemplate/image-20220602002129124.png">
+<meta property="og:image" content="http://c89757.gitee.io/colinstar/2022/06/01/restTemplate/image-20220602002305195.png">
+<meta property="article:published_time" content="2022-06-01T12:26:08.000Z">
+<meta property="article:modified_time" content="2022-06-01T16:26:14.544Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://c89757.gitee.io/colinstar/2022/06/01/restTemplate/image-20220601203121291.png">
   <!-- Canonical links -->
-  <link rel="canonical" href="http://c89757.gitee.io/colinstar/tags/nio/index.html">
+  <link rel="canonical" href="http://c89757.gitee.io/colinstar/2022/06/01/restTemplate/index.html">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -342,68 +352,260 @@
 </aside>
 
   
-  <main class="main" role="main">
-  <article class="content article article-tags post-type-list" itemscope="">
-    <header class="article-header">
-      <h1 itemprop="name" class="hidden-xs">标签: nio</h1>
-      <p class="text-muted hidden-xs">共 1 篇文章</p>
-      <nav role="navigation" id="nav-main" class="okayNav">
-        <ul>
-          <li><a href="/colinstar/tags">All</a></li>
-          
-          <li><a href="/colinstar/tags/mysql/">mysql</a></li>
-          
-          <li><a href="/colinstar/tags/JUC/">JUC</a></li>
-          
-          <li><a href="/colinstar/tags/多线程/">多线程</a></li>
-          
-          <li><a href="/colinstar/tags/others/">others</a></li>
-          
-          <li><a href="/colinstar/tags/堆/">堆</a></li>
-          
-          <li><a href="/colinstar/tags/排序算法/">排序算法</a></li>
-          
-          <li><a href="/colinstar/tags/nio/">nio</a></li>
-          
-          <li><a href="/colinstar/tags/netty/">netty</a></li>
-          
-        </ul>
-      </nav>
-    </header>
-    <!-- /header -->
-    <div class="article-body">
-      <div class="row">
-        
-<div class="col-md-6">
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-restTemplate" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
     
-<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
-  <div class="panel-body">
-     <div class="article-meta">
-       <time datetime="2022-01-06T12:58:22.000Z" itemprop="datePublished">2022-01-06</time>
-     </div>
-     <h3 class="article-title" itemprop="name">
-       <a class="article-link" href="/colinstar/2022/01/06/Netty/">Netty</a>
-     </h3>
-   </div>
-   
-   <div class="panel-footer">
-     
-      <a href="/colinstar/tags/nio/" class="label label-default mb">nio</a>
-     
-      <a href="/colinstar/tags/netty/" class="label label-default mb">netty</a>
-     
-     
-   </div>
-   
-</article>
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      restTemplate
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/colinstar/2022/06/01/restTemplate/" class="article-date">
+	  <time datetime="2022-06-01T12:26:08.000Z" itemprop="datePublished">2022-06-01</time>
+	</a>
+</span>
+        
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
 
 
-</div>
-
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/colinstar/2022/06/01/restTemplate/#comments" class="article-comment-link">评论</a></span>
+        
       </div>
     </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><br>
+
+<p>最近项目有个新需求，需要将原来的接口支持https，虽然之前也有用过restTemplate，但一直未对其进行过深入了解，今天便来看一看</p>
+<p>官方文档：<a target="_blank" rel="noopener" href="https://docs.spring.io/spring-framework/docs/current/reference/html/integration.html#rest-client-accessRestTemplate">https://docs.spring.io/spring-framework/docs/current/reference/html/integration.html#rest-client-accessRestTemplate</a></p>
+<br>
+
+<img src="/colinstar/2022/06/01/restTemplate/image-20220601203121291.png" class>
+
+
+
+
+
+
+
+<p>有两种方法可以创建restTemplate实例，一种是直接new，另一种是通过构建者构建出来</p>
+<ul>
+<li>new</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 直接new</span></span><br><span class="line">RestTemplate restTemplate = <span class="keyword">new</span> RestTemplate();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 也可以调用有参构造，传入一个ClientHttpRequestFactory的实现类</span></span><br><span class="line">SimpleClientHttpRequestFactory factory = <span class="keyword">new</span> SimpleClientHttpRequestFactory();</span><br><span class="line">factory.setConnectTimeout(<span class="number">3000</span>);</span><br><span class="line">factory.setReadTimeout(<span class="number">3000</span>);</span><br><span class="line">RestTemplate restTemplate = <span class="keyword">new</span> RestTemplate(factory);</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<ul>
+<li>build</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">RestTemplate restTemplate = <span class="keyword">new</span> RestTemplateBuilder()</span><br><span class="line">    			.basicAuthentication(<span class="string">&quot;username&quot;</span>, <span class="string">&quot;password&quot;</span>)</span><br><span class="line">                .setConnectTimeout(Duration.ofMillis(<span class="number">3000</span>))</span><br><span class="line">                .setReadTimeout(Duration.ofMillis(<span class="number">3000</span>))</span><br><span class="line">                .rootUri(<span class="string">&quot;http://example/base/&quot;</span>)</span><br><span class="line">                .build();</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="常用API"><a href="#常用API" class="headerlink" title="常用API"></a>常用API</h1><ul>
+<li>postForEntity</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">String url = <span class="string">&quot;http://www.baidu.com&quot;</span>;</span><br><span class="line">HttpHeaders header = <span class="keyword">new</span> HttpHeaders();</span><br><span class="line">header.add(<span class="string">&quot;auth&quot;</span>,<span class="string">&quot;bearer ****&quot;</span>);</span><br><span class="line">HttpEntity&lt;UserReqInfo&gt; httpEntity = <span class="keyword">new</span> HttpEntity&lt;&gt;(<span class="keyword">new</span> UserReqInfo(),header);</span><br><span class="line">ResponseEntity&lt;UserRespInfo&gt; orderResponseEntity = restTemplate.postForEntity(url, httpEntity, UserRespInfo.class);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>对于基本类型和实体传参，必须使用MultiValueMap传参    </p>
+<p>​    什么是基本类型和实体传参呢？类似于form表单，如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@PostMapping(&quot;/test&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">(UserDTO userDTO,Integer requestId)</span></span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>而对于@Requestbody传参，需要使用HttpEntity传参</p>
+<ul>
+<li>exhange</li>
+</ul>
+<p>exchange有以下几种重载方法</p>
+<br>
+
+<img src="/colinstar/2022/06/01/restTemplate/image-20220601211450632.png" class>
+
+<br>
+
+
+
+<p>url：请求路径</p>
+<p>method：请求方法</p>
+<p>requestEntity：封装请求头和请求体</p>
+<p>responseType：返回数据类型</p>
+<p>uriVariables：支持PathVariable类型的数据</p>
+<p>示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">String url = <span class="string">&quot;http://www.baidu.com&quot;</span>;</span><br><span class="line"><span class="comment">// 创建http的header</span></span><br><span class="line">HttpHeaders header = <span class="keyword">new</span> HttpHeaders();</span><br><span class="line">header.add(<span class="string">&quot;auth&quot;</span>,<span class="string">&quot;bearer ****&quot;</span>);</span><br><span class="line">header.setContentType(MediaType.APPLICATION_JSON);</span><br><span class="line">Gson gson = <span class="keyword">new</span> Gson();</span><br><span class="line">String json = gson.toJson(<span class="keyword">new</span> UserReqInfo()); <span class="comment">// UserReqInfo自定义实体类</span></span><br><span class="line"><span class="comment">// 设置请求体和请求头</span></span><br><span class="line">HttpEntity&lt;String&gt; httpEntity = <span class="keyword">new</span> HttpEntity&lt;&gt;(json,header);</span><br><span class="line">ResponseEntity&lt;UserRespInfo&gt; exchange = restTemplate.exchange(url, HttpMethod.POST, httpEntity, UserRespInfo.class); <span class="comment">// UserRespInfo自定义实体类 </span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<ul>
+<li>execute</li>
+</ul>
+<p>restTemplate的所有get,post等等方法，最终都是调用的execute方法。</p>
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>初始化</p>
+<p>默认使用HttpUrlConnection，可以通过构造方法传入一个ClientHttpRequestFactory的实现类，以此来替换底层的执行引擎，常见的执行引擎包括HttpClient、Netty、OKHttp。</p>
+
+
+
+
+
+
+<p>无参构造</p>
+<p>调用RestTemplate无参构造初始化时，会去调用父类<code>InterceptingHttpAccessor</code>的无参构造，其又会去调用顶级父类<code>HttpAccessor</code>的无参构造，虽然无参构造啥也没做，但是可以看到，默认的ClientHttpRequestFactory在类加载时已经初始化为<code>SimpleClientHttpRequestFactory</code>了</p>
+<p><img src="/colinstar/colinstar/2022/06/01/restTemplate/git_repository\hexo_workspace\blog\source_posts\restTemplate\image-20220601233400136.png" alt="image-20220601233400136"></p>
+<p>有参构造</p>
+<p>我们可以先创建一个<code>HttpComponentsClientHttpRequestFactory</code>的实例，该类的执行引擎用的是HttpClient</p>
+<img src="/colinstar/2022/06/01/restTemplate/image-20220602002129124.png" class>
+
+<p>exchange（）方法</p>
+<img src="/colinstar/2022/06/01/restTemplate/image-20220602002305195.png" class>
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://c89757.gitee.io/colinstar/2022/06/01/restTemplate/" title="restTemplate" target="_blank" rel="external">http://c89757.gitee.io/colinstar/2022/06/01/restTemplate/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://gitee.com/c89757" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/colinstar/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://gitee.com/c89757" target="_blank"><span class="text-dark">colin</span><small class="ml-1x">悟已往之不谏，知来者之可追</small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
   </article>
-   
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/colinstar/2022/03/24/%E5%A0%86%E6%8E%92%E5%BA%8F/" title="堆排序"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/colinstar/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/colinstar/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 </main>
 
   <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
@@ -467,6 +669,14 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
 
 
   <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>
