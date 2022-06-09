@@ -6,7 +6,7 @@
   <link href="http://c89757.gitee.io/colinstar/atom.xml" rel="self"/>
   
   <link href="http://c89757.gitee.io/colinstar/"/>
-  <updated>2022-06-01T16:26:14.544Z</updated>
+  <updated>2022-06-09T15:13:40.832Z</updated>
   <id>http://c89757.gitee.io/colinstar/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>maven打包报错:Malformed \uxxx encoding</title>
+    <link href="http://c89757.gitee.io/colinstar/2022/06/09/maven%E6%89%93%E5%8C%85%E6%8A%A5%E9%94%99-Malformed-uxxx-encoding/"/>
+    <id>http://c89757.gitee.io/colinstar/2022/06/09/maven%E6%89%93%E5%8C%85%E6%8A%A5%E9%94%99-Malformed-uxxx-encoding/</id>
+    <published>2022-06-09T14:27:51.000Z</published>
+    <updated>2022-06-09T15:13:40.832Z</updated>
+    
+    <content type="html"><![CDATA[<p>在最近一次项目构建中，执行<code>mvn clean package</code>却报出<code>Malformed \uxxx encoding</code>的错误。查阅资料后，</p><p>给出了以下几种解决方式：</p><ul><li>删除~/.m2/repository/path-to-the-library的包</li><li>将项目中的<code>/</code>更改为<code>\</code></li></ul><p>对我来说都不得行，最后查阅到有人说是<code>resolver-status.properties</code>损坏，里面包含了\u0000，</p><p>然后我就根据Maven提示，带上参数 -e - X 执行命令：Maven -e - X clean package，日志打印出是哪个包报错，</p><p>最后来到仓库中，删除对应的<code>resolver-status.properties</code>文件，再次构建成功！</p><p>那<code>resolver-status.properties</code>文件是干嘛的呢？</p><p>Maven更新本地仓库的步骤是：先更新元文件，再根据元文件去更新本地仓库jar包</p><p>而元文件有三个<code>maven-metadata-local.xml</code>，<code>maven-metadata-snapshot-nexus.xml</code>，<code>resolver-status.properties</code></p><ul><li>maven-metadata-local.xml</li></ul><p>在本地install代码后会生成该文件，记录的是本地项目编译的时间戳</p><ul><li>maven-metadata-snapshot-nexus.xml</li></ul><p>从远程仓库拉取jar包后，会同时从仓库下载该元文件，该文件记录的是远程仓库上项目最新版本的时间</p><ul><li>resolver-status.properties</li></ul><p>从远程仓库拉取jar包的时候，也会生成该文件，并且每次拉取都会更新。该文件主要作用是记录maven-metadata–nexus.xml 文件的上次更新时间戳，并结合标签完成更新策略的一部分</p><p><strong>更新本地jar包</strong>：依赖于 maven-metadata-local.xml 和 maven-metadata-snapshot-nexus.xml 两个文件</p><ul><li>如果只有 maven-metadata-local.xml 文件，一般来说是配置有错，或者并没有从远程仓库中拉取过jar包</li><li>如果两个文件都有，每次都需要比较一下两个文件的时间戳，即标签上的时间戳。<ul><li>如果local.xml的时间戳比snapshot.xml的时间戳要新，就不会从远程仓库下载；</li><li>如果local.xml的时间戳比snapshot.xml的时间戳要旧，就会去检查一下本地maven仓库的该项目文件夹路径下是否有snapshot.xml对应版本的jar包</li><li>如果没有该版本的jar包，就会从远程仓库拉取该版本的jar包</li><li>如果有该版本的jar包，就不会做任何行为</li></ul></li></ul><p><strong>更新本地元文件</strong>：更新本地仓库jar包决定于本地元文件 maven-metadata-snapshot-nexus.xml，该文件的更新取决于resolver-status.properties文件</p><ul><li>先去远程仓库获取maven-metadata-snapshot-nexus.xml文件，远程仓库中不存在此文件，那么会走下载流程</li><li>如果存在，读取resolver-status.properties中的lastUpdated参数，然后与当前的时间做比较，根据跟新策略是否需要下载（always/never/daily…)</li></ul><p>附上stackOverflow上的回答：<a href="https://stackoverflow.com/questions/68003423/java-lang-illegalargumentexception-malformed-uxxxx-encoding-while-mvn-install">https://stackoverflow.com/questions/68003423/java-lang-illegalargumentexception-malformed-uxxxx-encoding-while-mvn-install</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;在最近一次项目构建中，执行&lt;code&gt;mvn clean package&lt;/code&gt;却报出&lt;code&gt;Malformed \uxxx encoding&lt;/code&gt;的错误。查阅资料后，&lt;/p&gt;
+&lt;p&gt;给出了以下几种解决方式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;删除~/.m2/re</summary>
+      
+    
+    
+    
+    
+    <category term="maven" scheme="http://c89757.gitee.io/colinstar/tags/maven/"/>
+    
+  </entry>
   
   <entry>
     <title>restTemplate</title>
