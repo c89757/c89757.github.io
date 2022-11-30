@@ -25,15 +25,15 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="单表查询的成本概述IO成本：我们的表经常使用的MyISAM、InnoDB存储引擎都是将数据和索引都存储到磁盘上的，当我们想查询表中的记录时，需要先把数据或者索引加载到内存中然后再操作。这个从磁盘到内存这个加载的过程损耗的时间称之为I&#x2F;O成本。 CPU成本：读取以及检测记录是否满足对应的搜索条件、对结果集进行排序等这些操作损耗的时间称之为CPU成本。 对于InnoDB来说，页是磁盘和内存之间进行交互">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://c89757.gitee.io/colinstar/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/typora-user-images/查询的成本/image-20221107233713733.png">
-<meta property="og:image" content="http://c89757.gitee.io/colinstar/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/typora-user-images/查询的成本/image-20221108001427511.png">
-<meta property="og:image" content="http://c89757.gitee.io/colinstar/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/typora-user-images/查询的成本/image-20221108001727200.png">
+<meta property="og:image" content="http://c89757.gitee.io/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/image-20221107233713733.png">
+<meta property="og:image" content="http://c89757.gitee.io/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/image-20221108001427511.png">
+<meta property="og:image" content="http://c89757.gitee.io/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/image-20221108001727200.png">
 <meta property="article:published_time" content="2022-11-07T15:15:38.000Z">
-<meta property="article:modified_time" content="2022-11-07T16:29:33.673Z">
+<meta property="article:modified_time" content="2022-11-30T15:43:24.430Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="Mysql">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://c89757.gitee.io/colinstar/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/typora-user-images/查询的成本/image-20221107233713733.png">
+<meta name="twitter:image" content="http://c89757.gitee.io/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/image-20221107233713733.png">
   <!-- Canonical links -->
   <link rel="canonical" href="http://c89757.gitee.io/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/index.html">
   
@@ -356,7 +356,7 @@
   <div class="slimContent">
     <nav id="toc" class="article-toc">
       <h3 class="toc-title">文章目录</h3>
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%95%E8%A1%A8%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC"><span class="toc-number">1.</span> <span class="toc-text">单表查询的成本</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">1.1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E6%88%90%E6%9C%AC%E7%9A%84%E4%BC%98%E5%8C%96%E6%AD%A5%E9%AA%A4"><span class="toc-number">1.2.</span> <span class="toc-text">基于成本的优化步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%E3%80%81%E6%A0%B9%E6%8D%AE%E6%90%9C%E7%B4%A2%E6%9D%A1%E4%BB%B6%EF%BC%8C%E6%89%BE%E5%87%BA%E6%89%80%E6%9C%89%E5%8F%AF%E8%83%BD%E4%BD%BF%E7%94%A8%E7%9A%84%E7%B4%A2%E5%BC%95"><span class="toc-number">1.2.1.</span> <span class="toc-text">1、根据搜索条件，找出所有可能使用的索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2%E3%80%81%E8%AE%A1%E7%AE%97%E5%85%A8%E8%A1%A8%E6%89%AB%E6%8F%8F%E7%9A%84%E4%BB%A3%E4%BB%B7"><span class="toc-number">1.2.2.</span> <span class="toc-text">2、计算全表扫描的代价</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3%E3%80%81%E8%AE%A1%E7%AE%97%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%90%8C%E7%B4%A2%E5%BC%95%E6%89%A7%E8%A1%8C%E6%9F%A5%E8%AF%A2%E7%9A%84%E4%BB%A3%E4%BB%B7"><span class="toc-number">1.2.3.</span> <span class="toc-text">3、计算使用不同索引执行查询的代价</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%99%AE%E9%80%9A%E4%BA%8C%E7%BA%A7%E7%B4%A2%E5%BC%95%E6%89%A7%E8%A1%8C%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC"><span class="toc-number">1.2.4.</span> <span class="toc-text">使用普通二级索引执行查询的成本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E7%B4%A2%E5%BC%95%E7%BB%9F%E8%AE%A1%E6%95%B0%E6%8D%AE%E7%9A%84%E6%88%90%E6%9C%AC%E8%AE%A1%E7%AE%97"><span class="toc-number">1.3.</span> <span class="toc-text">基于索引统计数据的成本计算</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%95%E8%A1%A8%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC"><span class="toc-number">1.</span> <span class="toc-text">单表查询的成本</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">1.1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E6%88%90%E6%9C%AC%E7%9A%84%E4%BC%98%E5%8C%96%E6%AD%A5%E9%AA%A4"><span class="toc-number">1.2.</span> <span class="toc-text">基于成本的优化步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B9%E6%8D%AE%E6%90%9C%E7%B4%A2%E6%9D%A1%E4%BB%B6%EF%BC%8C%E6%89%BE%E5%87%BA%E6%89%80%E6%9C%89%E5%8F%AF%E8%83%BD%E4%BD%BF%E7%94%A8%E7%9A%84%E7%B4%A2%E5%BC%95"><span class="toc-number">1.2.1.</span> <span class="toc-text">根据搜索条件，找出所有可能使用的索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E5%85%A8%E8%A1%A8%E6%89%AB%E6%8F%8F%E7%9A%84%E4%BB%A3%E4%BB%B7"><span class="toc-number">1.2.2.</span> <span class="toc-text">计算全表扫描的代价</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%90%8C%E7%B4%A2%E5%BC%95%E6%89%A7%E8%A1%8C%E6%9F%A5%E8%AF%A2%E7%9A%84%E4%BB%A3%E4%BB%B7"><span class="toc-number">1.2.3.</span> <span class="toc-text">计算使用不同索引执行查询的代价</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%99%AE%E9%80%9A%E4%BA%8C%E7%BA%A7%E7%B4%A2%E5%BC%95%E6%89%A7%E8%A1%8C%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC"><span class="toc-number">1.2.4.</span> <span class="toc-text">使用普通二级索引执行查询的成本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E7%B4%A2%E5%BC%95%E7%BB%9F%E8%AE%A1%E6%95%B0%E6%8D%AE%E7%9A%84%E6%88%90%E6%9C%AC%E8%AE%A1%E7%AE%97"><span class="toc-number">1.3.</span> <span class="toc-text">基于索引统计数据的成本计算</span></a></li></ol></li></ol>
     </nav>
   </div>
 </aside>
@@ -416,12 +416,20 @@
 <hr>
 <p>tips：在读取记录时，即使不需要检测记录是否符合搜索条件，其成本也算作0.2</p>
 <hr>
+<br>
+
+
+
+
+
+
+
 <ul>
 <li>准备工作</li>
 </ul>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> single_table (</span><br><span class="line">	id <span class="type">int</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> auto_increment,</span><br><span class="line">	key1 <span class="type">VARCHAR</span> ( <span class="number">100</span> ),</span><br><span class="line">	key2 <span class="type">INT</span>,</span><br><span class="line">	key3 <span class="type">VARCHAR</span> ( <span class="number">100</span> ),</span><br><span class="line">	key_part1 <span class="type">VARCHAR</span> ( <span class="number">100</span> ),</span><br><span class="line">	key_part2 <span class="type">VARCHAR</span> ( <span class="number">100</span> ),</span><br><span class="line">	key_part3 <span class="type">VARCHAR</span> ( <span class="number">100</span> ),</span><br><span class="line">	common_field <span class="type">VARCHAR</span> ( <span class="number">100</span> ),</span><br><span class="line">	<span class="keyword">PRIMARY</span> KEY ( id ),</span><br><span class="line">	KEY idx_key1 ( key1 ),</span><br><span class="line">	<span class="keyword">UNIQUE</span> KEY uk_key2 ( key2 ),</span><br><span class="line">	KEY idx_ke3 ( key3 ),</span><br><span class="line">KEY idx_key_part ( key_part1, key_part2, key_part3 ) </span><br><span class="line">) ENGINE <span class="operator">=</span> INNODB CHARSET <span class="operator">=</span> utf8;</span><br></pre></td></tr></table></figure>
 
-
+<br>
 
 <ul>
 <li>存储过程脚本插入1w数据</li>
@@ -437,6 +445,10 @@
 <li>计算使用不同索引执行查询的代价</li>
 <li>对比各种执行方案的代价，找出成本最低的那一个</li>
 </ol>
+<br>
+
+
+
 <p>如下面的查询语句：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">	<span class="operator">*</span> </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">	single_table </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">	key1 <span class="keyword">IN</span> ( <span class="string">&#x27;a&#x27;</span>, <span class="string">&#x27;b&#x27;</span>, <span class="string">&#x27;c&#x27;</span> ) </span><br><span class="line">	<span class="keyword">AND</span> key2 <span class="operator">&gt;</span> <span class="number">10</span> </span><br><span class="line">	<span class="keyword">AND</span> key2 <span class="operator">&lt;</span> <span class="number">1000</span> <span class="keyword">AND</span> key3 <span class="operator">&gt;</span> key2 </span><br><span class="line">	<span class="keyword">AND</span> key_part1 <span class="keyword">LIKE</span> <span class="string">&#x27;%hello%&#x27;</span> </span><br><span class="line">	<span class="keyword">AND</span> common_field <span class="operator">=</span> <span class="string">&#x27;123&#x27;</span>;</span><br></pre></td></tr></table></figure>
 
@@ -444,8 +456,8 @@
 
 
 
-<h3 id="1、根据搜索条件，找出所有可能使用的索引"><a href="#1、根据搜索条件，找出所有可能使用的索引" class="headerlink" title="1、根据搜索条件，找出所有可能使用的索引"></a>1、根据搜索条件，找出所有可能使用的索引</h3><p>​    很显然，上面的查询语句，可能用到的索引有 idx_key1( key1) 、uk_key2(key2)</p>
-<h3 id="2、计算全表扫描的代价"><a href="#2、计算全表扫描的代价" class="headerlink" title="2、计算全表扫描的代价"></a>2、计算全表扫描的代价</h3><p>​    全表扫描即：把聚簇索引中的记录都依次与给定的搜索条件进行比较，并把符合条件的记录加入结果集中。所以需要将聚簇索引对应的页面加载到内存中，然后再检测记录是否符合搜索条件。</p>
+<h3 id="根据搜索条件，找出所有可能使用的索引"><a href="#根据搜索条件，找出所有可能使用的索引" class="headerlink" title="根据搜索条件，找出所有可能使用的索引"></a>根据搜索条件，找出所有可能使用的索引</h3><p>​    很显然，上面的查询语句，可能用到的索引有 idx_key1( key1) 、uk_key2(key2)</p>
+<h3 id="计算全表扫描的代价"><a href="#计算全表扫描的代价" class="headerlink" title="计算全表扫描的代价"></a>计算全表扫描的代价</h3><p>​    全表扫描即：把聚簇索引中的记录都依次与给定的搜索条件进行比较，并把符合条件的记录加入结果集中。所以需要将聚簇索引对应的页面加载到内存中，然后再检测记录是否符合搜索条件。</p>
 <p>​    由于查询成本 = I/O成本 + CPU成本。所以计算全表扫描的代价需要两个信息：</p>
 <ul>
 <li>聚簇索引占用的页面数</li>
@@ -457,7 +469,12 @@
 
 
 <p>结果大致如下：</p>
-<p><img src="/colinstar/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/typora-user-images\查询的成本\image-20221107233713733.png" alt="image-20221107233713733"></p>
+<img src="/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/image-20221107233713733.png" class>
+
+
+
+
+
 <p>其中：</p>
 <p>Rows：表示表中记录条数。对于Myisam存储引擎来说，该值是准确的；对于Innodb来说，该值是估计值</p>
 <p>Data_length：表示表占用的存储空间字节数。对于Myisam来说，该值就是数据文件的大小；对于Innodb引擎来说，该值就相当于聚簇索引占用的存储空间大小。</p>
@@ -466,15 +483,27 @@
 <p>​                    聚簇索引的页面数量 = 1589248 / 16 / 1024 = 97</p>
 <p>所以I/O成本 = 97 * 1.0 = 97 （97页，每页成本1.0）</p>
 <p>CPU成本 = 9317 * 0.2 = 1863.4 （Rows = 9317行，每行检索成本0.2）</p>
+<br>
+
 <p>总成本  = 97 + 1863.4 = 1960.4</p>
+<br>
+
 <p>所以对该表的全表扫描成本即为 1960.4</p>
-<h3 id="3、计算使用不同索引执行查询的代价"><a href="#3、计算使用不同索引执行查询的代价" class="headerlink" title="3、计算使用不同索引执行查询的代价"></a>3、计算使用不同索引执行查询的代价</h3><p>Mysql查询优化器会优先分析使用唯一二级索引的成本，再分析普通索引的成本。所以先分析uk_key2的成本</p>
+<br>
+
+<h3 id="计算使用不同索引执行查询的代价"><a href="#计算使用不同索引执行查询的代价" class="headerlink" title="计算使用不同索引执行查询的代价"></a>计算使用不同索引执行查询的代价</h3><p>Mysql查询优化器会优先分析使用唯一二级索引的成本，再分析普通索引的成本。所以先分析uk_key2的成本</p>
+<br>
+
 <p>uk_key2的对应的搜索条件为 key2 &gt; 10 and key2 &lt; 1000，即对应扫描区间为（10，1000）</p>
+<br>
+
 <ul>
 <li>扫描区间数量</li>
 </ul>
 <p>无论某个扫描区间的二级索引到底占用了多少页面，查询优化器粗暴的认为读取索引的一个扫描区间的I/O成本与读取一个页面的I/O成本相同；</p>
 <p>此处的扫描区间数量只有一个: （10，1000），所以加载页面的I/O成本为1.0</p>
+<br>
+
 <ul>
 <li>需要回表的记录数</li>
 </ul>
@@ -487,6 +516,8 @@
 <p>tips：数据页中有个Page Header部分。Page Header中有一个PAGE_N_RECS属性，记录了该页面中目前有多少条记录。所以如果最左记录和最右记录相隔不太远，直接遍历这些页面，拿到这个属性相加即可</p>
 <hr>
 <p>如果最左记录和最右记录相隔比较远，则沿着最左记录向右读10个页面，计算每个页面平均包含多少记录，然后用这个平均值乘以最左记录和最右记录之前的页面数量即可。</p>
+<br>
+
 <p>假设根据上述方法，测得uk_key2再区间（10，1000）中大约有95条记录。读取这95条二级索引记录需要付出的CPU成本为 95 * 0.2 = 19</p>
 <br>
 
@@ -501,31 +532,57 @@
 <li>回表得到完整记录后，再检测其他搜索条件是否成立</li>
 </ul>
 <p>我们通过扫描区间获取到的二级索引记录有95条，对应着聚簇索引中的95条完整用户记录。读取并检测这些完整的用户记录是否符合其余的搜索条件，所以CPU成本为：95 * 0.2 = 19</p>
+<br>
+
 <p>所以综上所述，使用uk_key2执行查询的总成本为：1.0 + 95 * 0.2 + 95 * 1.0 + 95 * 0.2  = 134</p>
+<br>
+
 <h3 id="使用普通二级索引执行查询的成本"><a href="#使用普通二级索引执行查询的成本" class="headerlink" title="使用普通二级索引执行查询的成本"></a>使用普通二级索引执行查询的成本</h3><p>略</p>
+<br>
+
 <h2 id="基于索引统计数据的成本计算"><a href="#基于索引统计数据的成本计算" class="headerlink" title="基于索引统计数据的成本计算"></a>基于索引统计数据的成本计算</h2><p>有时候，在使用索引执行查询时，会有很多个单点扫描区间，比如in语句：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> single_table <span class="keyword">where</span> key1 <span class="keyword">in</span> (<span class="string">&#x27;a&#x27;</span>, <span class="string">&#x27;b&#x27;</span>, <span class="string">&#x27;c&#x27;</span> , .... <span class="string">&#x27;zzz&#x27;</span>);</span><br></pre></td></tr></table></figure>
 
 <p>很显然这个查询语句可能使用到的索引就是idx_key1。由于这个索引并不是唯一二级索引，所以并不能确定一个单点扫描区间内对应的二级索引记录的条数有多少（唯一二级索引不重复，所以有多少个in就有多少个等值比较；但普通索引，一个in值里可能包含许多重复的值）。所以我们要去计算一下，计算方式就是先获取索引对应的B+树的区间最左记录和最右记录，然后再计算这两条记录之间有多少记录。</p>
 <p>这种通过直接访问索引对应的B+树来计算某个扫面区间内对应的索引记录条数的方式称为**<code>index dive</code>**</p>
+<br>
+
 <p>如果只是零星几个单点扫描区间的话，使用index dive来计算这些单点扫描区间对应的记录数没什么问题。但是当扫描区间很多时，使用这种方法带来的性能损耗太大了，可能计算这些扫描区间对应的索引记录条数的成本比直接全表扫描的成本都大。</p>
+<br>
+
 <p>mysql中提供了一个系统变量<code>eq_range_index_limit</code></p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> VARIABLES <span class="keyword">LIKE</span> <span class="string">&#x27;%dive%&#x27;</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="/colinstar/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/typora-user-images\查询的成本\image-20221108001427511.png" alt="image-20221108001427511"></p>
+<br>
+
+<img src="/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/image-20221108001427511.png" class>
+
+<br>
+
 <p>也就是说，如果in语句生成的单点扫描区间的数量小于200个，将使用index dive来计算各个单点扫描区间对应的记录条数。</p>
 <p>如果大于等于200个，将使用索引统计数据（index statistics）来进行估算。具体如何估算如下：</p>
 <p>Mysql会为表中每个索引维护一份统计数据。可以通过如下sql查看</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> index <span class="keyword">from</span> single_table;</span><br></pre></td></tr></table></figure>
 
-<p><img src="/colinstar/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/typora-user-images\查询的成本\image-20221108001727200.png" alt="image-20221108001727200"></p>
+<br>
+
+<img src="/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/image-20221108001727200.png" class>
+
+<br>
+
 <p>Non_uniqe：该列所属索引是否是唯一索引。</p>
 <p>Seq_in_index：该列在索引包含的列中位置。对于联合索引idx_key_part来说，key_part1的位置是1，key_part2的位置是2</p>
 <p>Cardinality：该列中不重复值的数量。（是一个估算值，并不精确）比如对于一个有10000行记录的表来说，如果Cardinality = 10000，表明表中没有重复的值；如果Cardinality = 1，表示该列的值全部都是重复值；</p>
+<br>
+
 <p>索引统计数据（index statistics)</p>
 <p>1、使用show table status语句显示出来的rows值，表示表中有多少记录</p>
 <p>2、使用show index from语句显示出来的Cardinality值，</p>
 <p>我们可以计算出，某一个列中一个值平均重复多少次。即 rows / Cardinality</p>
+<br>
+
+<br>
+
 <p>假设Rows值为9693，key1列Cardinality值为968，计算出来单个列的平均重复次数为：9693 / 968 ≈ 10条</p>
 <p>假设in语句包含着2000个单点扫描区间。每个扫描区间大约对应10条记录。所以总共需要回表的成本就是 2000 * 10 * 1.0</p>
 <hr>

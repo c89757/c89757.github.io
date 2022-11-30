@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://c89757.gitee.io/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/</loc>
+    
+    <lastmod>2022-11-30</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://c89757.gitee.io/colinstar/2022/11/30/mysql%E6%9F%A5%E7%9C%8B%E4%BA%8B%E5%8A%A1%E5%8A%A0%E9%94%81%E6%83%85%E5%86%B5/</loc>
     
     <lastmod>2022-11-30</lastmod>
@@ -23,15 +32,6 @@
     <loc>http://c89757.gitee.io/colinstar/2022/11/13/Mysql%E5%AD%90%E6%9F%A5%E8%AF%A2/</loc>
     
     <lastmod>2022-11-13</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://c89757.gitee.io/colinstar/2022/11/07/%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%88%90%E6%9C%AC/</loc>
-    
-    <lastmod>2022-11-07</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -173,7 +173,7 @@
   </url>
   
   <url>
-    <loc>http://c89757.gitee.io/colinstar/books/index.html</loc>
+    <loc>http://c89757.gitee.io/colinstar/about/index.html</loc>
     
     <lastmod>2021-12-16</lastmod>
     
@@ -182,7 +182,7 @@
   </url>
   
   <url>
-    <loc>http://c89757.gitee.io/colinstar/about/index.html</loc>
+    <loc>http://c89757.gitee.io/colinstar/books/index.html</loc>
     
     <lastmod>2021-12-16</lastmod>
     
