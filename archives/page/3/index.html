@@ -17,21 +17,16 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>maven打包报错:Malformed \uxxx encoding | Colin</title>
-  <meta name="description" content="​    在最近一次项目构建中，执行mvn clean package却报出Malformed \uxxx encoding的错误。查阅资料后，给出了以下几种解决方式：  删除~&#x2F;.m2&#x2F;repository&#x2F;path-to-the-library的包 将项目中的&#x2F;更改为\    对我来说都不得行，最后查阅到有人说是resolver-status.properties损坏，里面包含了\u000">
-<meta property="og:type" content="article">
-<meta property="og:title" content="maven打包报错:Malformed \uxxx encoding">
-<meta property="og:url" content="http://c89757.gitee.io/colinstar/2022/06/09/maven%E6%89%93%E5%8C%85%E6%8A%A5%E9%94%99-Malformed-uxxx-encoding/index.html">
+  <title>归档 | Colin</title>
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://c89757.gitee.io/colinstar/archives/page/3/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="​    在最近一次项目构建中，执行mvn clean package却报出Malformed \uxxx encoding的错误。查阅资料后，给出了以下几种解决方式：  删除~&#x2F;.m2&#x2F;repository&#x2F;path-to-the-library的包 将项目中的&#x2F;更改为\    对我来说都不得行，最后查阅到有人说是resolver-status.properties损坏，里面包含了\u000">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-06-09T14:27:51.000Z">
-<meta property="article:modified_time" content="2022-06-09T15:16:01.862Z">
 <meta property="article:author" content="John Doe">
-<meta property="article:tag" content="maven">
 <meta name="twitter:card" content="summary">
   <!-- Canonical links -->
-  <link rel="canonical" href="http://c89757.gitee.io/colinstar/2022/06/09/maven%E6%89%93%E5%8C%85%E6%8A%A5%E9%94%99-Malformed-uxxx-encoding/index.html">
+  <link rel="canonical" href="http://c89757.gitee.io/colinstar/archives/page/3/index.html">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -349,188 +344,63 @@
   
   
 <main class="main" role="main">
-  <div class="content">
-  <article id="post-maven打包报错-Malformed-uxxx-encoding" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
-    
-    <div class="article-header">
-      
-        
+  	<article class="content article article-archives article-type-list" itemscope="">
+	    <header class="article-header">
+	      <h1 itemprop="title">归档</h1>
+	      <p class="text-muted">共 1 篇文章</p>
+	    </header>
+	    <div class="article-body">
+	      
   
-    <h1 class="article-title" itemprop="name">
-      maven打包报错:Malformed \uxxx encoding
-    </h1>
-  
-
-      
-      <div class="article-meta">
-        <span class="article-date">
-    <i class="icon icon-calendar-check"></i>
-	<a href="/colinstar/2022/06/09/maven%E6%89%93%E5%8C%85%E6%8A%A5%E9%94%99-Malformed-uxxx-encoding/" class="article-date">
-	  <time datetime="2022-06-09T14:27:51.000Z" itemprop="datePublished">2022-06-09</time>
-	</a>
-</span>
-        
-        
-  <span class="article-tag">
-    <i class="icon icon-tags"></i>
-	<a class="article-tag-link-link" href="/colinstar/tags/maven/" rel="tag">maven</a>
-  </span>
-
-
-        
-	<span class="article-read hidden-xs">
-	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
-	    <span id="busuanzi_container_page_pv">
-			<span id="busuanzi_value_page_pv">0</span>
-		</span>
-	</span>
-
-
-        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/colinstar/2022/06/09/maven%E6%89%93%E5%8C%85%E6%8A%A5%E9%94%99-Malformed-uxxx-encoding/#comments" class="article-comment-link">评论</a></span>
-        
-      </div>
-    </div>
-    <div class="article-entry marked-body" itemprop="articleBody">
-      
-        <br>
-
-<p>​    在最近一次项目构建中，执行<code>mvn clean package</code>却报出<code>Malformed \uxxx encoding</code>的错误。查阅资料后，给出了以下几种解决方式：</p>
-<ul>
-<li>删除~/.m2/repository/path-to-the-library的包</li>
-<li>将项目中的<code>/</code>更改为<code>\</code></li>
-</ul>
-<br>
-
-<p>对我来说都不得行，最后查阅到有人说是<code>resolver-status.properties</code>损坏，里面包含了\u0000，</p>
-<p>然后我就根据Maven提示，带上参数 -e - X 执行命令：Maven -e - X clean package，日志打印出是哪个包报错，</p>
-<p>最后来到仓库中，删除对应的<code>resolver-status.properties</code>文件，再次构建成功！</p>
-<hr>
-<p>那<code>resolver-status.properties</code>文件是干嘛的呢？</p>
-<hr>
-<br>
-
-<p>Maven更新本地仓库的步骤是：先更新元文件，再根据元文件去更新本地仓库jar包</p>
-<p>而元文件有三个<code>maven-metadata-local.xml</code>，<code>maven-metadata-snapshot-nexus.xml</code>，<code>resolver-status.properties</code></p>
-<br>
-
-<ul>
-<li>maven-metadata-local.xml</li>
-</ul>
-<p>在本地install代码后会生成该文件，记录的是本地项目编译的时间戳</p>
-<br>
-
-<ul>
-<li>maven-metadata-snapshot-nexus.xml</li>
-</ul>
-<p>从远程仓库拉取jar包后，会同时从仓库下载该元文件，该文件记录的是远程仓库上项目最新版本的时间</p>
-<br>
-
-<ul>
-<li>resolver-status.properties</li>
-</ul>
-<p>从远程仓库拉取jar包的时候，也会生成该文件，并且每次拉取都会更新。该文件主要作用是记录maven-metadata–nexus.xml 文件的上次更新时间戳，并结合标签完成更新策略的一部分</p>
-<br>
-
-<p><strong>更新本地jar包</strong>：依赖于 maven-metadata-local.xml 和 maven-metadata-snapshot-nexus.xml 两个文件</p>
-<ul>
-<li>如果只有 maven-metadata-local.xml 文件，一般来说是配置有错，或者并没有从远程仓库中拉取过jar包</li>
-<li>如果两个文件都有，每次都需要比较一下两个文件的时间戳，即标签上的时间戳。<ul>
-<li>如果local.xml的时间戳比snapshot.xml的时间戳要新，就不会从远程仓库下载；</li>
-<li>如果local.xml的时间戳比snapshot.xml的时间戳要旧，就会去检查一下本地maven仓库的该项目文件夹路径下是否有snapshot.xml对应版本的jar包</li>
-<li>如果没有该版本的jar包，就会从远程仓库拉取该版本的jar包</li>
-<li>如果有该版本的jar包，就不会做任何行为</li>
-</ul>
-</li>
-</ul>
-<br>
-
-<p><strong>更新本地元文件</strong>：更新本地仓库jar包决定于本地元文件 maven-metadata-snapshot-nexus.xml，该文件的更新取决于resolver-status.properties文件</p>
-<ul>
-<li>先去远程仓库获取maven-metadata-snapshot-nexus.xml文件，远程仓库中不存在此文件，那么会走下载流程</li>
-<li>如果存在，读取resolver-status.properties中的lastUpdated参数，然后与当前的时间做比较，根据跟新策略是否需要下载（always/never/daily…)</li>
-</ul>
-<br>
-
-<br>
-
-<p>附上stackOverflow上的回答：<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/68003423/java-lang-illegalargumentexception-malformed-uxxxx-encoding-while-mvn-install">https://stackoverflow.com/questions/68003423/java-lang-illegalargumentexception-malformed-uxxxx-encoding-while-mvn-install</a></p>
-
-      
-    </div>
-    <div class="article-footer">
-      <blockquote class="mt-2x">
-  <ul class="post-copyright list-unstyled">
-    
-    <li class="post-copyright-link hidden-xs">
-      <strong>本文链接：</strong>
-      <a href="http://c89757.gitee.io/colinstar/2022/06/09/maven%E6%89%93%E5%8C%85%E6%8A%A5%E9%94%99-Malformed-uxxx-encoding/" title="maven打包报错:Malformed \uxxx encoding" target="_blank" rel="external">http://c89757.gitee.io/colinstar/2022/06/09/maven打包报错-Malformed-uxxx-encoding/</a>
-    </li>
-    
-    <li class="post-copyright-license">
-      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
-    </li>
-  </ul>
-</blockquote>
-
-
-<div class="panel panel-default panel-badger">
-  <div class="panel-body">
-    <figure class="media">
-      <div class="media-left">
-        <a href="https://gitee.com/c89757" target="_blank" class="img-burn thumb-sm visible-lg">
-          <img src="/colinstar/images/avatar.jpg" class="img-rounded w-full" alt="">
-        </a>
-      </div>
-      <div class="media-body">
-        <h3 class="media-heading"><a href="https://gitee.com/c89757" target="_blank"><span class="text-dark">colin</span><small class="ml-1x">悟已往之不谏，知来者之可追</small></a></h3>
-        <div></div>
-      </div>
-    </figure>
-  </div>
-</div>
-
-
-    </div>
-  </article>
   
     
-  <section id="comments">
+    
+      
+      
+      <section class="panel panel-default b-no">
+        <div class="panel-heading" role="tab">
+          <h3 class="panel-title">
+            <a data-toggle="collapse" href="#collapse2021" aria-expanded="true">
+              <i class="icon icon-calendar-plus text-active"></i><i class="icon icon-calendar-minus text"></i>
+              2021
+            </a>
+            <!-- <a href="/colinstar/archives/2021" class="archive-year">2021</a> -->
+          </h3>
+        </div>
+        <div id="collapse2021" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading2021">
+        <div class="panel-body">
+          <div class="collection">
+    
+    
+<a href="/colinstar/2021/12/16/gitee+hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/" class="collection-item" target="_blank" itemprop="url">
+  <time datetime="2021-12-16T12:42:22.000Z" itemprop="datePublished">2021-12-16</time>
+  <span>&nbsp;&nbsp;&nbsp;</span> gitee+hexo搭建个人博客
+</a>
+
+
+  
+  
+    </div></div></div></section>
+  
+
+	    </div>
+  	</article>
   	
-  </section>
-
-
-  
-</div>
-
-  <nav class="bar bar-footer clearfix" data-stick-bottom>
-  <div class="bar-inner">
-  
-  <ul class="pager pull-left">
     
-    <li class="prev">
-      <a href="/colinstar/2022/06/18/Springboot%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D/" title="Springboot自动装配"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
-    </li>
+    <nav class="bar bar-footer clearfix" data-stick-bottom>
+        <div class="bar-inner">
+        <div class="pager pull-left">
+            
+            <a class="extend prev" rel="prev" href="/colinstar/archives/page/2/"> ＜上一页</a><a class="page-number" href="/colinstar/archives/">1</a><a class="page-number" href="/colinstar/archives/page/2/">2</a><span class="page-number current">3</span>
+            
+            <a class="next disabled" href="javascript:;">下一页 </a>
+            
+        </div>
+        <div class="total-article bar-right">Page 3 of 3</div>
+        </div>
+    </nav>
     
-    
-    <li class="next">
-      <a href="/colinstar/2022/06/01/restTemplate/" title="restTemplate"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
-    </li>
-    
-    
-  </ul>
-  
-  
-  
-  <div class="bar-right">
-    
-    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
-    
-  </div>
-  </div>
-</nav>
-  
-
-
+ 	
 </main>
 
   <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
@@ -594,14 +464,6 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
-   
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-
-
-
-
-
-   
 
 
   <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>

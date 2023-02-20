@@ -6,7 +6,7 @@
   <link href="http://c89757.gitee.io/colinstar/atom.xml" rel="self"/>
   
   <link href="http://c89757.gitee.io/colinstar/"/>
-  <updated>2023-02-19T14:50:19.194Z</updated>
+  <updated>2023-02-20T15:08:50.511Z</updated>
   <id>http://c89757.gitee.io/colinstar/</id>
   
   <author>
@@ -17,11 +17,36 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>Mysql索引合并</title>
+    <link href="http://c89757.gitee.io/colinstar/2023/02/20/Mysql%E7%B4%A2%E5%BC%95%E5%90%88%E5%B9%B6/"/>
+    <id>http://c89757.gitee.io/colinstar/2023/02/20/Mysql%E7%B4%A2%E5%BC%95%E5%90%88%E5%B9%B6/</id>
+    <published>2023-02-20T14:40:41.000Z</published>
+    <updated>2023-02-20T15:08:50.511Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Intersection索引合并"><a href="#Intersection索引合并" class="headerlink" title="Intersection索引合并"></a>Intersection索引合并</h1><p>例如以下查询</p><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> table_name <span class="keyword">where</span> key1 <span class="operator">=</span> <span class="string">&#x27;a&#x27;</span> <span class="keyword">and</span> key3 <span class="operator">=</span> <span class="string">&#x27;b&#x27;</span>;</span><br></pre></td></tr></table></figure><p>其中key1、key3加了普通索引，分别名为idx_key1，idx_key3</p><p>那么，有如下几种方案执行该查询</p><p>1、使用idx_key1索引执行该查询，此时对应的扫描区间就是 [‘a’, ‘a’]。对于获取的每条二级索引记录，都需要根据它的id值执行回表操作后获取到完整的用户记录，再判断key3 = ‘b’是否成立。其中，二级索引中，对于key1 = ‘a’的id列是按照主键值排序的</p><p>2、使用idx_key3索引执行 该查询，同样的，需要回表判断key1的条件是否成立</p><p>方案3：同时使用idx_key1和idx_key3进行查询。也就是在idx_key1中扫描key1值在[‘a’,’a’]区间中的二级索引记录，同时在idx_key3中扫描key3在[‘b’,’b’]区间中的二级索引记录，然后从两者的操作结果中找出id列值相同的值，进行回表（这样可以省下很多回表操作）</p><p>Intersection索引合并指的就是从不同索引中扫描的记录id取交集，只会为这些共同的id值进行回表操作。</p><blockquote><p>如果使用Intersection索引合并的方式进行查询，并且每个使用的索引都是二级索引的话，则要求从每个索引中获取到的二级索引记录都是按照主键值排序的</p></blockquote><h1 id="Union索引合并"><a href="#Union索引合并" class="headerlink" title="Union索引合并"></a>Union索引合并</h1><p>例如以下查询</p><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> table_name <span class="keyword">where</span> key1 <span class="operator">=</span> <span class="string">&#x27;a&#x27;</span> <span class="keyword">or</span> key3 <span class="operator">=</span> <span class="string">&#x27;b&#x27;</span>;</span><br></pre></td></tr></table></figure><p>其中key1、key3加了普通索引，分别名为idx_key1，idx_key3</p><p>上述查询，可以同时使用idx_key1和idx_key2来执行查询。也就是在idx_key1中扫描key1值位于[‘a’,’a’]区间中的二级索引记录，同时在idx_key3中扫描key3值位于[‘b’,’b’]区间中的二级索引记录，然后根据二级索引记录的id值在两者的结果中进行去重，再根据去重后的id值执行回表操作，这样重复的id值只需要回表一次</p><blockquote><p>如果使用Union索引合并的方式进行查询，并且每个使用的索引都是二级索引的话，则要求从每个索引中获取到的二级索引记录都是按照主键值排序的</p></blockquote><p>如果在使用某个二级索引执行查询时，从对应的扫描区间中读取出的二级索引记录不是按照主键值排序的，则不可以使用Union索引合并的方式执行查询。比如下面的查询</p><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> table_name <span class="keyword">where</span> key1 <span class="operator">&gt;</span> <span class="string">&#x27;a&#x27;</span> <span class="keyword">or</span> key3 <span class="operator">=</span> <span class="string">&#x27;b&#x27;</span>;</span><br></pre></td></tr></table></figure><p>因为从idx_key1的扫描区间（’a’, +∞）中获取到的记录并不是按照主键值排序的（只有在key1列相同的时候，它相对应的主键是有序的）</p><h1 id="Sort-Union索引合并"><a href="#Sort-Union索引合并" class="headerlink" title="Sort-Union索引合并"></a>Sort-Union索引合并</h1><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> table_name <span class="keyword">where</span> key1 <span class="operator">&lt;</span> <span class="string">&#x27;a&#x27;</span> <span class="keyword">or</span> key3 <span class="operator">&gt;</span> <span class="string">&#x27;z&#x27;</span>;</span><br></pre></td></tr></table></figure><p>这个查询不能用union索引合并查询，但是我们可以像如下操作：</p><p>1、先根据key1 &lt; ‘a’条件从idx_key1二级索引中获取二级索引记录，并将获取到的二级索引记录的主键进行排序</p><p>2、再根据key3 &gt; ‘z’条件从idx_key3二级索引中获取二级索引记录，并将获取到的二级索引记录的主键进行排序</p><p>3、因此上述两个二级索引主键值都是排好序了，剩下的操作就是使用union索引合并</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Intersection索引合并&quot;&gt;&lt;a href=&quot;#Intersection索引合并&quot; class=&quot;headerlink&quot; title=&quot;Intersection索引合并&quot;&gt;&lt;/a&gt;Intersection索引合并&lt;/h1&gt;&lt;p&gt;例如以下查询&lt;/p&gt;
+&lt;fi</summary>
+      
+    
+    
+    
+    <category term="mysql" scheme="http://c89757.gitee.io/colinstar/categories/mysql/"/>
+    
+    
+    <category term="mysql" scheme="http://c89757.gitee.io/colinstar/tags/mysql/"/>
+    
+  </entry>
+  
+  <entry>
     <title>innodb数据页</title>
     <link href="http://c89757.gitee.io/colinstar/2023/02/18/innodb%E6%95%B0%E6%8D%AE%E9%A1%B5/"/>
     <id>http://c89757.gitee.io/colinstar/2023/02/18/innodb%E6%95%B0%E6%8D%AE%E9%A1%B5/</id>
     <published>2023-02-18T14:54:52.000Z</published>
-    <updated>2023-02-19T14:50:19.194Z</updated>
+    <updated>2023-02-19T16:04:56.828Z</updated>
     
     <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><br><p>innodb页目录结构大致如下</p><br><img src="/colinstar/2023/02/18/innodb%E6%95%B0%E6%8D%AE%E9%A1%B5/image-20230218234003851.png" class><br><p>先说说行格式，compact行格式结构如下</p><p>（其中，记录的真实数据，除了用户真实的数据以外，还有一些隐藏列，</p><p>row_id - 行id，唯一标识一条记录，没有定义主键时，会添加此隐藏列；</p><p>事务id -  事务ID</p><p>roll_pointer：回滚指针）</p><br><img src="/colinstar/2023/02/18/innodb%E6%95%B0%E6%8D%AE%E9%A1%B5/image-20230218233845956.png" class><br><p>记录头各属性及其解释如下</p><br><img src="/colinstar/2023/02/18/innodb%E6%95%B0%E6%8D%AE%E9%A1%B5/image-20230218233857866.png" class><br><p>表中记录大致如下</p><br><img src="/colinstar/2023/02/18/innodb%E6%95%B0%E6%8D%AE%E9%A1%B5/image-20230218235643636.png" class><br><br><h1 id="Page-Directory"><a href="#Page-Directory" class="headerlink" title="Page Directory"></a>Page Directory</h1><br><p>​    记录在页中是按照主键值由小到大的顺序串联成一个单项链表，如果要查找表中一条记录，最简单的方法就是遍历链表，但是当记录非常多时，是很耗费性能的，于是就有了page directory页目录。其实就是一个字典</p><br><p>1、将所有正常的记录（包括Infimum和Supremum记录，但是不包括已经移除到垃圾链表的记录）划分为几个组</p><p>2、每个组的最后一条记录（也就是组内最大的那条记录）相当于带头大哥，组内其余的记录相当于小弟，带头大哥记录的头信息中的n_owned属性表示该组内共有几条记录</p><p>3、将每个组中最后一条记录在页面中的地址偏移量（就是该记录的真实数据与页面中第0个字节之间的距离）单独提取出来，按顺序存储到靠近页尾部的地方，这个地方就是<code>Page Directory</code>.页目录中这些地址偏移量称为槽（Slot)，每个槽占用2字节，页目录就是由多个槽组成的</p><br><img src="/colinstar/2023/02/18/innodb%E6%95%B0%E6%8D%AE%E9%A1%B5/image-20230219000408171.png" class><br><br><ul><li>Infimum记录中的n_owned值为1，表示以Infimum记录为最后一个节点的这个组中只有一条记录，也就是Infimum记录自身</li><li>Supremum记录的n_owned值为3，表示以Supremum记录为最后一个节点的这个分组中有3条记录，即除了Supremum记录自身外，还有两条记录</li></ul><br><br><p>分组的依据：</p><p>对于Infimum记录所在的分组只能有1条记录，Supremum记录所在的分组拥有的记录条数只能在1<del>8之间，剩下分组中的条数范围只能是4</del>8之间。</p><br><h1 id="Page-Header"><a href="#Page-Header" class="headerlink" title="Page Header"></a>Page Header</h1><br><p>页面头部</p><p>存储数据页中的记录的各种状态信息</p><br><img src="/colinstar/2023/02/18/innodb%E6%95%B0%E6%8D%AE%E9%A1%B5/image-20230219224613055.png" class><br><br><h1 id="File-Header"><a href="#File-Header" class="headerlink" title="File Header"></a>File Header</h1><br><p>记录页面当前页号，以及上一页、下一页的页号（并不是所有类型的页都会记录上一页、下一页的页号）</p><br><img src="/colinstar/2023/02/18/innodb%E6%95%B0%E6%8D%AE%E9%A1%B5/image-20230219001321572.png" class><br><ul><li>每一个<code>页</code>都有一个单独的页号，就跟你的身份证号码一样，<code>InnoDB</code>通过页号来可以唯一定位一个<code>页</code>。</li><li>FIL_PAGE_TYPE</li></ul><br><img src="/colinstar/2023/02/18/innodb%E6%95%B0%E6%8D%AE%E9%A1%B5/image-20230219001549129.png" class><ul><li>我们存放记录的数据页的类型其实是<code>FIL_PAGE_INDEX</code>，也就是所谓的<code>索引页</code></li></ul><br><h1 id="File-Trailer"><a href="#File-Trailer" class="headerlink" title="File Trailer"></a>File Trailer</h1><br><p>文件尾部，用于检验一个页是否完整（刷盘时，不可预知的情况可能导致刷盘只刷新了一部分)</p><br>]]></content>
     
@@ -494,31 +519,6 @@
     
     
     <category term="mysql" scheme="http://c89757.gitee.io/colinstar/tags/mysql/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>gitee+hexo搭建个人博客</title>
-    <link href="http://c89757.gitee.io/colinstar/2021/12/16/gitee+hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/"/>
-    <id>http://c89757.gitee.io/colinstar/2021/12/16/gitee+hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</id>
-    <published>2021-12-16T12:42:22.000Z</published>
-    <updated>2021-12-17T11:49:04.429Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a><strong>概述</strong></h1><p>事前准备：</p><p>先创建一个仓库，同时在仓库根目录下创建index.html (gitee官网这样说的,没试过缺少这个文件会怎样)</p><img src="/colinstar/2021/12/16/gitee+hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/1.png" class title="This is an example image"><h1 id="安装Hexo"><a href="#安装Hexo" class="headerlink" title="安装Hexo"></a>安装Hexo</h1><h2 id="所需环境"><a href="#所需环境" class="headerlink" title="所需环境"></a>所需环境</h2><ul><li><p>node.js</p></li><li><p>git</p><p>自行进行下载与安装</p></li></ul><h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 安装hexo</span></span><br><span class="line">npm install -g hexo</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 创建文件夹,用来存储你博客内容</span></span><br><span class="line">hexo init test</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">cd</span>到创建的目录,执行</span></span><br><span class="line">npm install</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 开启hexo服务</span></span><br><span class="line">hexo s</span><br></pre></td></tr></table></figure><p>访问<a href="http://localhost:4000；没有问题的话就会显示他的默认页面">http://localhost:4000；没有问题的话就会显示他的默认页面</a></p><h2 id="修改配置"><a href="#修改配置" class="headerlink" title="修改配置"></a>修改配置</h2><p>关联git仓库，在你创建的目录下找到 config.yml文件（例如此处我的是test/_config.yml）</p><p>打开添加如下配置</p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">&#x27;git&#x27;</span></span><br><span class="line">  <span class="attr">repository:</span> <span class="string">https://gitee.com/xxx/xxxx</span>   <span class="comment"># 你的仓库地址</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">master</span>   <span class="comment"># 你的仓库分支</span></span><br></pre></td></tr></table></figure><ul><li>生成静态页面</li></ul><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo g    #或者 hexo generate</span><br></pre></td></tr></table></figure><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 此时若出现如下报错：</span></span><br><span class="line">ERROR Local hexo not found in ~/blog</span><br><span class="line">ERROR Try runing: &#x27;npm install hexo --save&#x27;</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 则执行命令：</span></span><br><span class="line">npm install hexo --save</span><br></pre></td></tr></table></figure><ul><li>将生成的页面提交到仓库</li></ul><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo d  #或者hexo deploy</span><br></pre></td></tr></table></figure><p>若执行命令hexo deploy报错：无法连接git或找不到git，则执行如下命令来安装hexo-deployer-git：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure><h1 id="发布文章"><a href="#发布文章" class="headerlink" title="发布文章"></a>发布文章</h1><p>进入到你创建的“text”目录，新建文章，执行</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo new &quot;blog&quot;</span><br></pre></td></tr></table></figure><p>此时在test/source/_posts下，会新建一个名为“blog.md”的文件，利用相关markdown编辑器就能编写你的博客啦!(我这里用的typore)</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo g # 生成静态页面</span><br><span class="line"></span><br><span class="line">hexo d # 部署到gitee</span><br></pre></td></tr></table></figure><p>hexo有许多主题，默认生成的主题都是landscape，你也可以去<a href="http://hexo.io/themes">主题官网</a>寻找自己喜欢的主题</p><p>例如主题pure</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/cofess/hexo-theme-pure.git themes/pure</span><br><span class="line"><span class="meta">#</span><span class="bash">修改<span class="built_in">test</span>目录下_config.yml里theme的名称,将landscape修改为pure即可</span> </span><br><span class="line"></span><br><span class="line">hexo clean</span><br><span class="line"><span class="meta">#</span><span class="bash">清除缓存文件 (db.json) 和静态文件 (public)</span></span><br><span class="line"></span><br><span class="line">hexo g</span><br><span class="line"><span class="meta">#</span><span class="bash">生成缓存和静态文件</span></span><br><span class="line"></span><br><span class="line">hexo d             </span><br><span class="line"><span class="meta">#</span><span class="bash">重新部署到服务器</span></span><br></pre></td></tr></table></figure>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;&lt;strong&gt;概述&lt;/strong&gt;&lt;/h1&gt;&lt;p&gt;事前准备：&lt;/p&gt;
-&lt;p&gt;先创建一个仓库，同时在仓库根目录下创建index.html (gitee官网这样</summary>
-      
-    
-    
-    
-    <category term="others" scheme="http://c89757.gitee.io/colinstar/categories/others/"/>
-    
-    
-    <category term="others" scheme="http://c89757.gitee.io/colinstar/tags/others/"/>
     
   </entry>
   
