@@ -6,7 +6,7 @@
   <link href="http://c89757.gitee.io/colinstar/atom.xml" rel="self"/>
   
   <link href="http://c89757.gitee.io/colinstar/"/>
-  <updated>2023-02-20T15:08:50.511Z</updated>
+  <updated>2023-08-16T15:04:03.267Z</updated>
   <id>http://c89757.gitee.io/colinstar/</id>
   
   <author>
@@ -15,6 +15,84 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>jvm常见命令</title>
+    <link href="http://c89757.gitee.io/colinstar/2023/08/16/jvm%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4/"/>
+    <id>http://c89757.gitee.io/colinstar/2023/08/16/jvm%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4/</id>
+    <published>2023-08-16T12:55:41.000Z</published>
+    <updated>2023-08-16T15:04:03.267Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Jstat"><a href="#Jstat" class="headerlink" title="Jstat"></a>Jstat</h1><h2 id="JIT相关"><a href="#JIT相关" class="headerlink" title="JIT相关"></a>JIT相关</h2><ul><li>jstata  -compiler [pid]</li></ul><p>查看JIT编译器编译过的方法、耗时等</p><ul><li>jstat -printcompilation</li></ul><p>输出已经被JIT编译的方法</p><h2 id="垃圾回收相关"><a href="#垃圾回收相关" class="headerlink" title="垃圾回收相关"></a>垃圾回收相关</h2><ul><li>-gc</li></ul><blockquote><p> 显示与GC相关的对信息。包括Eden区、两个Survivor区、老年代、永久代等容量、已用空间</p></blockquote><p><code>jstat -gc [pid] 1000 10</code>: 每隔一秒（1000ms ）打印一次gc信息，总共打印10次</p><p><code>jstat -gc -t</code>: 会多一列Timestamp，表示Java进程启动的总时间；</p><p>我们可以比较Java进程启动的总时间以及总GC时间（GCT列），或者两次测量的间隔时间以及GC总时间的增量，得到GC时间占运行时间的比例</p><p>如果该比例超过20%，则说明目前堆压力较大；如果超过90%，则说明堆里几乎没有可用空间，随时都可能抛出OOM异常</p><ul><li>-gccapacoty</li></ul><blockquote><p>显示内容与-gc基本相同，但输出主要关注Java堆各个区域使用到的最大、最小空间。</p></blockquote><ul><li>-gcutil</li></ul><blockquote><p>显示内容与-gc基本相同。但输出主要关注已使用空间占总空间的百分比</p></blockquote><ul><li>-gccause</li></ul><blockquote><p>与-gcutil功能一样，但会额外输出导致最后一次或当前正在发生的GC产生的原因</p></blockquote><ul><li>-gcnew</li></ul><blockquote><p>显示新生代GC情况</p></blockquote><ul><li>-gcnewcapacity</li></ul><blockquote><p>显示内容与-gcnew基本相同，输出主要关注使用到的最大、最小空间</p></blockquote><ul><li>-geold</li></ul><blockquote><p>显示老年代GC情况</p></blockquote><ul><li>-gcolccapacity</li></ul><blockquote><p>显示内容与-gcold基本相同，输出主要关注使用到的最大、最小空间</p></blockquote><ul><li>-gcpermcapacity</li></ul><blockquote><p>显示永久代使用到的最大、最小空间</p></blockquote><p>jstat还可以用来判断是否出现内存泄漏</p><p>1、在长时间运行的Java程序中，我们可以运行jstat命令连续获取多行性能数据，并取这几行数据中OU列（即已占用的老年代内存）的最小值</p><p>2、然后我们每隔一段较长的时间重复一次上述操作，来获得多组OU最小值。如果这些值呈上升趋势，则说明该Java程序的老年代内存已使用量在不断上涨，这意味着无法回收的对象在不断增加，因此很有可能存在内存泄漏</p><h1 id="Jinfo"><a href="#Jinfo" class="headerlink" title="Jinfo"></a>Jinfo</h1><p>查看虚拟机配置参数信息，也可用于调整虚拟机的配置参数</p><h2 id="查看"><a href="#查看" class="headerlink" title="查看"></a>查看</h2><p>PID必须要加上</p><table><thead><tr><th>选项</th><th>说明</th></tr></thead><tbody><tr><td>no optition</td><td>输出全部的参数和系统属性</td></tr><tr><td>-flag name</td><td>输出对应名称的参数</td></tr><tr><td>-flag [+-name]</td><td>开启或关闭对应名称的参数，只有被编辑为manageable的参数才可以被动态修改</td></tr><tr><td>-flag name=value</td><td>设定对应名称的参数</td></tr><tr><td>-flags</td><td>输出全部的参数</td></tr><tr><td>-sysprops</td><td>输出系统属性</td></tr></tbody></table><h2 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h2><p>jinfo甚至可以在运行时修改部分参数，并使之立即生效</p><p>但是，并非所有参数都支持动态修改，参数只有标记为manageable的flag可以被实时修改，其实，这个修改能力都是及其有限的</p><p>可以查看被标记为manageable的参数</p><p><code>java -XX:+PrintFlagsFinal -version |grep manageable</code></p><h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p><code>java -XX:+PrintFlagInitial</code></p><p>查看所有JVM参数启动的初始值</p><p><code>java -XX:+PrintFlagsFinal</code></p><p>查看所有JVM参数的最终只</p><p><code>java -XX+PrintCommandLineFlags</code></p><p>查看那些已经被用户或者JVM设置过的详细的XX参数的名称和值</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Jstat&quot;&gt;&lt;a href=&quot;#Jstat&quot; class=&quot;headerlink&quot; title=&quot;Jstat&quot;&gt;&lt;/a&gt;Jstat&lt;/h1&gt;&lt;h2 id=&quot;JIT相关&quot;&gt;&lt;a href=&quot;#JIT相关&quot; class=&quot;headerlink&quot; title=&quot;JIT</summary>
+      
+    
+    
+    
+    <category term="jvm" scheme="http://c89757.gitee.io/colinstar/categories/jvm/"/>
+    
+    
+    <category term="jvm" scheme="http://c89757.gitee.io/colinstar/tags/jvm/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>线上cpu飙升排查</title>
+    <link href="http://c89757.gitee.io/colinstar/2023/08/09/%E7%BA%BF%E4%B8%8Acpu%E9%A3%99%E5%8D%87%E6%8E%92%E6%9F%A5/"/>
+    <id>http://c89757.gitee.io/colinstar/2023/08/09/%E7%BA%BF%E4%B8%8Acpu%E9%A3%99%E5%8D%87%E6%8E%92%E6%9F%A5/</id>
+    <published>2023-08-09T14:58:45.000Z</published>
+    <updated>2023-08-09T15:12:59.647Z</updated>
+    
+    <content type="html"><![CDATA[<p>1、找出服务运行的进程号</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jps</span><br></pre></td></tr></table></figure><p>2、利用top命令查看对应进程下，各个线程占用情况</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">top -H -p &#123;pid&#125;</span><br></pre></td></tr></table></figure><p>3、找到占用最高的线程，拿到线程其线程号，将其转为十六进制（因为java里面记录的线程号都是十六进制）</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">printf &#x27;%x\n&#x27; &#123;tid&#125;</span><br></pre></td></tr></table></figure><p>4、利用<code>jstack</code>抓取线程快照</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstack -l &#123;pid&#125; |grep ‘&#123;十六进制tid&#125;&#x27;</span><br></pre></td></tr></table></figure>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;1、找出服务运行的进程号&lt;/p&gt;
+&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;c</summary>
+      
+    
+    
+    
+    <category term="jvm" scheme="http://c89757.gitee.io/colinstar/categories/jvm/"/>
+    
+    
+    <category term="jvm" scheme="http://c89757.gitee.io/colinstar/tags/jvm/"/>
+    
+    <category term="questions" scheme="http://c89757.gitee.io/colinstar/tags/questions/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>阻塞队列</title>
+    <link href="http://c89757.gitee.io/colinstar/2023/03/09/%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97/"/>
+    <id>http://c89757.gitee.io/colinstar/2023/03/09/%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97/</id>
+    <published>2023-03-09T15:21:33.000Z</published>
+    <updated>2023-03-09T16:28:23.725Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="JDK里的阻塞队列"><a href="#JDK里的阻塞队列" class="headerlink" title="JDK里的阻塞队列"></a>JDK里的阻塞队列</h1><ul><li>ArrayBlockingQueue</li></ul><p>数组构成的有界阻塞队列</p><ul><li>LinkedBlockingQueue</li></ul><p>链表构成的无界阻塞队列</p><p>tips: 使用无界阻塞队列的put或offer方法时，永远不会阻塞， 因为队列不可能满</p><ul><li>PriorityBlockingQueue</li></ul><p>一个支持优先级排序的无界阻塞队列</p><ul><li>DelayQueue</li></ul><p>一个使用优先级队列实现的无界阻塞队列</p><ul><li>SynchronousQueue</li></ul><p>一个不存储元素的阻塞队列</p><ul><li>LinkedTransferQueue</li></ul><p>由链表组成的无界阻塞队列</p><ul><li>LinkedBlockingDeque</li></ul><p>由链表结构组成的双向阻塞队列</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;JDK里的阻塞队列&quot;&gt;&lt;a href=&quot;#JDK里的阻塞队列&quot; class=&quot;headerlink&quot; title=&quot;JDK里的阻塞队列&quot;&gt;&lt;/a&gt;JDK里的阻塞队列&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;ArrayBlockingQueue&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;数组构</summary>
+      
+    
+    
+    
+    <category term="java" scheme="http://c89757.gitee.io/colinstar/categories/java/"/>
+    
+    
+    <category term="java" scheme="http://c89757.gitee.io/colinstar/tags/java/"/>
+    
+  </entry>
   
   <entry>
     <title>Mysql索引合并</title>
@@ -75,11 +153,22 @@
     <link href="http://c89757.gitee.io/colinstar/2023/02/05/G1-GC/"/>
     <id>http://c89757.gitee.io/colinstar/2023/02/05/G1-GC/</id>
     <published>2023-02-05T07:13:35.000Z</published>
-    <updated>2023-02-05T07:13:35.782Z</updated>
+    <updated>2023-04-16T16:18:51.707Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Grabage-First"><a href="#Grabage-First" class="headerlink" title="Grabage First"></a>Grabage First</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>​    G1是一款主要面向服务端的垃圾收集器，在JDK9时，取代了Parallel Scavenge + Parallel Old组合，成为了默认的垃圾收集器。    </p><p>​    在G1出现之前，垃圾收集的目标范围要么是整个新生代（Minor GC），要么是整个老年代（Major GC），再要么就是整个Java堆（Full GC）。而G1可以面向堆内存任何部分来组成回收集（Collection Set，简称CSet）进行回收，衡量标准不再是它属于哪个分代，而是哪块内存中存放的垃圾数量最多，回收收益最大，这就是G1收集器的Mixed GC模式。</p><p>​    G1不再坚持固定大小以及固定数量的分代区域划分，而是把连续的Java堆划分为多个大小相等的独立区域（Region），每一个Region都可以根据需要扮演新生代的Eden、Survivor、或者老年代 。</p><p>​    Humongous，专门存储大对象（超过了一个Region容量一半的对象，即达到1.5倍region）。每个Region的大小可以通过参数 <code>-XX:G1HeapRegionSize</code>设定。取值范围为1MB~32MB，且应为2的N次幂。而超过了整个Region容量的超级大对象，将会被存放在N个连续的Humongous Region之中。（G1的大多数行为把Humongous当作老年代的一部分看待）</p><p>​    G1仍然保留新生代和老年代的概念，但新生代和老年代不再是固定的了。</p><h2 id="Remembered-Set"><a href="#Remembered-Set" class="headerlink" title="Remembered Set"></a>Remembered Set</h2><p>一个Region中的对象可能被其他任意Region中的对象所引用，判断对象存活时，是否需要扫描整合java堆才能保证准确？</p><blockquote><p>比如新生代Region中的对象被老年代Region中的对象引用，回收新生代时不得不同时扫描老年代，这样的话会降低Minor GC的效率</p></blockquote><p>无论是G1还是其他分代收集器，JVM都是使用Remembered Set来避免全局扫描</p><p><strong>每个Region都有一个对应的Remembered  Set</strong></p><blockquote><p>G1内存占用比较高，需要维护记忆集、卡表等。至少要耗费大约相当于堆容量的10%~20%的额外内存来维持收集器工作</p></blockquote>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Grabage-First&quot;&gt;&lt;a href=&quot;#Grabage-First&quot; class=&quot;headerlink&quot; title=&quot;Grabage First&quot;&gt;&lt;/a&gt;Grabage First&lt;/h1&gt;&lt;h2 id=&quot;简介&quot;&gt;&lt;a href=&quot;#简介&quot; cla</summary>
+      
     
     
     
+    <category term="jvm" scheme="http://c89757.gitee.io/colinstar/categories/jvm/"/>
     
+    
+    <category term="jvm" scheme="http://c89757.gitee.io/colinstar/tags/jvm/"/>
     
   </entry>
   
@@ -317,7 +406,7 @@
     <link href="http://c89757.gitee.io/colinstar/2022/06/09/maven%E6%89%93%E5%8C%85%E6%8A%A5%E9%94%99-Malformed-uxxx-encoding/"/>
     <id>http://c89757.gitee.io/colinstar/2022/06/09/maven%E6%89%93%E5%8C%85%E6%8A%A5%E9%94%99-Malformed-uxxx-encoding/</id>
     <published>2022-06-09T14:27:51.000Z</published>
-    <updated>2022-06-09T15:16:01.862Z</updated>
+    <updated>2023-08-09T15:00:59.662Z</updated>
     
     <content type="html"><![CDATA[<br><p>​    在最近一次项目构建中，执行<code>mvn clean package</code>却报出<code>Malformed \uxxx encoding</code>的错误。查阅资料后，给出了以下几种解决方式：</p><ul><li>删除~/.m2/repository/path-to-the-library的包</li><li>将项目中的<code>/</code>更改为<code>\</code></li></ul><br><p>对我来说都不得行，最后查阅到有人说是<code>resolver-status.properties</code>损坏，里面包含了\u0000，</p><p>然后我就根据Maven提示，带上参数 -e - X 执行命令：Maven -e - X clean package，日志打印出是哪个包报错，</p><p>最后来到仓库中，删除对应的<code>resolver-status.properties</code>文件，再次构建成功！</p><hr><p>那<code>resolver-status.properties</code>文件是干嘛的呢？</p><hr><br><p>Maven更新本地仓库的步骤是：先更新元文件，再根据元文件去更新本地仓库jar包</p><p>而元文件有三个<code>maven-metadata-local.xml</code>，<code>maven-metadata-snapshot-nexus.xml</code>，<code>resolver-status.properties</code></p><br><ul><li>maven-metadata-local.xml</li></ul><p>在本地install代码后会生成该文件，记录的是本地项目编译的时间戳</p><br><ul><li>maven-metadata-snapshot-nexus.xml</li></ul><p>从远程仓库拉取jar包后，会同时从仓库下载该元文件，该文件记录的是远程仓库上项目最新版本的时间</p><br><ul><li>resolver-status.properties</li></ul><p>从远程仓库拉取jar包的时候，也会生成该文件，并且每次拉取都会更新。该文件主要作用是记录maven-metadata–nexus.xml 文件的上次更新时间戳，并结合标签完成更新策略的一部分</p><br><p><strong>更新本地jar包</strong>：依赖于 maven-metadata-local.xml 和 maven-metadata-snapshot-nexus.xml 两个文件</p><ul><li>如果只有 maven-metadata-local.xml 文件，一般来说是配置有错，或者并没有从远程仓库中拉取过jar包</li><li>如果两个文件都有，每次都需要比较一下两个文件的时间戳，即标签上的时间戳。<ul><li>如果local.xml的时间戳比snapshot.xml的时间戳要新，就不会从远程仓库下载；</li><li>如果local.xml的时间戳比snapshot.xml的时间戳要旧，就会去检查一下本地maven仓库的该项目文件夹路径下是否有snapshot.xml对应版本的jar包</li><li>如果没有该版本的jar包，就会从远程仓库拉取该版本的jar包</li><li>如果有该版本的jar包，就不会做任何行为</li></ul></li></ul><br><p><strong>更新本地元文件</strong>：更新本地仓库jar包决定于本地元文件 maven-metadata-snapshot-nexus.xml，该文件的更新取决于resolver-status.properties文件</p><ul><li>先去远程仓库获取maven-metadata-snapshot-nexus.xml文件，远程仓库中不存在此文件，那么会走下载流程</li><li>如果存在，读取resolver-status.properties中的lastUpdated参数，然后与当前的时间做比较，根据跟新策略是否需要下载（always/never/daily…)</li></ul><br><br><p>附上stackOverflow上的回答：<a href="https://stackoverflow.com/questions/68003423/java-lang-illegalargumentexception-malformed-uxxxx-encoding-while-mvn-install">https://stackoverflow.com/questions/68003423/java-lang-illegalargumentexception-malformed-uxxxx-encoding-while-mvn-install</a></p>]]></content>
     
@@ -335,6 +424,8 @@
     
     
     <category term="maven" scheme="http://c89757.gitee.io/colinstar/tags/maven/"/>
+    
+    <category term="questions" scheme="http://c89757.gitee.io/colinstar/tags/questions/"/>
     
   </entry>
   
@@ -443,82 +534,6 @@
     <category term="nio" scheme="http://c89757.gitee.io/colinstar/tags/nio/"/>
     
     <category term="netty" scheme="http://c89757.gitee.io/colinstar/tags/netty/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>关于count(*)</title>
-    <link href="http://c89757.gitee.io/colinstar/2021/12/22/%E5%85%B3%E4%BA%8Ecount()/"/>
-    <id>http://c89757.gitee.io/colinstar/2021/12/22/%E5%85%B3%E4%BA%8Ecount()/</id>
-    <published>2021-12-22T12:09:37.000Z</published>
-    <updated>2021-12-22T13:01:32.776Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="count-的不同实现方式"><a href="#count-的不同实现方式" class="headerlink" title="count(*)的不同实现方式"></a>count(*)的不同实现方式</h1><hr><p>在 msyql 引擎中，count（*）有不同的实现方式</p><hr><ul><li>MyISAM引擎把一个表的总行数存在了磁盘上,因此执行count(*)的时候会直接返回这个数，效率很高</li><li>而InnoDB引擎就麻烦了，它执行count(*)的时候，需要把数据一行一行地从引擎里面读出来，然后累计计数</li></ul><p>当然，这里说的是不加where条件的count(*)，如果加了条件，MyISAM表也不能返回这么快的。</p><p>为什么InnoDB不像MyISAM一样，也把数字存起来呢？</p><p>​    因为即使在同一个时刻的多个子查询，由于多版本并发控制（MVCC）的原因，而InnoDB表 应该返回多少行 也是不确定的。</p><p>比如现在某表中有1000条数据</p><p>会话A去执行select(*)</p><p>会话B开启事务，新增一条数据，再执行select * </p><p>会话A和会话B在同一时刻执行，那么他们返回的总行数是不一样的，A返回1000，而B返回1001</p><p>这和InnoDB的事务有关系，可重复读是它默认的隔离级别，在代码上就是通过多版本并发控制，也就是MVCC来实现的。每一行记录都要判断自己是否对这个会话可见，因此对于count(*)请求来说，InnoDB会把数据一行一行的读出来依次判断，可见的行才能够计算“基于这个查询”的表的总行数</p><blockquote><p>​    MySQL在执行 count(*)操作的时候还是做了优化的。 InnoDB 是索引组织表，主键索引树的叶子节点是数据，而普通索引树的叶子节点是 主键值。所以，普通索引树比主键索引树小很多。对于 count(*) 这样的操作，遍历哪个索引树 得到的结果逻辑上都是一样的。因此，MySQL 优化器会找到最小的那棵树来遍历。在保证逻辑 正确的前提下，尽量减少扫描的数据量，是数据库系统设计的通用法则之一</p></blockquote><h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><hr><p>如果一个页面需要经常查询显示某表的总数，应该如何去做呢？</p><hr><p>我们应该自己去计数</p><h2 id="用缓存系统保存计数"><a href="#用缓存系统保存计数" class="headerlink" title="用缓存系统保存计数"></a>用缓存系统保存计数</h2><p>​    可以用Redis去记录这个表的总行数。每插入一行Redis计数就加1，每删除一行Redis计数就减1。</p><p>可能存在的问题：</p><p>1、Redis可能会丢失数据，如果我们刚在表里插入了一行数据，Redis中的值也进行了自增，然后Redis宕机了，还没来得及进行持久化，导致数据的丢失；</p><p>（我们可以在Redis宕机后，手动select(*)查询总行数写回Redis)</p><p>2、Redis和MySql存在分布式事务问题；</p><p>比如某个场景下，我们需要查询显示总数，并且还要显示最近操作的100条记录。那我们就需要先从Redis里面取出计数，再去表里取数据记录</p><p>可能存在的问题，查到的100行里面没有新增的数据，但Redis的计数已经加1</p><p>另一种是，查到的100行有新增的数，但是Redis的计数还没加1</p><p>产生的原因就是，无法保证提交数据库事务的同时写入Redis，</p><h2 id="在数据库保存计数"><a href="#在数据库保存计数" class="headerlink" title="在数据库保存计数"></a>在数据库保存计数</h2><p>​    用一张表去记录总数，可以避免上述问题，因此事务的可见性，我们插入数据和修改表中记录的行数都是在方法执行完后统一提交的事务，事务还未提交时，对其他线程是不可见的</p><ul><li>从并发系统性能的角度看，应该先插数据表，还是先更新计数表呢？</li></ul><p>更新计数表会涉及到行锁的竞争，先插入再更新能最大程度的减少了事务之间的锁等待，提高并发度（事务开启后，更新操作放到最后，减少锁等待时间的影响）</p><h1 id="不同count的用法"><a href="#不同count的用法" class="headerlink" title="不同count的用法"></a>不同count的用法</h1><p>count(*)、count(id)、count(字段)、count(1)的用法的性能，有哪些差别呢。</p><hr><p>基于InnoDB引擎</p><hr><p>count（）是一个聚合函数，对于返回的结果集，一行一行的判断，如果count函数的参数不是null,就会累计值加1，否则不加。</p><p>所以count(*),count(id),count(字段),count(1)都返回满足条件的结果集的总行数；而count(字段），则表示返回满足条件的数据行里，参数“字段”不为null的总个数</p><ul><li><p>对于count(id)来说。InnoDB引擎会遍历整张表，把每一行的id值都取出来，返回给server层，server层拿到id后，判断是不可能为空的，就按行累加</p></li><li><p>对于count(1)来说。InnoDB引擎遍历整张表，但是不取值。server层对于返回的每一行，放一个数字“1”进去，判断是不可能为空的，按行累加</p></li></ul><p>count(*)执行的要比count(id)快，因为从引擎返回id会涉及到解析数据行，以及拷贝字段值的操作</p><ul><li>对于count(字段)来说。 如果这个字段是定义为not null的话，一行行的从记录里面读取出这个字段，判断不能为null,按行累加； 如果这个字段允许为空，那么执行的时候，判断到有可能是null，还要把值取出来再判断一下，不是null才累加</li><li>对于count(*)来说。并不会把全部字段取出来，而是专门做了优化，不取值，count(*)肯定不是null,按行累加</li></ul><p>按照效率排序的话，count(字段) &lt; count(id) &lt; count(1) ≈ count(*)</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;count-的不同实现方式&quot;&gt;&lt;a href=&quot;#count-的不同实现方式&quot; class=&quot;headerlink&quot; title=&quot;count(*)的不同实现方式&quot;&gt;&lt;/a&gt;count(*)的不同实现方式&lt;/h1&gt;&lt;hr&gt;
-&lt;p&gt;在 msyql 引擎中，count</summary>
-      
-    
-    
-    
-    <category term="mysql" scheme="http://c89757.gitee.io/colinstar/categories/mysql/"/>
-    
-    
-    <category term="mysql" scheme="http://c89757.gitee.io/colinstar/tags/mysql/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Sychronized关键字-monitorenter与monitorexit</title>
-    <link href="http://c89757.gitee.io/colinstar/2021/12/17/Sychronized%E5%85%B3%E9%94%AE%E5%AD%97-monitorenter%E4%B8%8Emonitorexit/"/>
-    <id>http://c89757.gitee.io/colinstar/2021/12/17/Sychronized%E5%85%B3%E9%94%AE%E5%AD%97-monitorenter%E4%B8%8Emonitorexit/</id>
-    <published>2021-12-17T11:19:25.000Z</published>
-    <updated>2022-01-15T15:13:50.736Z</updated>
-    
-    <content type="html"><![CDATA[<blockquote><p>每个对象都有一个Monitor与之关联，当Monitor被持有后，它将处于锁定状态。Synchronized在JVM里的实现都是 基于进入和退出Monitor对象来实现方法同步和代码块同步，都可以通过成对的MonitorEnter和MonitorExit指令来实现。</p></blockquote><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">synchronized</span>(<span class="keyword">this</span>) &#123;</span><br><span class="line">           System.out.println(<span class="string">&quot;hello world&quot;</span>);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure><p>经过javap解析后</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method</span><span class="params">()</span></span>;</span><br><span class="line">   Code:</span><br><span class="line">      <span class="number">0</span>: aload_0</span><br><span class="line">      <span class="number">1</span>: dup</span><br><span class="line">      <span class="number">2</span>: astore_1</span><br><span class="line">      <span class="number">3</span>: monitorenter</span><br><span class="line">      <span class="number">4</span>: getstatic     #<span class="number">2</span>                  <span class="comment">// Field java/lang/System.out:Ljava/io/PrintStream;</span></span><br><span class="line">      <span class="number">7</span>: ldc           #<span class="number">3</span>                  <span class="comment">// String hello world</span></span><br><span class="line">      <span class="number">9</span>: invokevirtual #<span class="number">4</span>                  <span class="comment">// Method java/io/PrintStream.println:(Ljava/lang/String;)V</span></span><br><span class="line">     <span class="number">12</span>: aload_1</span><br><span class="line">     <span class="number">13</span>: monitorexit</span><br><span class="line">     <span class="number">14</span>: goto          <span class="number">22</span></span><br><span class="line">     <span class="number">17</span>: astore_2</span><br><span class="line">     <span class="number">18</span>: aload_1</span><br><span class="line">     <span class="number">19</span>: monitorexit</span><br><span class="line">     <span class="number">20</span>: aload_2</span><br><span class="line">     <span class="number">21</span>: athrow</span><br><span class="line">     <span class="number">22</span>: <span class="keyword">return</span></span><br><span class="line">   Exception table:</span><br><span class="line">      from    to  target type</span><br><span class="line">          <span class="number">4</span>    <span class="number">14</span>    <span class="number">17</span>   any</span><br><span class="line">         <span class="number">17</span>    <span class="number">20</span>    <span class="number">17</span>   any</span><br><span class="line"></span><br></pre></td></tr></table></figure><p>此处会发现有一个monitorenter，却有两个monitorexit；<br>这是JVM的补偿机制，保证你的同步代码块中出现异常，能正常释放锁</p><p>如字节码行号4-13可能会出现异常，则会走17进行异常处理，在此处进行锁的释放</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;blockquote&gt;
-&lt;p&gt;每个对象都有一个Monitor与之关联，当Monitor被持有后，它将处于锁定状态。Synchronized在JVM里的实现都是 基于进入和退出Monitor对象来实现方法同步和代码块同步，都可以通过成对的MonitorEnter和MonitorE</summary>
-      
-    
-    
-    
-    <category term="JUC" scheme="http://c89757.gitee.io/colinstar/categories/JUC/"/>
-    
-    
-    <category term="JUC" scheme="http://c89757.gitee.io/colinstar/tags/JUC/"/>
-    
-    <category term="多线程" scheme="http://c89757.gitee.io/colinstar/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>MySql性能调优</title>
-    <link href="http://c89757.gitee.io/colinstar/2021/12/16/MySql%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/"/>
-    <id>http://c89757.gitee.io/colinstar/2021/12/16/MySql%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/</id>
-    <published>2021-12-16T15:08:30.000Z</published>
-    <updated>2021-12-17T11:47:30.089Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="啥也没有，只是为了样式展示"><a href="#啥也没有，只是为了样式展示" class="headerlink" title="啥也没有，只是为了样式展示"></a>啥也没有，只是为了样式展示</h1>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;啥也没有，只是为了样式展示&quot;&gt;&lt;a href=&quot;#啥也没有，只是为了样式展示&quot; class=&quot;headerlink&quot; title=&quot;啥也没有，只是为了样式展示&quot;&gt;&lt;/a&gt;啥也没有，只是为了样式展示&lt;/h1&gt;</summary>
-      
-    
-    
-    
-    <category term="mysql" scheme="http://c89757.gitee.io/colinstar/categories/mysql/"/>
-    
-    
-    <category term="mysql" scheme="http://c89757.gitee.io/colinstar/tags/mysql/"/>
     
   </entry>
   
