@@ -18,15 +18,15 @@
   
   
   <title>Mysql子查询 | Colin</title>
-  <meta name="description" content="子查询的分类按照出现位置区分1、在select子句中 如： 1select (select m1 from t1 limit 1);    2、在From子句中 如： 1select m,n from (select m2 as m , n2 as n from t2 where  m &gt; 2 ) as t ;    3、在where或on子句的表达式中 如： 1select * from">
+  <meta name="description" content="子查询的分类按照出现位置区分1、在select子句中 如： 1select (select m1 from t1 limit 1);    2、在From子句中 如： 1select m,n from (select m2 as m , n2 as n from t2 where  m &gt; 2 ) as t ;   放在FROM子句后面的子查询被称为派生表  3、在where或on子句的表达">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Mysql子查询">
 <meta property="og:url" content="http://c89757.gitee.io/colinstar/2022/11/13/Mysql%E5%AD%90%E6%9F%A5%E8%AF%A2/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="子查询的分类按照出现位置区分1、在select子句中 如： 1select (select m1 from t1 limit 1);    2、在From子句中 如： 1select m,n from (select m2 as m , n2 as n from t2 where  m &gt; 2 ) as t ;    3、在where或on子句的表达式中 如： 1select * from">
+<meta property="og:description" content="子查询的分类按照出现位置区分1、在select子句中 如： 1select (select m1 from t1 limit 1);    2、在From子句中 如： 1select m,n from (select m2 as m , n2 as n from t2 where  m &gt; 2 ) as t ;   放在FROM子句后面的子查询被称为派生表  3、在where或on子句的表达">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-11-13T10:07:59.000Z">
-<meta property="article:modified_time" content="2022-11-13T14:34:16.039Z">
+<meta property="article:modified_time" content="2023-08-25T16:12:10.465Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="mysql">
 <meta name="twitter:card" content="summary">
@@ -352,7 +352,7 @@
   <div class="slimContent">
     <nav id="toc" class="article-toc">
       <h3 class="toc-title">文章目录</h3>
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AD%90%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%88%86%E7%B1%BB"><span class="toc-number">1.</span> <span class="toc-text">子查询的分类</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%89%E7%85%A7%E5%87%BA%E7%8E%B0%E4%BD%8D%E7%BD%AE%E5%8C%BA%E5%88%86"><span class="toc-number">1.1.</span> <span class="toc-text">按照出现位置区分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%89%E8%BF%94%E5%9B%9E%E7%9A%84%E7%BB%93%E6%9E%9C%E9%9B%86%E5%8C%BA%E5%88%86"><span class="toc-number">1.2.</span> <span class="toc-text">按返回的结果集区分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%89%E4%B8%8E%E5%A4%96%E5%B1%82%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%85%B3%E7%B3%BB%E6%9D%A5%E5%8C%BA%E5%88%86"><span class="toc-number">1.3.</span> <span class="toc-text">按与外层查询的关系来区分</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AD%90%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B"><span class="toc-number">2.</span> <span class="toc-text">子查询的执行过程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%87%E9%87%8F%E5%AD%90%E6%9F%A5%E8%AF%A2%E3%80%81%E8%A1%8C%E5%AD%90%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B"><span class="toc-number">2.1.</span> <span class="toc-text">标量子查询、行子查询的执行过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E7%9B%B8%E5%85%B3%E6%9F%A5%E8%AF%A2"><span class="toc-number">2.1.1.</span> <span class="toc-text">不相关查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E6%9F%A5%E8%AF%A2"><span class="toc-number">2.1.2.</span> <span class="toc-text">相关查询</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IN%E5%AD%90%E6%9F%A5%E8%AF%A2%E7%9A%84%E4%BC%98%E5%8C%96"><span class="toc-number">2.2.</span> <span class="toc-text">IN子查询的优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Table-pullout%EF%BC%88%E5%AD%90%E6%9F%A5%E8%AF%A2%E4%B8%AD%E7%9A%84%E8%A1%A8%E4%B8%8A%E6%8B%89%EF%BC%89"><span class="toc-number">2.2.1.</span> <span class="toc-text">Table pullout（子查询中的表上拉）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Duplicate-Weedout%EF%BC%88%E9%87%8D%E5%A4%8D%E5%80%BC%E6%B6%88%E9%99%A4%EF%BC%89"><span class="toc-number">2.2.2.</span> <span class="toc-text">Duplicate Weedout（重复值消除）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LooseScan%EF%BC%88%E6%9D%BE%E6%95%A3%E6%89%AB%E6%8F%8F%EF%BC%89"><span class="toc-number">2.2.3.</span> <span class="toc-text">LooseScan（松散扫描）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Semi-join-Materialization-%E5%8D%8A%E8%BF%9E%E6%8E%A5%E7%89%A9%E5%8C%96"><span class="toc-number">2.2.4.</span> <span class="toc-text">Semi-join Materialization (半连接物化)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FirstMatch-%E9%A6%96%E6%AC%A1%E5%8C%B9%E9%85%8D"><span class="toc-number">2.2.5.</span> <span class="toc-text">FirstMatch(首次匹配)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%8A%E8%BF%9E%E6%8E%A5%E9%80%82%E7%94%A8%E6%9D%A1%E4%BB%B6"><span class="toc-number">2.2.6.</span> <span class="toc-text">半连接适用条件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NOT-EXISTS%E5%AD%90%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%89%A7%E8%A1%8C"><span class="toc-number">2.3.</span> <span class="toc-text">[NOT] EXISTS子查询的执行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B4%BE%E7%94%9F%E8%A1%A8%E7%9A%84%E4%BC%98%E5%8C%96"><span class="toc-number">2.4.</span> <span class="toc-text">派生表的优化</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AD%90%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%88%86%E7%B1%BB"><span class="toc-number">1.</span> <span class="toc-text">子查询的分类</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%89%E7%85%A7%E5%87%BA%E7%8E%B0%E4%BD%8D%E7%BD%AE%E5%8C%BA%E5%88%86"><span class="toc-number">1.1.</span> <span class="toc-text">按照出现位置区分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%89%E8%BF%94%E5%9B%9E%E7%9A%84%E7%BB%93%E6%9E%9C%E9%9B%86%E5%8C%BA%E5%88%86"><span class="toc-number">1.2.</span> <span class="toc-text">按返回的结果集区分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%89%E4%B8%8E%E5%A4%96%E5%B1%82%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%85%B3%E7%B3%BB%E6%9D%A5%E5%8C%BA%E5%88%86"><span class="toc-number">1.3.</span> <span class="toc-text">按与外层查询的关系来区分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%90%E6%9F%A5%E8%AF%A2%E4%B8%8E%E5%B8%83%E5%B0%94%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="toc-number">1.4.</span> <span class="toc-text">子查询与布尔表达式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AD%90%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B"><span class="toc-number">2.</span> <span class="toc-text">子查询的执行过程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%87%E9%87%8F%E3%80%81%E8%A1%8C%E5%AD%90%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B"><span class="toc-number">2.1.</span> <span class="toc-text">标量、行子查询的执行过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E7%9B%B8%E5%85%B3%E6%9F%A5%E8%AF%A2"><span class="toc-number">2.1.1.</span> <span class="toc-text">不相关查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E6%9F%A5%E8%AF%A2"><span class="toc-number">2.1.2.</span> <span class="toc-text">相关查询</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IN%E5%AD%90%E6%9F%A5%E8%AF%A2%E7%9A%84%E4%BC%98%E5%8C%96"><span class="toc-number">2.2.</span> <span class="toc-text">IN子查询的优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%A9%E5%8C%96%E8%A1%A8"><span class="toc-number">2.2.1.</span> <span class="toc-text">物化表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Table-pullout%EF%BC%88%E5%AD%90%E6%9F%A5%E8%AF%A2%E4%B8%AD%E7%9A%84%E8%A1%A8%E4%B8%8A%E6%8B%89%EF%BC%89"><span class="toc-number">2.2.2.</span> <span class="toc-text">Table pullout（子查询中的表上拉）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Duplicate-Weedout%EF%BC%88%E9%87%8D%E5%A4%8D%E5%80%BC%E6%B6%88%E9%99%A4%EF%BC%89"><span class="toc-number">2.2.3.</span> <span class="toc-text">Duplicate Weedout（重复值消除）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LooseScan%EF%BC%88%E6%9D%BE%E6%95%A3%E6%89%AB%E6%8F%8F%EF%BC%89"><span class="toc-number">2.2.4.</span> <span class="toc-text">LooseScan（松散扫描）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Semi-join-Materialization-%E5%8D%8A%E8%BF%9E%E6%8E%A5%E7%89%A9%E5%8C%96"><span class="toc-number">2.2.5.</span> <span class="toc-text">Semi-join Materialization (半连接物化)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FirstMatch-%E9%A6%96%E6%AC%A1%E5%8C%B9%E9%85%8D"><span class="toc-number">2.2.6.</span> <span class="toc-text">FirstMatch(首次匹配)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%8A%E8%BF%9E%E6%8E%A5%E9%80%82%E7%94%A8%E6%9D%A1%E4%BB%B6"><span class="toc-number">2.2.7.</span> <span class="toc-text">半连接适用条件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NOT-EXISTS%E5%AD%90%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%89%A7%E8%A1%8C"><span class="toc-number">2.3.</span> <span class="toc-text">[NOT] EXISTS子查询的执行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B4%BE%E7%94%9F%E8%A1%A8%E7%9A%84%E4%BC%98%E5%8C%96"><span class="toc-number">2.4.</span> <span class="toc-text">派生表的优化</span></a></li></ol></li></ol>
     </nav>
   </div>
 </aside>
@@ -416,8 +416,9 @@
 <p>如：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> m,n <span class="keyword">from</span> (<span class="keyword">select</span> m2 <span class="keyword">as</span> m , n2 <span class="keyword">as</span> n <span class="keyword">from</span> t2 <span class="keyword">where</span>  m <span class="operator">&gt;</span> <span class="number">2</span> ) <span class="keyword">as</span> t ;</span><br></pre></td></tr></table></figure>
 
-
-
+<blockquote>
+<p>放在FROM子句后面的子查询被称为派生表</p>
+</blockquote>
 <p>3、在where或on子句的表达式中</p>
 <p>如：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t1 <span class="keyword">where</span> m1 <span class="keyword">in</span> ( <span class="keyword">select</span> m2 <span class="keyword">from</span> t2 );</span><br></pre></td></tr></table></figure>
@@ -433,8 +434,9 @@
 <p>比如：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t1 <span class="keyword">where</span> m1 <span class="operator">=</span> ( <span class="keyword">select</span> <span class="built_in">MIN</span>(m2) <span class="keyword">from</span> t2);</span><br></pre></td></tr></table></figure>
 
-
-
+<blockquote>
+<p>在select子句中的子查询必须是标量子查询</p>
+</blockquote>
 <ul>
 <li>行子查询</li>
 </ul>
@@ -475,9 +477,41 @@
 
 
 
+<h2 id="子查询与布尔表达式"><a href="#子查询与布尔表达式" class="headerlink" title="子查询与布尔表达式"></a>子查询与布尔表达式</h2><ul>
+<li>使用=、&gt;、&lt;、&gt;=、&lt;=、&lt;&gt;、!=、&lt;=&gt; 作为布尔表达式的操作符</li>
+</ul>
+<blockquote>
+<p> 操作数 【表达式】 （子查询）</p>
+</blockquote>
+<p>这里的操作数可以是某个列名、或者常量等。但是，这里的子查询只能是标量子查询或行子查询（只能有单一的值或者一条记录）</p>
+<p>如</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t1 <span class="keyword">where</span> m1 <span class="operator">&lt;</span> (<span class="keyword">select</span> <span class="built_in">MIN</span>(m2) <span class="keyword">from</span> t2);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> m1 <span class="keyword">where</span> (m1, n1) <span class="operator">=</span> (<span class="keyword">select</span> m2, n2 <span class="keyword">from</span> t2 limit <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
 
 
-<h1 id="子查询的执行过程"><a href="#子查询的执行过程" class="headerlink" title="子查询的执行过程"></a>子查询的执行过程</h1><h2 id="标量子查询、行子查询的执行过程"><a href="#标量子查询、行子查询的执行过程" class="headerlink" title="标量子查询、行子查询的执行过程"></a>标量子查询、行子查询的执行过程</h2><h3 id="不相关查询"><a href="#不相关查询" class="headerlink" title="不相关查询"></a>不相关查询</h3><p>如：</p>
+
+<ul>
+<li>[NOT] IN/ANY/SOME/ALL子查询</li>
+</ul>
+<p>子查询的结果集往往有多条，是一个集合</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t1 <span class="keyword">where</span> (m1, n1) <span class="keyword">in</span> (<span class="keyword">select</span> m2, n2 <span class="keyword">from</span> t2);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t1 <span class="keyword">where</span> m1 <span class="operator">&gt;</span> <span class="keyword">ANY</span>(<span class="keyword">select</span> m2 <span class="keyword">from</span> t2); <span class="operator">/</span><span class="operator">/</span> <span class="keyword">ANY</span>与<span class="keyword">SOME</span>表达的意思相同</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t1 <span class="keyword">where</span> m1 <span class="operator">&gt;</span> <span class="keyword">ALL</span>(<span class="keyword">select</span> m2 <span class="keyword">from</span> t2); <span class="operator">/</span><span class="operator">/</span> 本质上等价于 <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t1 <span class="keyword">where</span> m1 <span class="operator">&gt;</span> (<span class="keyword">select</span> <span class="built_in">MAX</span>(m2) <span class="keyword">from</span> t2);</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<hr>
+<blockquote>
+<p>Tips</p>
+</blockquote>
+<p>对于[NOT] IN/ANY/SOME/ALL子查询来说</p>
+<ol>
+<li>子查询中不允许有LIMIT子句</li>
+<li>子查询的结果其实是一个集合，集合里的值是否排序一点儿都不重要 - 子查询里的order by 无意义 </li>
+<li>子查询中的DISTINCT无意义 （<a href="#物化表">子查询建立的临时表会去重</a>）</li>
+<li>没有聚合函数以及HAVING子句时，GROUP BY 子句无意义</li>
+</ol>
+<p>如：select * from t1 where m1 in (select m2 from t2 group by m2)</p>
+<h1 id="子查询的执行过程"><a href="#子查询的执行过程" class="headerlink" title="子查询的执行过程"></a>子查询的执行过程</h1><h2 id="标量、行子查询的执行过程"><a href="#标量、行子查询的执行过程" class="headerlink" title="标量、行子查询的执行过程"></a>标量、行子查询的执行过程</h2><h3 id="不相关查询"><a href="#不相关查询" class="headerlink" title="不相关查询"></a>不相关查询</h3><p>如：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> s1 <span class="keyword">where</span> key1 <span class="operator">=</span> (<span class="keyword">select</span> common_field <span class="keyword">from</span> s2 <span class="keyword">where</span> key3 <span class="operator">=</span> <span class="string">&#x27;a&#x27;</span> limit <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
 
 
@@ -493,7 +527,23 @@
 <p>2、然后从这条记录中找出子查询涉及的列。即key3 ，然后执行子查询</p>
 <p>3、根据子查询的查询结果，来检测是否与外层查询的where条件相符合。如果条件成立符合，加入结果集。反之丢弃</p>
 <p>4、跳到步骤1，重复此过程，直到外层查询获取不到记录为止</p>
-<h2 id="IN子查询的优化"><a href="#IN子查询的优化" class="headerlink" title="IN子查询的优化"></a>IN子查询的优化</h2><p> 例如：</p>
+<h2 id="IN子查询的优化"><a href="#IN子查询的优化" class="headerlink" title="IN子查询的优化"></a>IN子查询的优化</h2><h3 id="物化表"><a href="#物化表" class="headerlink" title="物化表"></a>物化表</h3><p>对于不相关子查询，如</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> s1 <span class="keyword">where</span> key1 <span class="keyword">in</span> (<span class="keyword">select</span> common_field <span class="keyword">from</span> s2 <span class="keyword">where</span> key3 <span class="operator">=</span> <span class="string">&#x27;a&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>如果子查询的结果条数很少，那么按照我们之前的想法，先执行子查询，获取一条记录，然后放到外面的查询执行，判断结果是否满足。这种其实没啥问题</p>
+<p>如果子查询的结果条数很多，可能内存都放不下。</p>
+<p>于是我们可以这样：</p>
+<p>不直接将子查询的结果集当作外层查询的参数，而是将结果集写入一个临时表。写入临时表时，需要注意两点</p>
+<ul>
+<li><p>该临时表的列就是子查询结果集中的列</p>
+</li>
+<li><p>写入临时表的记录会被去重（临时表也是表，给该表建立唯一索引或者主键即可实现）</p>
+<p>一般情况下，子查询的结果集不会太离谱，所以会为它建立基于内存的Memory存储引擎的临时表，而且还会为该表建立哈希索引</p>
+</li>
+</ul>
+<p>（in语句的本值就是判断某一列或多列是否存在于某个集合中，有了哈希索引，这个判断过程非常快）</p>
+<p>​        如果子查询的集合非常大，超过了系统变量<code>tmp_table_size</code>或者<code>max_heap_table_size</code>的值，临时表会转而使用基于<strong>磁盘</strong>的存储引擎来保存结果集，索引类型也转换为B+数索引</p>
+<p> 例如：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> s1 <span class="keyword">where</span> key1 <span class="keyword">in</span> (<span class="keyword">select</span> common_field <span class="keyword">from</span> s2 <span class="keyword">where</span> key3 <span class="operator">=</span> <span class="string">&#x27;a&#x27;</span>);</span><br></pre></td></tr></table></figure>
 
 
