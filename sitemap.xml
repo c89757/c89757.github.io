@@ -245,15 +245,6 @@
   </url>
   
   <url>
-    <loc>http://c89757.gitee.io/colinstar/links/index.html</loc>
-    
-    <lastmod>2021-12-16</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>http://c89757.gitee.io/colinstar/categories/index.html</loc>
     
     <lastmod>2021-12-16</lastmod>
@@ -263,7 +254,7 @@
   </url>
   
   <url>
-    <loc>http://c89757.gitee.io/colinstar/about/index.html</loc>
+    <loc>http://c89757.gitee.io/colinstar/links/index.html</loc>
     
     <lastmod>2021-12-16</lastmod>
     
@@ -273,6 +264,15 @@
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/books/index.html</loc>
+    
+    <lastmod>2021-12-16</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://c89757.gitee.io/colinstar/about/index.html</loc>
     
     <lastmod>2021-12-16</lastmod>
     
