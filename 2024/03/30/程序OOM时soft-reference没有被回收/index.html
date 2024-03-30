@@ -17,21 +17,25 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>记-升级mariadb-java-client引发的问题 | Colin</title>
-  <meta name="description" content="背景项目中使用flywaydb作为数据库迁移工具 但是在执行一段DDL语句时，引发了报错 语句如下： 1ALTER TABLE table_name MODIFY COLUMN column_name data_type NOT NULL DEFAULT 1;  该字段之前默认NULL，现将其改为NOT NULL 执行却报错：Invalid use of null value; 排错网上查了下，因">
+  <title>程序OOM时soft-reference没有被回收? | Colin</title>
+  <meta name="description" content="背景最近在编写一块缓存代码时，想到了软引用，但是不太清楚软引用究竟在什么时候会被回收，于是就写了一块测试代码  JDK1.8  -Xms60m -Xmx60m  123456789101112131415161718192021222324252627282930313233public class Test &amp;#123;    public static SoftReference&lt;byt">
 <meta property="og:type" content="article">
-<meta property="og:title" content="记-升级mariadb-java-client引发的问题">
-<meta property="og:url" content="http://c89757.gitee.io/colinstar/2024/03/11/%E8%AE%B0-%E5%8D%87%E7%BA%A7mariadb-java-client%E5%BC%95%E5%8F%91%E7%9A%84%E9%97%AE%E9%A2%98/index.html">
+<meta property="og:title" content="程序OOM时soft-reference没有被回收?">
+<meta property="og:url" content="http://c89757.gitee.io/colinstar/2024/03/30/%E7%A8%8B%E5%BA%8FOOM%E6%97%B6soft-reference%E6%B2%A1%E6%9C%89%E8%A2%AB%E5%9B%9E%E6%94%B6/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="背景项目中使用flywaydb作为数据库迁移工具 但是在执行一段DDL语句时，引发了报错 语句如下： 1ALTER TABLE table_name MODIFY COLUMN column_name data_type NOT NULL DEFAULT 1;  该字段之前默认NULL，现将其改为NOT NULL 执行却报错：Invalid use of null value; 排错网上查了下，因">
+<meta property="og:description" content="背景最近在编写一块缓存代码时，想到了软引用，但是不太清楚软引用究竟在什么时候会被回收，于是就写了一块测试代码  JDK1.8  -Xms60m -Xmx60m  123456789101112131415161718192021222324252627282930313233public class Test &amp;#123;    public static SoftReference&lt;byt">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-03-11T11:05:10.000Z">
-<meta property="article:modified_time" content="2024-03-11T11:39:04.373Z">
+<meta property="og:image" content="http://c89757.gitee.io/colinstar/2024/03/30/%E7%A8%8B%E5%BA%8FOOM%E6%97%B6soft-reference%E6%B2%A1%E6%9C%89%E8%A2%AB%E5%9B%9E%E6%94%B6/image-20240331000639577.png">
+<meta property="og:image" content="http://c89757.gitee.io/colinstar/2024/03/30/%E7%A8%8B%E5%BA%8FOOM%E6%97%B6soft-reference%E6%B2%A1%E6%9C%89%E8%A2%AB%E5%9B%9E%E6%94%B6/image-20240331001043783.png">
+<meta property="article:published_time" content="2024-03-30T14:57:37.000Z">
+<meta property="article:modified_time" content="2024-03-30T16:17:33.877Z">
 <meta property="article:author" content="John Doe">
-<meta property="article:tag" content="mysql">
+<meta property="article:tag" content="java">
+<meta property="article:tag" content="GC">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://c89757.gitee.io/colinstar/2024/03/30/%E7%A8%8B%E5%BA%8FOOM%E6%97%B6soft-reference%E6%B2%A1%E6%9C%89%E8%A2%AB%E5%9B%9E%E6%94%B6/image-20240331000639577.png">
   <!-- Canonical links -->
-  <link rel="canonical" href="http://c89757.gitee.io/colinstar/2024/03/11/%E8%AE%B0-%E5%8D%87%E7%BA%A7mariadb-java-client%E5%BC%95%E5%8F%91%E7%9A%84%E9%97%AE%E9%A2%98/index.html">
+  <link rel="canonical" href="http://c89757.gitee.io/colinstar/2024/03/30/%E7%A8%8B%E5%BA%8FOOM%E6%97%B6soft-reference%E6%B2%A1%E6%9C%89%E8%A2%AB%E5%9B%9E%E6%94%B6/index.html">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -352,21 +356,21 @@
   <div class="slimContent">
     <nav id="toc" class="article-toc">
       <h3 class="toc-title">文章目录</h3>
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%92%E9%94%99"><span class="toc-number">2.</span> <span class="toc-text">排错</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">3.</span> <span class="toc-text">解决方案</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8E%9F%E5%9B%A0"><span class="toc-number">2.</span> <span class="toc-text">原因</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A1%A5%E5%85%85"><span class="toc-number">3.</span> <span class="toc-text">补充</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%87%B4%E8%B0%A2"><span class="toc-number">4.</span> <span class="toc-text">致谢</span></a></li></ol>
     </nav>
   </div>
 </aside>
 
 <main class="main" role="main">
   <div class="content">
-  <article id="post-记-升级mariadb-java-client引发的问题" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+  <article id="post-程序OOM时soft-reference没有被回收" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
     
     <div class="article-header">
       
         
   
     <h1 class="article-title" itemprop="name">
-      记-升级mariadb-java-client引发的问题
+      程序OOM时soft-reference没有被回收?
     </h1>
   
 
@@ -374,20 +378,20 @@
       <div class="article-meta">
         <span class="article-date">
     <i class="icon icon-calendar-check"></i>
-	<a href="/colinstar/2024/03/11/%E8%AE%B0-%E5%8D%87%E7%BA%A7mariadb-java-client%E5%BC%95%E5%8F%91%E7%9A%84%E9%97%AE%E9%A2%98/" class="article-date">
-	  <time datetime="2024-03-11T11:05:10.000Z" itemprop="datePublished">2024-03-11</time>
+	<a href="/colinstar/2024/03/30/%E7%A8%8B%E5%BA%8FOOM%E6%97%B6soft-reference%E6%B2%A1%E6%9C%89%E8%A2%AB%E5%9B%9E%E6%94%B6/" class="article-date">
+	  <time datetime="2024-03-30T14:57:37.000Z" itemprop="datePublished">2024-03-30</time>
 	</a>
 </span>
         
   <span class="article-category">
     <i class="icon icon-folder"></i>
-    <a class="article-category-link" href="/colinstar/categories/mysql/">mysql</a>
+    <a class="article-category-link" href="/colinstar/categories/java/">java</a>
   </span>
 
         
   <span class="article-tag">
     <i class="icon icon-tags"></i>
-	<a class="article-tag-link-link" href="/colinstar/tags/mysql/" rel="tag">mysql</a>
+	<a class="article-tag-link-link" href="/colinstar/tags/GC/" rel="tag">GC</a>, <a class="article-tag-link-link" href="/colinstar/tags/java/" rel="tag">java</a>
   </span>
 
 
@@ -400,57 +404,85 @@
 	</span>
 
 
-        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/colinstar/2024/03/11/%E8%AE%B0-%E5%8D%87%E7%BA%A7mariadb-java-client%E5%BC%95%E5%8F%91%E7%9A%84%E9%97%AE%E9%A2%98/#comments" class="article-comment-link">评论</a></span>
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/colinstar/2024/03/30/%E7%A8%8B%E5%BA%8FOOM%E6%97%B6soft-reference%E6%B2%A1%E6%9C%89%E8%A2%AB%E5%9B%9E%E6%94%B6/#comments" class="article-comment-link">评论</a></span>
         
       </div>
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>项目中使用<code>flywaydb</code>作为数据库迁移工具</p>
-<p>但是在执行一段<code>DDL</code>语句时，引发了报错</p>
-<p>语句如下：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> table_name MODIFY <span class="keyword">COLUMN</span> column_name data_type <span class="keyword">NOT</span> <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
-
-<p>该字段之前默认<code>NULL</code>，现将其改为<code>NOT NULL</code></p>
-<p>执行却报错：<code>Invalid use of null value;</code></p>
-<h1 id="排错"><a href="#排错" class="headerlink" title="排错"></a>排错</h1><p>网上查了下，因为表中已经存在了<code>NULL</code>值，所以不允许将其修改为<code>NOT NULL</code>。</p>
-<p>但是，将这段脚本直接放到<code>navicat</code>中却能执行成功。</p>
-<p>到此开始怀疑是项目升级<code>mariadb-java-client</code>至<code>2.7.10</code>导致的。且这种语句执行结果的差异化，大多和<code>sql_mode</code>有关。</p>
-<ol>
-<li>查询<code>mysql</code>官网</li>
-</ol>
-<p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/sql-mode.html">https://dev.mysql.com/doc/refman/5.7/en/sql-mode.html</a></p>
-<p>没有明确找到针对词条语句有做差异化的<code>sql_mode</code>，推测是与严格模式有关——<code>STRICT_TRANS_TABLES</code>;</p>
-<ol start="2">
-<li>在<code>navicat</code>中，查看<code>sql_mode</code></li>
-</ol>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> @<span class="variable">@GLOBAL</span>.sql_mode;</span><br><span class="line"><span class="keyword">SELECT</span> @<span class="variable">@SESSION</span>.sql_mode;</span><br></pre></td></tr></table></figure>
-
-<p>结果都为空</p>
-<ol start="3">
-<li>设置session级别的<code>sql_mode</code></li>
-</ol>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SET</span> SESSION sql_mode <span class="operator">=</span> sys.list_add(@<span class="variable">@session</span>.sql_mode, <span class="string">&#x27;STRICT_TRANS_TABLES&#x27;</span>);</span><br></pre></td></tr></table></figure>
+        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>最近在编写一块缓存代码时，想到了软引用，但是不太清楚软引用究竟在什么时候会被回收，于是就写了一块测试代码</p>
+<blockquote>
+<p>JDK1.8 </p>
+<p>-Xms60m -Xmx60m</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> SoftReference&lt;<span class="keyword">byte</span>[]&gt; cache = <span class="keyword">new</span> SoftReference&lt;&gt;(<span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">0</span>]);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> List&lt;<span class="keyword">byte</span>[]&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            func();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (OutOfMemoryError e) &#123;</span><br><span class="line">            sniff();</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">byte</span>[] bytes = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span> * <span class="number">1024</span>];</span><br><span class="line">        cache = <span class="keyword">new</span> SoftReference&lt;&gt;(bytes);</span><br><span class="line">        <span class="keyword">for</span>(;;) &#123;</span><br><span class="line">            <span class="keyword">byte</span>[] tmp = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span> * <span class="number">1024</span>];</span><br><span class="line">            list.add(tmp);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">sniff</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">byte</span>[] bytes = cache.get();</span><br><span class="line">        <span class="keyword">if</span> (bytes == <span class="keyword">null</span>) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;recycling data.&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;object still live&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
 
-<ol start="4">
-<li>设置完后，再次执行脚本，问题复现<code>Invalid use of null value</code>;</li>
-</ol>
-<h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><ol>
-<li>可以在<code>DDL</code>之前，通过<code>update</code>语句，将全部的NULL值修改为不为NULL</li>
-</ol>
-<ol start="2">
-<li>在执行<code>DDL</code>之前，判断是否开启了<code>STRICT_TRANS_TABLES</code>, 如果有开启，可以先将其移除，<code>DDL</code>执行之后再将其加回来</li>
-</ol>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SET</span> SESSION sql_mode <span class="operator">=</span> sys.list_drop(@<span class="variable">@session</span>.sql_mode, <span class="string">&#x27;STRICT_TRANS_TABLES&#x27;</span>);</span><br><span class="line">&#123;&#123;DDL&#125;&#125;;</span><br><span class="line"><span class="keyword">SET</span> SESSION sql_mode <span class="operator">=</span> sys.list_add(@<span class="variable">@session</span>.sql_mode, <span class="string">&#x27;STRICT_TRANS_TABLES&#x27;</span>);</span><br></pre></td></tr></table></figure>
+<p>通过不断往<code>list</code>填充 大小为<code>1M</code>的字节数组，为了让程序发生<code>OOM</code>，并且在捕获<code>OutOfMemoryError</code>时，来观测软引用的对象是否被回收了</p>
+<p>（<code>cache.get() == null</code>就说明软引用关联的对象，在即将OOM时，被GC回收了）</p>
+<p>但是程序运行结果如下：</p>
+<blockquote>
+<p>object still live</p>
+</blockquote>
+<p>说明在发生OOM时，GC并没有去回收这个软引用对象</p>
+<h1 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h1><p>什么叫软可达对象<em>softly reachable</em> </p>
+<p>官网给出的原文如下：</p>
+<blockquote>
+<p>An object is <em>softly reachable</em> if it is not strongly reachable but can be reached by traversing a soft reference.</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/ref/package-summary.html#reachability">oracle官方文档链接</a></p>
+<p>很重要的一点，<code>not strongly reachable</code>，不被强引用关联!</p>
+<p>上述例子中，就是因为 <code>new byte[1024 * 1024]</code> 除了被软引用关联外，还被变量<code>bytes</code>的强引用关联，所以，即使到最后发生了<code>OOM</code>，<code>Garbage Collector</code>也不会去回收它。</p>
+<p>将代码改为</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        cache = <span class="keyword">new</span> SoftReference&lt;&gt;(<span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span> * <span class="number">1024</span>]);</span><br><span class="line">        <span class="keyword">for</span>(;;) &#123;</span><br><span class="line">            <span class="keyword">byte</span>[] tmp = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span> * <span class="number">1024</span>];</span><br><span class="line">            list.add(tmp);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
+<p>不再使用变量去关联<code>new byte[1024 * 1024]</code>, 而是直接将他添加到引用对象中</p>
+<p>程序运行结果：</p>
+<blockquote>
+<p>recycling data</p>
+</blockquote>
+<p>软引用对象被正常回收</p>
+<h1 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h1><p>在上述例子中，如果将代码改为如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">public class Test &#123;</span><br><span class="line"></span><br><span class="line">    public static SoftReference&lt;byte[]&gt; cache = new SoftReference&lt;&gt;(new byte[0]);</span><br><span class="line"></span><br><span class="line">    public static List&lt;byte[]&gt; list = new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            func();</span><br><span class="line">        &#125; catch (OutOfMemoryError e) &#123;</span><br><span class="line">            sniff();</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void func() &#123;</span><br><span class="line">        for(;;) &#123;</span><br><span class="line">            byte[] tmp = new byte[1024 * 1024];</span><br><span class="line">            list.add(tmp);</span><br><span class="line">            byte[] bytes = new byte[1024 * 1024];</span><br><span class="line">            cache = new SoftReference&lt;&gt;(bytes);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void sniff() &#123;</span><br><span class="line">        byte[] bytes = cache.get();</span><br><span class="line">        if (bytes == null) &#123;</span><br><span class="line">            System.out.println(&quot;recycling data.&quot;);</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            System.out.println(&quot;object still live&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+<p>也就是将</p>
+<p><code>byte[] bytes = new byte[1024 * 1024]; cache = new SoftReference&lt;&gt;(bytes);</code></p>
+<p>这两行代码放入for循环里面，<code>list.add(tmp)</code>后面</p>
+<p>程序运行结果：</p>
+<blockquote>
+<p>recycling data.</p>
+</blockquote>
+<p>又懵了呀！</p>
+<p>按照我们上述的分析来说，这里也有一个强引用<code>bytes</code>关联这个数组，为什么发生<code>OOM</code>时软引用还能被回收呢？</p>
+<br>
 
-<ol start="3">
-<li>修改项目中数据库的<code>URL</code>连接串，添加参数<code>jdbcCompliantTruncation=false</code></li>
-</ol>
-<p>这个是通过源码发现的，当这个值为<code>true</code>时（默认为true)，<code>mariadb</code>连接<code>mysql</code>时，会添加上session级别的<code>STRICT_TRANS_TABLES</code>, 所以将他关掉即可。另外，开启这个值后，还影响一些其他功能，如：插入时，字段超长，将不会报错，而是截取</p>
+<p>因为这个例子有点特殊，事先说明一点，程序是运行到这一行发生的<code>OOM</code><br><code>byte[] bytes = new byte[1024 * 1024];</code></p>
+<br>
+
+<p>可以将代码加上几个打印点</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(;;) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;before&quot;</span>);</span><br><span class="line">        <span class="keyword">byte</span>[] tmp = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span> * <span class="number">1024</span>];</span><br><span class="line">        list.add(tmp);</span><br><span class="line">        System.out.println(<span class="string">&quot;add&quot;</span>);</span><br><span class="line">        <span class="keyword">byte</span>[] bytes = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span> * <span class="number">1024</span>];</span><br><span class="line">        System.out.println(<span class="string">&quot;after&quot;</span>);</span><br><span class="line">        cache = <span class="keyword">new</span> SoftReference&lt;&gt;(bytes);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程序是在输出<code>add</code>之后发生的<code>OOM</code>，但是并没有输出<code>after</code></p>
+<p>值得注意的是，在循环中，<code>bytes</code>所指向的对象一直在变化。</p>
+<p>如图：在执行完某一次循环的最后一行代码后，对象的指针如下</p>
+<br>
+
+<img src="/colinstar/2024/03/30/%E7%A8%8B%E5%BA%8FOOM%E6%97%B6soft-reference%E6%B2%A1%E6%9C%89%E8%A2%AB%E5%9B%9E%E6%94%B6/image-20240331000639577.png" class>
+
+<br>
+
+<p>紧接着继续循环，代码执行到<code>byte[] bytes = new byte[1024 * 1024];</code>时，对象的关系如下</p>
+<br>
+
+<img src="/colinstar/2024/03/30/%E7%A8%8B%E5%BA%8FOOM%E6%97%B6soft-reference%E6%B2%A1%E6%9C%89%E8%A2%AB%E5%9B%9E%E6%94%B6/image-20240331001043783.png" class>
+
+<br>
+
+<p>此时，软引用引用的对象并没有强引用的关联关系，如果此时发生内存紧张，那么软引用所引用的对象就会被回收。</p>
+<h1 id="致谢"><a href="#致谢" class="headerlink" title="致谢"></a>致谢</h1><p>感谢<code>stackOverFlow</code>上的这位老哥的答疑</p>
+<p>原帖链接如下：（请忽略作者的垃圾英语水平）</p>
+<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/78247787/java-softreference-soft-references-were-not-collected-before-the-occurrence-of">https://stackoverflow.com/questions/78247787/java-softreference-soft-references-were-not-collected-before-the-occurrence-of</a></p>
 
       
     </div>
@@ -460,7 +492,7 @@
     
     <li class="post-copyright-link hidden-xs">
       <strong>本文链接：</strong>
-      <a href="http://c89757.gitee.io/colinstar/2024/03/11/%E8%AE%B0-%E5%8D%87%E7%BA%A7mariadb-java-client%E5%BC%95%E5%8F%91%E7%9A%84%E9%97%AE%E9%A2%98/" title="记-升级mariadb-java-client引发的问题" target="_blank" rel="external">http://c89757.gitee.io/colinstar/2024/03/11/记-升级mariadb-java-client引发的问题/</a>
+      <a href="http://c89757.gitee.io/colinstar/2024/03/30/%E7%A8%8B%E5%BA%8FOOM%E6%97%B6soft-reference%E6%B2%A1%E6%9C%89%E8%A2%AB%E5%9B%9E%E6%94%B6/" title="程序OOM时soft-reference没有被回收?" target="_blank" rel="external">http://c89757.gitee.io/colinstar/2024/03/30/程序OOM时soft-reference没有被回收/</a>
     </li>
     
     <li class="post-copyright-license">
@@ -504,13 +536,9 @@
   
   <ul class="pager pull-left">
     
-    <li class="prev">
-      <a href="/colinstar/2024/03/30/%E7%A8%8B%E5%BA%8FOOM%E6%97%B6soft-reference%E6%B2%A1%E6%9C%89%E8%A2%AB%E5%9B%9E%E6%94%B6/" title="程序OOM时soft-reference没有被回收?"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
-    </li>
-    
     
     <li class="next">
-      <a href="/colinstar/2023/09/26/mysql%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8EMVVC/" title="mysql事务隔离级别与MVVC"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+      <a href="/colinstar/2024/03/11/%E8%AE%B0-%E5%8D%87%E7%BA%A7mariadb-java-client%E5%BC%95%E5%8F%91%E7%9A%84%E9%97%AE%E9%A2%98/" title="记-升级mariadb-java-client引发的问题"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
     </li>
     
     
