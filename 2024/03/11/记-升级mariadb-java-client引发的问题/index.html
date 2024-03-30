@@ -17,16 +17,21 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>分类: netty | Colin</title>
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://c89757.gitee.io/colinstar/categories/netty/index.html">
+  <title>记-升级mariadb-java-client引发的问题 | Colin</title>
+  <meta name="description" content="背景项目中使用flywaydb作为数据库迁移工具 但是在执行一段DDL语句时，引发了报错 语句如下： 1ALTER TABLE table_name MODIFY COLUMN column_name data_type NOT NULL DEFAULT 1;  该字段之前默认NULL，现将其改为NOT NULL 执行却报错：Invalid use of null value; 排错网上查了下，因">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记-升级mariadb-java-client引发的问题">
+<meta property="og:url" content="http://c89757.gitee.io/colinstar/2024/03/11/%E8%AE%B0-%E5%8D%87%E7%BA%A7mariadb-java-client%E5%BC%95%E5%8F%91%E7%9A%84%E9%97%AE%E9%A2%98/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="背景项目中使用flywaydb作为数据库迁移工具 但是在执行一段DDL语句时，引发了报错 语句如下： 1ALTER TABLE table_name MODIFY COLUMN column_name data_type NOT NULL DEFAULT 1;  该字段之前默认NULL，现将其改为NOT NULL 执行却报错：Invalid use of null value; 排错网上查了下，因">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-03-11T11:05:10.000Z">
+<meta property="article:modified_time" content="2024-03-11T11:39:04.373Z">
 <meta property="article:author" content="John Doe">
+<meta property="article:tag" content="mysql">
 <meta name="twitter:card" content="summary">
   <!-- Canonical links -->
-  <link rel="canonical" href="http://c89757.gitee.io/colinstar/categories/netty/index.html">
+  <link rel="canonical" href="http://c89757.gitee.io/colinstar/2024/03/11/%E8%AE%B0-%E5%8D%87%E7%BA%A7mariadb-java-client%E5%BC%95%E5%8F%91%E7%9A%84%E9%97%AE%E9%A2%98/index.html">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -342,67 +347,192 @@
 </aside>
 
   
-  <main class="main" role="main">
-  <article class="content article article-categories article-type-list" itemscope="">
-    <header class="article-header">
-      <h1 itemprop="name" class="hidden-xs">分类: netty</h1>
-      <p class="hidden-xs">共 1 篇文章</p>
-      <nav role="navigation" id="nav-main" class="okayNav">
-        <ul>
-          <li><a href="/colinstar/categories">All</a></li>
-          
-          <li><a href="/colinstar/categories/jvm/">jvm</a></li>
-          
-          <li><a href="/colinstar/categories/mysql/">mysql</a></li>
-          
-          <li><a href="/colinstar/categories/JUC/">JUC</a></li>
-          
-          <li><a href="/colinstar/categories/others/">others</a></li>
-          
-          <li><a href="/colinstar/categories/数据结构与算法/">数据结构与算法</a></li>
-          
-          <li><a href="/colinstar/categories/Mysql/">Mysql</a></li>
-          
-          <li><a href="/colinstar/categories/java/">java</a></li>
-          
-          <li><a href="/colinstar/categories/springboot/">springboot</a></li>
-          
-          <li><a href="/colinstar/categories/netty/">netty</a></li>
-          
-        </ul>
-      </nav>
-    </header>
-    <!-- /header -->
-    <div class="article-body">
-      <div class="panel panel-default b-no">
-    <div class="panel-heading" role="tab">
-        <h4 class="panel-title">
-            <a data-toggle="collapse" href="#collapsenetty" aria-expanded="true">
-              <i class="icon icon-folder text-active"></i><i class="icon icon-folder-open text"></i>
-              netty
-            </a>
-            <small class="text-muted">(Total 1 articles)</small>
-        </h4>
-    </div>
-    <div id="collapsenetty" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingnetty">
-        <div class="panel-body">
-            <div class="collection">
-              
-                
-<a href="/colinstar/2022/01/06/Netty/" class="collection-item" target="_blank" itemprop="url">
-  <time datetime="2022-01-06T12:58:22.000Z" itemprop="datePublished">2022-01-06</time>
-  <span>&nbsp;&nbsp;&nbsp;</span> Netty
-</a>
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%92%E9%94%99"><span class="toc-number">2.</span> <span class="toc-text">排错</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">3.</span> <span class="toc-text">解决方案</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-记-升级mariadb-java-client引发的问题" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      记-升级mariadb-java-client引发的问题
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/colinstar/2024/03/11/%E8%AE%B0-%E5%8D%87%E7%BA%A7mariadb-java-client%E5%BC%95%E5%8F%91%E7%9A%84%E9%97%AE%E9%A2%98/" class="article-date">
+	  <time datetime="2024-03-11T11:05:10.000Z" itemprop="datePublished">2024-03-11</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/colinstar/categories/mysql/">mysql</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/colinstar/tags/mysql/" rel="tag">mysql</a>
+  </span>
 
 
-              
-            </div>
-        </div>
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/colinstar/2024/03/11/%E8%AE%B0-%E5%8D%87%E7%BA%A7mariadb-java-client%E5%BC%95%E5%8F%91%E7%9A%84%E9%97%AE%E9%A2%98/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
     </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>项目中使用<code>flywaydb</code>作为数据库迁移工具</p>
+<p>但是在执行一段<code>DDL</code>语句时，引发了报错</p>
+<p>语句如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> table_name MODIFY <span class="keyword">COLUMN</span> column_name data_type <span class="keyword">NOT</span> <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<p>该字段之前默认<code>NULL</code>，现将其改为<code>NOT NULL</code></p>
+<p>执行却报错：<code>Invalid use of null value;</code></p>
+<h1 id="排错"><a href="#排错" class="headerlink" title="排错"></a>排错</h1><p>网上查了下，因为表中已经存在了<code>NULL</code>值，所以不允许将其修改为<code>NOT NULL</code>。</p>
+<p>但是，将这段脚本直接放到<code>navicat</code>中却能执行成功。</p>
+<p>到此开始怀疑是项目升级<code>mariadb-java-client</code>至<code>2.7.10</code>导致的。且这种语句执行结果的差异化，大多和<code>sql_mode</code>有关。</p>
+<ol>
+<li>查询<code>mysql</code>官网</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/sql-mode.html">https://dev.mysql.com/doc/refman/5.7/en/sql-mode.html</a></p>
+<p>没有明确找到针对词条语句有做差异化的<code>sql_mode</code>，推测是与严格模式有关——<code>STRICT_TRANS_TABLES</code>;</p>
+<ol start="2">
+<li>在<code>navicat</code>中，查看<code>sql_mode</code></li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> @<span class="variable">@GLOBAL</span>.sql_mode;</span><br><span class="line"><span class="keyword">SELECT</span> @<span class="variable">@SESSION</span>.sql_mode;</span><br></pre></td></tr></table></figure>
+
+<p>结果都为空</p>
+<ol start="3">
+<li>设置session级别的<code>sql_mode</code></li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SET</span> SESSION sql_mode <span class="operator">=</span> sys.list_add(@<span class="variable">@session</span>.sql_mode, <span class="string">&#x27;STRICT_TRANS_TABLES&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+
+
+<ol start="4">
+<li>设置完后，再次执行脚本，问题复现<code>Invalid use of null value</code>;</li>
+</ol>
+<h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><ol>
+<li>可以在<code>DDL</code>之前，通过<code>update</code>语句，将全部的NULL值修改为不为NULL</li>
+</ol>
+<ol start="2">
+<li>在执行<code>DDL</code>之前，判断是否开启了<code>STRICT_TRANS_TABLES</code>, 如果有开启，可以先将其移除，<code>DDL</code>执行之后再将其加回来</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SET</span> SESSION sql_mode <span class="operator">=</span> sys.list_drop(@<span class="variable">@session</span>.sql_mode, <span class="string">&#x27;STRICT_TRANS_TABLES&#x27;</span>);</span><br><span class="line">&#123;&#123;DDL&#125;&#125;;</span><br><span class="line"><span class="keyword">SET</span> SESSION sql_mode <span class="operator">=</span> sys.list_add(@<span class="variable">@session</span>.sql_mode, <span class="string">&#x27;STRICT_TRANS_TABLES&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+
+
+<ol start="3">
+<li>修改项目中数据库的<code>URL</code>连接串，添加参数<code>jdbcCompliantTruncation=false</code></li>
+</ol>
+<p>这个是通过源码发现的，当这个值为<code>true</code>时（默认为true)，<code>mariadb</code>连接<code>mysql</code>时，会添加上session级别的<code>STRICT_TRANS_TABLES</code>, 所以将他关掉即可。另外，开启这个值后，还影响一些其他功能，如：插入时，字段超长，将不会报错，而是截取</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://c89757.gitee.io/colinstar/2024/03/11/%E8%AE%B0-%E5%8D%87%E7%BA%A7mariadb-java-client%E5%BC%95%E5%8F%91%E7%9A%84%E9%97%AE%E9%A2%98/" title="记-升级mariadb-java-client引发的问题" target="_blank" rel="external">http://c89757.gitee.io/colinstar/2024/03/11/记-升级mariadb-java-client引发的问题/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://gitee.com/c89757" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/colinstar/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://gitee.com/c89757" target="_blank"><span class="text-dark">colin</span><small class="ml-1x">悟已往之不谏，知来者之可追</small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
 </div>
+
+
     </div>
   </article>
-   
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/colinstar/2023/09/26/mysql%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8EMVVC/" title="mysql事务隔离级别与MVVC"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
 </main>
 
   <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
@@ -466,6 +596,14 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
 
 
   <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>
