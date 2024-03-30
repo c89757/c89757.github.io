@@ -28,7 +28,7 @@
 <meta property="og:image" content="http://c89757.gitee.io/colinstar/2024/03/30/%E7%A8%8B%E5%BA%8FOOM%E6%97%B6soft-reference%E6%B2%A1%E6%9C%89%E8%A2%AB%E5%9B%9E%E6%94%B6/image-20240331000639577.png">
 <meta property="og:image" content="http://c89757.gitee.io/colinstar/2024/03/30/%E7%A8%8B%E5%BA%8FOOM%E6%97%B6soft-reference%E6%B2%A1%E6%9C%89%E8%A2%AB%E5%9B%9E%E6%94%B6/image-20240331001043783.png">
 <meta property="article:published_time" content="2024-03-30T14:57:37.000Z">
-<meta property="article:modified_time" content="2024-03-30T16:32:21.729Z">
+<meta property="article:modified_time" content="2024-03-30T16:36:21.523Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="java">
 <meta property="article:tag" content="GC">
@@ -479,7 +479,7 @@
 
 <br>
 
-<p>此时，软引用引用的对象并没有强引用的关联关系，如果此时发生内存紧张，那么软引用所引用的对象就会被回收。</p>
+<p>此时，软引用所指向的对象 并没有强引用的关联关系，如果此时发生内存紧张，那么软引用所引用的对象就会被回收。</p>
 <blockquote>
 <p>顺便一提，如果将那两行代码放在循环体的开始，程序运行结果又会不一样，究其原因还是当即将发生<code>OOM</code>时，软引用变量所持有的对象究竟有没有被强引用所关联。</p>
 <p>在上述例子中，bytes变量所持有的对象的生命周期只在一个循环中，下次循环会被覆盖，原先的引用关系被断开。而<code>list.add(tmp)</code>，<code>tmp</code>所指向的对象一直被添加到static申明的变量中，生命周期也就和static变量一样</p>
