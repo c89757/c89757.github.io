@@ -17,22 +17,23 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>Sychronized关键字-monitorenter与monitorexit | Colin</title>
-  <meta name="description" content="每个对象都有一个Monitor与之关联，当Monitor被持有后，它将处于锁定状态。Synchronized在JVM里的实现都是 基于进入和退出Monitor对象来实现方法同步和代码块同步，都可以通过成对的MonitorEnter和MonitorExit指令来实现。  12345public void method() &amp;#123;       synchronized(this) &amp;#123;">
+  <title>InnoDB-BufferPool | Colin</title>
+  <meta name="description" content="其实就是一片连续的内存缓冲区，用于缓解CPU和磁盘的速度矛盾。 数据从磁盘加载出来后，会放到BufferPool中缓存起来，下次需要读取相同的页面时，直接从内存中获取即可。  BufferPoll的组成BufferPool会将一片连续的内存划分为若干个页面，页面大小与InnoDB表空间大小一致，也就是默认16KB， 每一个缓冲页对应一个控制块，记录了页面的一些元数据，比如该页面所属的表空间号，页">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Sychronized关键字-monitorenter与monitorexit">
-<meta property="og:url" content="http://c89757.gitee.io/colinstar/2021/12/17/Sychronized%E5%85%B3%E9%94%AE%E5%AD%97-monitorenter%E4%B8%8Emonitorexit/index.html">
+<meta property="og:title" content="InnoDB-BufferPool">
+<meta property="og:url" content="http://c89757.gitee.io/colinstar/2024/04/14/MySql-BufferPool/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="每个对象都有一个Monitor与之关联，当Monitor被持有后，它将处于锁定状态。Synchronized在JVM里的实现都是 基于进入和退出Monitor对象来实现方法同步和代码块同步，都可以通过成对的MonitorEnter和MonitorExit指令来实现。  12345public void method() &amp;#123;       synchronized(this) &amp;#123;">
+<meta property="og:description" content="其实就是一片连续的内存缓冲区，用于缓解CPU和磁盘的速度矛盾。 数据从磁盘加载出来后，会放到BufferPool中缓存起来，下次需要读取相同的页面时，直接从内存中获取即可。  BufferPoll的组成BufferPool会将一片连续的内存划分为若干个页面，页面大小与InnoDB表空间大小一致，也就是默认16KB， 每一个缓冲页对应一个控制块，记录了页面的一些元数据，比如该页面所属的表空间号，页">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-12-17T11:19:25.000Z">
-<meta property="article:modified_time" content="2022-01-15T15:13:50.736Z">
+<meta property="og:image" content="http://c89757.gitee.io/colinstar/2024/04/14/MySql-BufferPool/1.png">
+<meta property="article:published_time" content="2024-04-14T06:55:16.000Z">
+<meta property="article:modified_time" content="2024-04-14T09:50:58.500Z">
 <meta property="article:author" content="John Doe">
-<meta property="article:tag" content="JUC">
-<meta property="article:tag" content="多线程">
+<meta property="article:tag" content="MySql">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://c89757.gitee.io/colinstar/2024/04/14/MySql-BufferPool/1.png">
   <!-- Canonical links -->
-  <link rel="canonical" href="http://c89757.gitee.io/colinstar/2021/12/17/Sychronized%E5%85%B3%E9%94%AE%E5%AD%97-monitorenter%E4%B8%8Emonitorexit/index.html">
+  <link rel="canonical" href="http://c89757.gitee.io/colinstar/2024/04/14/MySql-BufferPool/index.html">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -353,21 +354,21 @@
   <div class="slimContent">
     <nav id="toc" class="article-toc">
       <h3 class="toc-title">文章目录</h3>
-      
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#BufferPoll%E7%9A%84%E7%BB%84%E6%88%90"><span class="toc-number">1.</span> <span class="toc-text">BufferPoll的组成</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Free%E9%93%BE%E8%A1%A8"><span class="toc-number">1.1.</span> <span class="toc-text">Free链表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E7%9F%A5%E9%81%93%E6%95%B0%E6%8D%AE%E9%A1%B5%E6%98%AF%E5%90%A6%E5%9C%A8%E7%BC%93%E5%86%B2%E9%A1%B5%E4%B8%AD"><span class="toc-number">1.2.</span> <span class="toc-text">如何知道数据页是否在缓冲页中?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Flush%E9%93%BE%E8%A1%A8"><span class="toc-number">1.3.</span> <span class="toc-text">Flush链表</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#LRU%E9%93%BE%E8%A1%A8"><span class="toc-number">2.</span> <span class="toc-text">LRU链表</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#innodb-buffer-pool-instances"><span class="toc-number">3.</span> <span class="toc-text">innodb_buffer_pool_instances</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#innodb-buffer-pool-chunk-size"><span class="toc-number">4.</span> <span class="toc-text">innodb_buffer_pool_chunk_size</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8BBuffer-Pool%E4%BF%A1%E6%81%AF"><span class="toc-number">5.</span> <span class="toc-text">查看Buffer Pool信息</span></a></li></ol>
     </nav>
   </div>
 </aside>
 
 <main class="main" role="main">
   <div class="content">
-  <article id="post-Sychronized关键字-monitorenter与monitorexit" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+  <article id="post-MySql-BufferPool" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
     
     <div class="article-header">
       
         
   
     <h1 class="article-title" itemprop="name">
-      Sychronized关键字-monitorenter与monitorexit
+      InnoDB-BufferPool
     </h1>
   
 
@@ -375,20 +376,20 @@
       <div class="article-meta">
         <span class="article-date">
     <i class="icon icon-calendar-check"></i>
-	<a href="/colinstar/2021/12/17/Sychronized%E5%85%B3%E9%94%AE%E5%AD%97-monitorenter%E4%B8%8Emonitorexit/" class="article-date">
-	  <time datetime="2021-12-17T11:19:25.000Z" itemprop="datePublished">2021-12-17</time>
+	<a href="/colinstar/2024/04/14/MySql-BufferPool/" class="article-date">
+	  <time datetime="2024-04-14T06:55:16.000Z" itemprop="datePublished">2024-04-14</time>
 	</a>
 </span>
         
   <span class="article-category">
     <i class="icon icon-folder"></i>
-    <a class="article-category-link" href="/colinstar/categories/JUC/">JUC</a>
+    <a class="article-category-link" href="/colinstar/categories/MySql/">MySql</a>
   </span>
 
         
   <span class="article-tag">
     <i class="icon icon-tags"></i>
-	<a class="article-tag-link-link" href="/colinstar/tags/JUC/" rel="tag">JUC</a>, <a class="article-tag-link-link" href="/colinstar/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag">多线程</a>
+	<a class="article-tag-link-link" href="/colinstar/tags/MySql/" rel="tag">MySql</a>
   </span>
 
 
@@ -401,22 +402,157 @@
 	</span>
 
 
-        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/colinstar/2021/12/17/Sychronized%E5%85%B3%E9%94%AE%E5%AD%97-monitorenter%E4%B8%8Emonitorexit/#comments" class="article-comment-link">评论</a></span>
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/colinstar/2024/04/14/MySql-BufferPool/#comments" class="article-comment-link">评论</a></span>
         
       </div>
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
         <blockquote>
-<p>每个对象都有一个Monitor与之关联，当Monitor被持有后，它将处于锁定状态。Synchronized在JVM里的实现都是 基于进入和退出Monitor对象来实现方法同步和代码块同步，都可以通过成对的MonitorEnter和MonitorExit指令来实现。</p>
+<p>其实就是一片连续的内存缓冲区，用于缓解CPU和磁盘的速度矛盾。</p>
+<p>数据从磁盘加载出来后，会放到<code>BufferPool</code>中缓存起来，下次需要读取相同的页面时，直接从内存中获取即可。</p>
 </blockquote>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">synchronized</span>(<span class="keyword">this</span>) &#123;</span><br><span class="line">           System.out.println(<span class="string">&quot;hello world&quot;</span>);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<h1 id="BufferPoll的组成"><a href="#BufferPoll的组成" class="headerlink" title="BufferPoll的组成"></a>BufferPoll的组成</h1><p><code>BufferPool</code>会将一片连续的内存划分为若干个页面，页面大小与<code>InnoDB</code>表空间大小一致，也就是默认<code>16KB</code>，</p>
+<p>每一个缓冲页对应一个控制块，记录了页面的一些元数据，比如该页面所属的表空间号，页号，缓冲页的物理地址等。</p>
+<p>控制块也在<code>BufferPool</code>的内存中，放在缓冲页的前面，如下图</p>
+<br>
 
-<p>经过javap解析后</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method</span><span class="params">()</span></span>;</span><br><span class="line">   Code:</span><br><span class="line">      <span class="number">0</span>: aload_0</span><br><span class="line">      <span class="number">1</span>: dup</span><br><span class="line">      <span class="number">2</span>: astore_1</span><br><span class="line">      <span class="number">3</span>: monitorenter</span><br><span class="line">      <span class="number">4</span>: getstatic     #<span class="number">2</span>                  <span class="comment">// Field java/lang/System.out:Ljava/io/PrintStream;</span></span><br><span class="line">      <span class="number">7</span>: ldc           #<span class="number">3</span>                  <span class="comment">// String hello world</span></span><br><span class="line">      <span class="number">9</span>: invokevirtual #<span class="number">4</span>                  <span class="comment">// Method java/io/PrintStream.println:(Ljava/lang/String;)V</span></span><br><span class="line">     <span class="number">12</span>: aload_1</span><br><span class="line">     <span class="number">13</span>: monitorexit</span><br><span class="line">     <span class="number">14</span>: goto          <span class="number">22</span></span><br><span class="line">     <span class="number">17</span>: astore_2</span><br><span class="line">     <span class="number">18</span>: aload_1</span><br><span class="line">     <span class="number">19</span>: monitorexit</span><br><span class="line">     <span class="number">20</span>: aload_2</span><br><span class="line">     <span class="number">21</span>: athrow</span><br><span class="line">     <span class="number">22</span>: <span class="keyword">return</span></span><br><span class="line">   Exception table:</span><br><span class="line">      from    to  target type</span><br><span class="line">          <span class="number">4</span>    <span class="number">14</span>    <span class="number">17</span>   any</span><br><span class="line">         <span class="number">17</span>    <span class="number">20</span>    <span class="number">17</span>   any</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<img src="/colinstar/2024/04/14/MySql-BufferPool/1.png" class>
 
-<p>此处会发现有一个monitorenter，却有两个monitorexit；<br>这是JVM的补偿机制，保证你的同步代码块中出现异常，能正常释放锁</p>
-<p>如字节码行号4-13可能会出现异常，则会走17进行异常处理，在此处进行锁的释放</p>
+<br>
+
+
+
+<h2 id="Free链表"><a href="#Free链表" class="headerlink" title="Free链表"></a>Free链表</h2><blockquote>
+<p>为了知道哪一个缓冲页是空闲可用的。</p>
+</blockquote>
+<p><code>MySql</code>会将所有空闲的缓冲页的对应的<strong>控制块 作为一个节点</strong>放到链表中串起来，这个链表就是<code>free链表</code>（或空闲链表）.</p>
+<p>在<code>MySql</code>服务刚刚启动时，会向操作系统申请一片连续的内存空间用于<code>BufferPoll</code>，将他划分为控制块和缓冲页，此时所有的缓冲页都是空闲可用的，即所有缓冲页（的控制块）都处于<code>free链表</code>中。当有数据需要加载进<code>BufferPoll</code>中时，从free链表中获取一个空闲的缓冲页，并将数据所对应的表空间、页号等信息填入缓冲页的控制块中，最后将该缓冲页对应的控制块从<code>free链表</code>中移除。</p>
+<h2 id="如何知道数据页是否在缓冲页中"><a href="#如何知道数据页是否在缓冲页中" class="headerlink" title="如何知道数据页是否在缓冲页中?"></a>如何知道数据页是否在缓冲页中?</h2><p>在访问某个页的数据时，如果数据页已经被加载进<code>BufferPool</code>了，就不会再从磁盘读取数据，那么如何知道数据页已经被加载了呢？</p>
+<p>加载磁盘数据时，其实是通过表空间号 + 页号来定位一个唯一页面的。</p>
+<p><code>MySql</code>会维护一个<code>hash</code>表，<code>hash</code>表的key就是 表空间号 + 页号，value就是缓冲页控制块的地址。</p>
+<p>当需要访问某个页面时，根据key从hash表中查找，如果value不为空，则直接访问内存中的数据；</p>
+<p>如果value为空，则从磁盘加载页数据后，从free链表中获取一个缓冲页，将其缓存起来。</p>
+<h2 id="Flush链表"><a href="#Flush链表" class="headerlink" title="Flush链表"></a>Flush链表</h2><blockquote>
+<p>解决缓存一致性的问题</p>
+</blockquote>
+<br>
+
+<p>当某个要修改某行数据时，如果该页的数据已经被加载进<code>BufferPoll</code>了，那<code>MySql</code>只会先修改<code>buffer pool</code>中的数据，不会立马更新磁盘，那么该修改过的缓冲页就被称为<strong>脏页（Dirty Page）</strong>。</p>
+<br>
+
+<blockquote>
+<p>如果要修改二级索引数据，并且二级索引数据页不在buffer pool中，<code>MySql</code>会将其修改保存到change buffer中，待下次查询出来时，将其结果合并。change buffer属于buffer pool中的一小部分，change buffer只支持二级索引！</p>
+</blockquote>
+<br>
+
+<p><code>Mysql</code>会维护一个<code>flush链表</code>，来管理这些脏页，由后台线程定期将脏页中的数据刷到磁盘</p>
+<p>跟free链表结构差不多，flush链表也会将 脏页对应的控制块作为节点</p>
+<h1 id="LRU链表"><a href="#LRU链表" class="headerlink" title="LRU链表"></a>LRU链表</h1><blockquote>
+<p>缓冲页的淘汰策略</p>
+</blockquote>
+<p>buffer pool的内存大小有限，总会有用完的一天，如果缓冲页全部被用完了怎么办呢？</p>
+<p><code>MySql</code>基于变种的<code>LRU</code>算法。将已经使用了的缓冲页对应的控制块串起来，用特定算法去淘汰掉最近最少使用的缓冲页。</p>
+<blockquote>
+<p>free链表中的控制块一定不在<code>LRU</code>链表中，但是flush链表中的控制块一定在<code>LRU链表</code>中。</p>
+</blockquote>
+<br>
+
+<ul>
+<li><code>InnoDB</code>的<strong>预读</strong></li>
+</ul>
+<p>有点空间局部性和时间局部性的味道</p>
+<p>线性预读：当顺序访问某个区的页面超过了<code>innodb_read_ahead_threshold</code>的值，就会触发异步读取下一个区中的全部页面到<code>Buffer Pool</code>中</p>
+<p>随机预读：如果某个区的13个连续的页面都已经被加载到了<code>Buffer Pool</code>中，就会触发一次异步读取本区的其他所有页面到<code>Buffer Pool</code>中。随机预读默认关闭，需要通过<code>innodb_random_read_ahead</code>开启。</p>
+<br>
+
+<p>预读可能导致 许多无用页面被加载到<code>Buffer Pool</code>中，影响到缓冲页的淘汰</p>
+<p><code>MySql</code>将<code>LRU链表</code>按照一定比例划分为两个区域</p>
+<p>young区域：存储使用频率较高的缓冲页，这部分链表也称为热数据</p>
+<p>old区域：存储使用频率不是很高的缓冲页，这部分链表也称为冷数据</p>
+<ul>
+<li><p>当磁盘上的某个数据页在初次加载到<code>Buffer Pool</code>中时，该缓冲区对应的磁盘块会放到old区域的头部。如果该页面不进行后续访问，会逐渐从old区逐出，而不会影响到young区域中使用较频繁的缓存页。</p>
+</li>
+<li><p>对于全表扫描来说，短时间内访问大量使用频率非常低的页面（一个页面很有很数据，每次获取数据都相当于访问一次页面）。如果访问old区某个缓冲页的时间点，相较于上次访问的时间间隔 小于<code>innodb_old_blocks_time</code>的值，则不会将该old区的数据移动到young区。</p>
+</li>
+<li><p>只有访问的缓冲页位于young区域的1/4的后面时，才会被移动到<code>LRU链表</code>头部。这样可以降低调整链表的频率，提高性能</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/innodb-change-buffer.html">https://dev.mysql.com/doc/refman/5.7/en/innodb-change-buffer.html</a></p>
+<h1 id="innodb-buffer-pool-instances"><a href="#innodb-buffer-pool-instances" class="headerlink" title="innodb_buffer_pool_instances"></a>innodb_buffer_pool_instances</h1><p>在多线程环境下，访问Buffer Pool的各种链表都需要加锁，锁粒度较大，影响效率。于是可以将一个大的<code>Buffer Pool</code>拆成若干个小的<code>Buffer Pool</code>，每个<code>Buffer Pool</code>都是称为一个实例，他们是相互独立的——独立申请内存，独立管理各种链表。</p>
+<p>可以通过修改系统参数 <code>innodb_buffer_pool_instances</code>的值来修改<code>Buffer Pool</code>实例的个数</p>
+<h1 id="innodb-buffer-pool-chunk-size"><a href="#innodb-buffer-pool-chunk-size" class="headerlink" title="innodb_buffer_pool_chunk_size"></a>innodb_buffer_pool_chunk_size</h1><p><code>MySql</code>在申请<code>buffer pool</code>的内存时，是以一个chunk为单位向操作系统申请空间的，一个chunk就代表一片连续的内存空间。</p>
+<p>一个<code>Buffer Pool</code>实例其实就是由若干个chunk组成的</p>
+<p>我们可以通过修改参数<code>innodb_buffer_pool_chunk_size</code>来调整chunk的大小</p>
+<p>tips</p>
+<blockquote>
+<p><code>innodb_buffer_pool_size</code>的值 必须是 <code>innodb_buffer_pool_chunk_size</code> * <code>innodb_buffer_pool_instances</code>的倍数（主要为了保证每个Buffer Pool实例中的chunk数量相同</p>
+</blockquote>
+<h1 id="查看Buffer-Pool信息"><a href="#查看Buffer-Pool信息" class="headerlink" title="查看Buffer Pool信息"></a>查看Buffer Pool信息</h1><p>可以通过语句<code>show innodb engine status</code>来查看<code>innodb</code>存储引擎运行过程中的一些状态信息，其中就有Buffer Pool的信息（也可以查看死锁等信息）</p>
+<p>下面是部分信息</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">----------------------</span></span><br><span class="line">BUFFER POOL <span class="keyword">AND</span> MEMORY</span><br><span class="line"><span class="comment">----------------------</span></span><br><span class="line">Total <span class="keyword">large</span> memory allocated <span class="number">8585216</span></span><br><span class="line">Dictionary memory allocated <span class="number">229735</span></span><br><span class="line">Buffer pool size   <span class="number">512</span></span><br><span class="line"><span class="keyword">Free</span> buffers       <span class="number">254</span></span><br><span class="line">Database pages     <span class="number">256</span></span><br><span class="line"><span class="keyword">Old</span> database pages <span class="number">0</span></span><br><span class="line">Modified db pages  <span class="number">0</span></span><br><span class="line">Pending <span class="keyword">reads</span>      <span class="number">0</span></span><br><span class="line">Pending writes: LRU <span class="number">0</span>, flush list <span class="number">0</span>, single page <span class="number">0</span></span><br><span class="line">Pages made young <span class="number">0</span>, <span class="keyword">not</span> young <span class="number">0</span></span><br><span class="line"><span class="number">0.00</span> youngs<span class="operator">/</span>s, <span class="number">0.00</span> non<span class="operator">-</span>youngs<span class="operator">/</span>s</span><br><span class="line">Pages read <span class="number">480</span>, created <span class="number">57</span>, written <span class="number">128</span></span><br><span class="line"><span class="number">0.00</span> <span class="keyword">reads</span><span class="operator">/</span>s, <span class="number">0.00</span> creates<span class="operator">/</span>s, <span class="number">0.76</span> writes<span class="operator">/</span>s</span><br><span class="line">Buffer pool hit rate <span class="number">1000</span> <span class="operator">/</span> <span class="number">1000</span>, young<span class="operator">-</span>making rate <span class="number">0</span> <span class="operator">/</span> <span class="number">1000</span> <span class="keyword">not</span> <span class="number">0</span> <span class="operator">/</span> <span class="number">1000</span></span><br><span class="line">Pages read ahead <span class="number">0.00</span><span class="operator">/</span>s, evicted <span class="keyword">without</span> access <span class="number">0.00</span><span class="operator">/</span>s, Random read ahead <span class="number">0.00</span><span class="operator">/</span>s</span><br><span class="line">LRU len: <span class="number">256</span>, unzip_LRU len: <span class="number">0</span></span><br><span class="line">I<span class="operator">/</span>O sum[<span class="number">34</span>]:cur[<span class="number">0</span>], unzip sum[<span class="number">0</span>]:cur[<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<ul>
+<li><p><code>Total memory allocated</code>：代表<code>Buffer Pool</code>向操作系统申请的连续内存空间大小，包括全部控制块、缓存页、以及碎片的大小。</p>
+</li>
+<li><p><code>Dictionary memory allocated</code>：为数据字典信息分配的内存空间大小，注意这个内存空间和<code>Buffer Pool</code>没啥关系，不包括在<code>Total memory allocated</code>中。</p>
+</li>
+<li><p><code>Buffer pool size</code>：代表该<code>Buffer Pool</code>可以容纳多少缓存<code>页</code>，注意，单位是<code>页</code>！</p>
+</li>
+<li><p><code>Free buffers</code>：代表当前<code>Buffer Pool</code>还有多少空闲缓存页，也就是<code>free链表</code>中还有多少个节点。</p>
+</li>
+<li><p><code>Database pages</code>：代表<code>LRU</code>链表中的页的数量，包含<code>young</code>和<code>old</code>两个区域的节点数量。</p>
+</li>
+<li><p><code>Old database pages</code>：代表<code>LRU</code>链表<code>old</code>区域的节点数量。</p>
+</li>
+<li><p><code>Modified db pages</code>：代表脏页数量，也就是<code>flush链表</code>中节点的数量。</p>
+</li>
+<li><p><code>Pending reads</code>：正在等待从磁盘上加载到<code>Buffer Pool</code>中的页面数量。</p>
+<p>当准备从磁盘中加载某个页面时，会先为这个页面在<code>Buffer Pool</code>中分配一个缓存页以及它对应的控制块，然后把这个控制块添加到<code>LRU</code>的<code>old</code>区域的头部，但是这个时候真正的磁盘页并没有被加载进来，<code>Pending reads</code>的值会跟着加1。</p>
+</li>
+<li><p><code>Pending writes LRU</code>：即将从<code>LRU</code>链表中刷新到磁盘中的页面数量。</p>
+</li>
+<li><p><code>Pending writes flush list</code>：即将从<code>flush</code>链表中刷新到磁盘中的页面数量。</p>
+</li>
+<li><p><code>Pending writes single page</code>：即将以单个页面的形式刷新到磁盘中的页面数量。</p>
+</li>
+<li><p><code>Pages made young</code>：代表<code>LRU</code>链表中曾经从<code>old</code>区域移动到<code>young</code>区域头部的节点数量。</p>
+<p>这里需要注意，一个节点每次只有从<code>old</code>区域移动到<code>young</code>区域头部时才会将<code>Pages made young</code>的值加1，也就是说如果该节点本来就在<code>young</code>区域，由于它符合在<code>young</code>区域1/4后边的要求，下一次访问这个页面时也会将它移动到<code>young</code>区域头部，但这个过程并不会导致<code>Pages made young</code>的值加1。</p>
+</li>
+<li><p><code>Page made not young</code>：在将<code>innodb_old_blocks_time</code>设置的值大于0时，首次访问或者后续访问某个处在<code>old</code>区域的节点时由于不符合时间间隔的限制而不能将其移动到<code>young</code>区域头部时，<code>Page made not young</code>的值会加1。</p>
+<p>这里需要注意，对于处在<code>young</code>区域的节点，如果由于它在<code>young</code>区域的1/4处而导致它没有被移动到<code>young</code>区域头部，这样的访问并不会将<code>Page made not young</code>的值加1。</p>
+</li>
+<li><p><code>youngs/s</code>：代表每秒从<code>old</code>区域被移动到<code>young</code>区域头部的节点数量。</p>
+</li>
+<li><p><code>non-youngs/s</code>：代表每秒由于不满足时间限制而不能从<code>old</code>区域移动到<code>young</code>区域头部的节点数量。</p>
+</li>
+<li><p><code>Pages read</code>、<code>created</code>、<code>written</code>：代表读取，创建，写入了多少页。后边跟着读取、创建、写入的速率。</p>
+</li>
+<li><p><code>Buffer pool hit rate</code>：表示在过去某段时间，平均访问1000次页面，有多少次该页面已经被缓存到<code>Buffer Pool</code>了。</p>
+</li>
+<li><p><code>young-making rate</code>：表示在过去某段时间，平均访问1000次页面，有多少次访问使页面移动到<code>young</code>区域的头部了。</p>
+<p>需要大家注意的一点是，这里统计的将页面移动到<code>young</code>区域的头部次数不仅仅包含从<code>old</code>区域移动到<code>young</code>区域头部的次数，还包括从<code>young</code>区域移动到<code>young</code>区域头部的次数（访问某个<code>young</code>区域的节点，只要该节点在<code>young</code>区域的1/4处往后，就会把它移动到<code>young</code>区域的头部）。</p>
+</li>
+<li><p><code>not (young-making rate)</code>：表示在过去某段时间，平均访问1000次页面，有多少次访问没有使页面移动到<code>young</code>区域的头部。</p>
+<p>需要大家注意的一点是，这里统计的没有将页面移动到<code>young</code>区域的头部次数不仅仅包含因为设置了<code>innodb_old_blocks_time</code>系统变量而导致访问了<code>old</code>区域中的节点但没把它们移动到<code>young</code>区域的次数，还包含因为该节点在<code>young</code>区域的前1/4处而没有被移动到<code>young</code>区域头部的次数。</p>
+</li>
+<li><p><code>LRU len</code>：代表<code>LRU链表</code>中节点的数量。</p>
+</li>
+<li><p><code>unzip_LRU</code>：代表<code>unzip_LRU链表</code>中节点的数量（由于我们没有具体唠叨过这个链表，现在可以忽略它的值）。</p>
+</li>
+<li><p><code>I/O sum</code>：最近50s读取磁盘页的总数。</p>
+</li>
+<li><p><code>I/O cur</code>：现在正在读取的磁盘页数量。</p>
+</li>
+<li><p><code>I/O unzip sum</code>：最近50s解压的页面数量。</p>
+</li>
+<li><p><code>I/O unzip cur</code>：正在解压的页面数量。</p>
+</li>
+</ul>
 
       
     </div>
@@ -426,7 +562,7 @@
     
     <li class="post-copyright-link hidden-xs">
       <strong>本文链接：</strong>
-      <a href="http://c89757.gitee.io/colinstar/2021/12/17/Sychronized%E5%85%B3%E9%94%AE%E5%AD%97-monitorenter%E4%B8%8Emonitorexit/" title="Sychronized关键字-monitorenter与monitorexit" target="_blank" rel="external">http://c89757.gitee.io/colinstar/2021/12/17/Sychronized关键字-monitorenter与monitorexit/</a>
+      <a href="http://c89757.gitee.io/colinstar/2024/04/14/MySql-BufferPool/" title="InnoDB-BufferPool" target="_blank" rel="external">http://c89757.gitee.io/colinstar/2024/04/14/MySql-BufferPool/</a>
     </li>
     
     <li class="post-copyright-license">
@@ -471,12 +607,12 @@
   <ul class="pager pull-left">
     
     <li class="prev">
-      <a href="/colinstar/2021/12/22/%E5%85%B3%E4%BA%8Ecount()/" title="关于count(*)"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+      <a href="/colinstar/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/" title="MySql的日志"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
     </li>
     
     
     <li class="next">
-      <a href="/colinstar/2021/12/16/gitee+hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/" title="gitee+hexo搭建个人博客"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+      <a href="/colinstar/2024/03/30/%E7%A8%8B%E5%BA%8FOOM%E6%97%B6soft-reference%E6%B2%A1%E6%9C%89%E8%A2%AB%E5%9B%9E%E6%94%B6/" title="程序OOM时soft-reference没有被回收?"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
     </li>
     
     
