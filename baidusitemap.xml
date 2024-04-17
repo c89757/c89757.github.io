@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://c89757.gitee.io/colinstar/colinstar/2024/04/17/MySql%E5%A2%9E%E5%8A%A0varchar%E9%95%BF%E5%BA%A6/</loc>
+    <lastmod>2024-04-17</lastmod>
+  </url>
+  <url>
     <loc>http://c89757.gitee.io/colinstar/colinstar/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/</loc>
-    <lastmod>2024-04-15</lastmod>
+    <lastmod>2024-04-16</lastmod>
   </url>
   <url>
     <loc>http://c89757.gitee.io/colinstar/colinstar/2024/04/14/MySql-BufferPool/</loc>
