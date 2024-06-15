@@ -290,6 +290,15 @@
   </url>
   
   <url>
+    <loc>http://c89757.gitee.io/colinstar/2021/12/16/gitee+hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</loc>
+    
+    <lastmod>2021-12-17</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://c89757.gitee.io/colinstar/tags/index.html</loc>
     
     <lastmod>2021-12-16</lastmod>
@@ -355,7 +364,7 @@
 
   <url>
     <loc>http://c89757.gitee.io/colinstar</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -363,119 +372,126 @@
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/jvm/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/mysql/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/JUC/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://c89757.gitee.io/colinstar/tags/others/</loc>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/maven/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/questions/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/spring/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/%E5%A0%86/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/Mysql/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/java/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/springboot/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/nio/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/netty/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/GC/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/MySql/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/tags/other/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
@@ -484,70 +500,77 @@
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/categories/jvm/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/categories/mysql/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/categories/JUC/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://c89757.gitee.io/colinstar/categories/others/</loc>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/categories/Mysql/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/categories/java/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/categories/springboot/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/categories/netty/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/categories/MySql/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://c89757.gitee.io/colinstar/categories/%E7%BD%91%E7%BB%9C/</loc>
-    <lastmod>2024-05-11</lastmod>
+    <lastmod>2024-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
