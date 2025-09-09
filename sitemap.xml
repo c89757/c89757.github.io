@@ -416,14 +416,14 @@
 
   
   <url>
-    <loc>https://c89757.github.io/tags/MySql/</loc>
+    <loc>https://c89757.github.io/tags/jvm/</loc>
     <lastmod>2025-09-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://c89757.github.io/tags/jvm/</loc>
+    <loc>https://c89757.github.io/tags/MySql/</loc>
     <lastmod>2025-09-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -473,6 +473,20 @@
   
   <url>
     <loc>https://c89757.github.io/tags/others/</loc>
+    <lastmod>2025-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://c89757.github.io/tags/%E7%BD%91%E7%BB%9C/</loc>
+    <lastmod>2025-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://c89757.github.io/tags/JDK/</loc>
     <lastmod>2025-09-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -542,20 +556,6 @@
   </url>
   
   <url>
-    <loc>https://c89757.github.io/tags/%E7%BD%91%E7%BB%9C/</loc>
-    <lastmod>2025-09-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://c89757.github.io/tags/JDK/</loc>
-    <lastmod>2025-09-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://c89757.github.io/tags/JVM/</loc>
     <lastmod>2025-09-09</lastmod>
     <changefreq>weekly</changefreq>
@@ -565,14 +565,14 @@
 
   
   <url>
-    <loc>https://c89757.github.io/categories/MySql/</loc>
+    <loc>https://c89757.github.io/categories/jvm/</loc>
     <lastmod>2025-09-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://c89757.github.io/categories/jvm/</loc>
+    <loc>https://c89757.github.io/categories/MySql/</loc>
     <lastmod>2025-09-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -614,6 +614,20 @@
   </url>
   
   <url>
+    <loc>https://c89757.github.io/categories/%E7%BD%91%E7%BB%9C/</loc>
+    <lastmod>2025-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://c89757.github.io/categories/JDK/</loc>
+    <lastmod>2025-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://c89757.github.io/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/</loc>
     <lastmod>2025-09-09</lastmod>
     <changefreq>weekly</changefreq>
@@ -628,21 +642,7 @@
   </url>
   
   <url>
-    <loc>https://c89757.github.io/categories/%E7%BD%91%E7%BB%9C/</loc>
-    <lastmod>2025-09-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://c89757.github.io/categories/java/</loc>
-    <lastmod>2025-09-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://c89757.github.io/categories/JDK/</loc>
     <lastmod>2025-09-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>

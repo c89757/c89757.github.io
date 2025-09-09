@@ -351,9 +351,9 @@
         <ul>
           <li><a href="/tags">All</a></li>
           
-          <li><a href="/tags/MySql/">MySql</a></li>
-          
           <li><a href="/tags/jvm/">jvm</a></li>
+          
+          <li><a href="/tags/MySql/">MySql</a></li>
           
           <li><a href="/tags/JUC/">JUC</a></li>
           
@@ -368,6 +368,10 @@
           <li><a href="/tags/springboot/">springboot</a></li>
           
           <li><a href="/tags/others/">others</a></li>
+          
+          <li><a href="/tags/网络/">网络</a></li>
+          
+          <li><a href="/tags/JDK/">JDK</a></li>
           
           <li><a href="/tags/maven/">maven</a></li>
           
@@ -386,10 +390,6 @@
           <li><a href="/tags/java/">java</a></li>
           
           <li><a href="/tags/GC/">GC</a></li>
-          
-          <li><a href="/tags/网络/">网络</a></li>
-          
-          <li><a href="/tags/JDK/">JDK</a></li>
           
           <li><a href="/tags/JVM/">JVM</a></li>
           
@@ -473,61 +473,6 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
         TRANSLATION: {
             POSTS: '文章',
             PAGES: '页面',
-            CATEGORIES: '分类',
-            TAGS: '标签',
-            UNTITLED: '(未命名)',
-        },
-        ROOT_URL: '/',
-        CONTENT_URL: '/content.json',
-    };
-    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
-})(window);
-</script>
-
-<script src="/js/insight.js"></script>
-
-
-
-
-
-
-
-
-  <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>
-  <script>
-  //利用 FancyBox 实现点击图片放大
-  $(document).ready(function() {
-    $('article img').not('[hidden]').not('.panel-body img').each(function() {
-      var $image = $(this);
-      var imageCaption = $image.attr('alt');
-      var $imageWrapLink = $image.parent('a');
-      if ($imageWrapLink.length < 1) {
-        var src = this.getAttribute('src');
-        var idx = src.lastIndexOf('?');
-        if (idx != -1) {
-          src = src.substring(0, idx);
-        }
-        $imageWrapLink = $image.wrap('<a href="' + src + '"></a>').parent('a');
-      }
-      $imageWrapLink.attr('data-fancybox', 'images');
-      if (imageCaption) {
-        $imageWrapLink.attr('data-caption', imageCaption);
-      }
-    });
-    $().fancybox({
-      selector: '[data-fancybox="images"]',
-      hash: false,
-      loop: false,
-    });
-  });
-  </script>
-
-
-
-
-
-</body>
-</html>GES: '页面',
             CATEGORIES: '分类',
             TAGS: '标签',
             UNTITLED: '(未命名)',
