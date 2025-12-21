@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>OAuth2.0 | Colin</title>
+  <meta name="description" content="概述​    OAuth2.0允许用户授权第三方应用访问他们在另一个服务提供方上的数据，而无需分享他们的凭证（如用户名、密码） 基本概念  客户端（Client） 请求访问资源的第三方应用。客户端可以是Web站点、App、设备等  服务提供商（Service Provider） 服务提供商是指提供、存放资源的网络服务。  资源所有者（Resource Owner） 资源所有者通常就是指用户。他们拥">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OAuth2.0">
+<meta property="og:url" content="https://c89757.github.io/2023/12/18/OAuth2-0/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="概述​    OAuth2.0允许用户授权第三方应用访问他们在另一个服务提供方上的数据，而无需分享他们的凭证（如用户名、密码） 基本概念  客户端（Client） 请求访问资源的第三方应用。客户端可以是Web站点、App、设备等  服务提供商（Service Provider） 服务提供商是指提供、存放资源的网络服务。  资源所有者（Resource Owner） 资源所有者通常就是指用户。他们拥">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://c89757.github.io/2023/12/18/OAuth2-0/AuthorizationCodeGrant.png">
+<meta property="og:image" content="https://c89757.github.io/2023/12/18/OAuth2-0/ImplicitGrant.png">
+<meta property="og:image" content="https://c89757.github.io/2023/12/18/OAuth2-0/ResourceOwnerPasswordCredentialsGrant.png">
+<meta property="og:image" content="https://c89757.github.io/2023/12/18/OAuth2-0/ClientCredentialsGrant.png">
+<meta property="article:published_time" content="2023-12-18T09:36:09.000Z">
+<meta property="article:modified_time" content="2025-12-18T16:39:36.333Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="协议">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://c89757.github.io/2023/12/18/OAuth2-0/AuthorizationCodeGrant.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://c89757.github.io/2023/12/18/OAuth2-0/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+    <link href="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.css" rel="stylesheet">
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://gitee.com/c89757" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">colin</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">悟已往之不谏，知来者之可追</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Changsha, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/JDK/">JDK</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JUC/">JUC</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JVM/">JVM</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%8D%8F%E8%AE%AE/">协议</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/">数据结构与算法</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/GC/" rel="tag">GC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/I-O/" rel="tag">I/O</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JDK/" rel="tag">JDK</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JUC/" rel="tag">JUC</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/maven/" rel="tag">maven</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netty/" rel="tag">netty</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nio/" rel="tag">nio</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/other/" rel="tag">other</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/questions/" rel="tag">questions</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/" rel="tag">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/" rel="tag">springboot</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%8F%E8%AE%AE/" rel="tag">协议</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A0%86/" rel="tag">堆</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag">多线程</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" rel="tag">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/GC/" style="font-size: 13px;">GC</a> <a href="/tags/I-O/" style="font-size: 13px;">I/O</a> <a href="/tags/JDK/" style="font-size: 13px;">JDK</a> <a href="/tags/JUC/" style="font-size: 13.5px;">JUC</a> <a href="/tags/JVM/" style="font-size: 13.5px;">JVM</a> <a href="/tags/MySQL/" style="font-size: 14px;">MySQL</a> <a href="/tags/java/" style="font-size: 13.25px;">java</a> <a href="/tags/maven/" style="font-size: 13px;">maven</a> <a href="/tags/netty/" style="font-size: 13px;">netty</a> <a href="/tags/nio/" style="font-size: 13px;">nio</a> <a href="/tags/other/" style="font-size: 13px;">other</a> <a href="/tags/questions/" style="font-size: 13.75px;">questions</a> <a href="/tags/spring/" style="font-size: 13px;">spring</a> <a href="/tags/springboot/" style="font-size: 13px;">springboot</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 13px;">分布式</a> <a href="/tags/%E5%8D%8F%E8%AE%AE/" style="font-size: 13.25px;">协议</a> <a href="/tags/%E5%A0%86/" style="font-size: 13px;">堆</a> <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" style="font-size: 13.5px;">多线程</a> <a href="/tags/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" style="font-size: 13px;">排序算法</a> <a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 13px;">网络</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/06/">六月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">八月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">七月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">五月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">四月 2024</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">三月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/12/">十二月 2023</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/08/">八月 2023</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">三月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/02/">二月 2023</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">十二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/JVM/">JVM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/08/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%A0%86%E5%A4%96%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/" class="title">记一次堆外内存泄漏</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-08-25T14:10:07.000Z" itemprop="datePublished">2025-08-25</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/JDK/">JDK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/" class="title">jdk8~21新特性</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-06-24T12:01:47.000Z" itemprop="datePublished">2025-06-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/03/19/https%E8%AF%A6%E8%A7%A3/" class="title">https详解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-03-19T12:09:40.000Z" itemprop="datePublished">2025-03-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/MySQL/">MySQL</a>
+              </p>
+              <p class="item-title">
+                <a href="/2024/08/07/%E8%AE%B0%E4%B8%80%E6%AC%A1mysql%E6%AD%BB%E9%94%81%E9%97%AE%E9%A2%98/" class="title">记一次mysql死锁问题</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2024-08-07T13:41:21.000Z" itemprop="datePublished">2024-08-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a>
+              </p>
+              <p class="item-title">
+                <a href="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/" class="title">Reactor模型</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2024-07-10T14:55:02.000Z" itemprop="datePublished">2024-07-10</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E7%A7%8D%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.</span> <span class="toc-text">四种模式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%88%E6%9D%83%E7%A0%81%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.1.</span> <span class="toc-text">授权码模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9A%90%E5%BC%8F%E6%8E%88%E6%9D%83%E6%A8%A1%E5%BC%8F-%E7%AE%80%E5%8C%96%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.2.</span> <span class="toc-text">隐式授权模式&#x2F;简化模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%86%E7%A0%81%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.3.</span> <span class="toc-text">密码模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.4.</span> <span class="toc-text">客户端模式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-OAuth2-0" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      OAuth2.0
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2023/12/18/OAuth2-0/" class="article-date">
+	  <time datetime="2023-12-18T09:36:09.000Z" itemprop="datePublished">2023-12-18</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E5%8D%8F%E8%AE%AE/">协议</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/%E5%8D%8F%E8%AE%AE/" rel="tag">协议</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2023/12/18/OAuth2-0/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>​    OAuth2.0允许用户授权第三方应用访问他们在另一个服务提供方上的数据，而无需分享他们的凭证（如用户名、密码）</p>
+<p><strong>基本概念</strong></p>
+<ul>
+<li><p>客户端（Client）</p>
+<p>请求访问资源的<strong>第三方应用</strong>。客户端可以是Web站点、App、设备等</p>
+</li>
+<li><p>服务提供商（Service Provider）</p>
+<p>服务提供商是指提供、存放资源的网络服务。</p>
+</li>
+<li><p>资源所有者（Resource Owner）</p>
+<p>资源所有者通常就是指用户。他们拥有服务提供商上的资源</p>
+</li>
+<li><p>授权服务器（Authorization Server)</p>
+<p>授权服务器是服务提供商用于处理和发放访问令牌的服务器。当用户请求访问资源时，需要先向授权服务器请求访问令牌。</p>
+</li>
+<li><p>资源服务器（Resource Server）</p>
+<p>资源服务器是服务提供商用于存储和管理资源的服务器。当用户访问令牌后，就可以向资源服务器请求资源。</p>
+</li>
+<li><p>访问令牌（Access Token）</p>
+<p>访问令牌是授权服务器发放给客户端的一个凭证。表示客户端有权访问资源所有者的资源。访问令牌有一定的有效期，过期后需要使用刷新令牌来获取新的访问令牌。</p>
+</li>
+<li><p>刷新令牌（Refresh Token）</p>
+<p>刷新令牌是授权服务器在发放访问令牌时一同发放的一个凭证，用于在访问令牌过期后获取新的访问令牌。刷新令牌通常有较长的有效期，甚至可以设置为永不过期。</p>
+</li>
+<li><p>用户代理（User Agent）</p>
+<p>通常指浏览器</p>
+</li>
+</ul>
+<h1 id="四种模式"><a href="#四种模式" class="headerlink" title="四种模式"></a>四种模式</h1><h2 id="授权码模式"><a href="#授权码模式" class="headerlink" title="授权码模式"></a>授权码模式</h2><p>授权码模式用于获取访问<code>AccessToken</code>和<code>RefreshToken</code>，并针对保密客户端进行了优化。</p>
+<p>由于这是一个基于重定向的流程，客户端必须能够与资源所有者的用户代理（通常是网络</p>
+<p>浏览器）进行交互，并能接收来自授权服务器的传入请求（通过重定向）</p>
+<br>
+
+<img src="/2023/12/18/OAuth2-0/AuthorizationCodeGrant.png" class>
+
+<br>
+
+<br>
+
+<p>A. 客户端（第三方应用）通过将资源所有者的用户代理（浏览器）指向授权服务器来启动流程。</p>
+<p>会带上客户端的标识、重定向URL。一旦资源所有者（用户）同意/拒绝访问，授权服务器会通过用户代理跳到到该URI</p>
+<p>B. 授权服务器对资源所有者进行验证（通过用户代理），并确定资源所有者是同意还是拒绝客户端的访问请求</p>
+<p>C. 如果资源所有者允许访问，授权服务器会使用之前（在请求重或客户端注册期间）提供的重定向URI将用户代理重定向回客户端。重定向URI里带上授权码</p>
+<p>D. 客户端通过授权码向授权服务器请求令牌。请求时带上授权码与<code>redirect_uri</code>（并且<code>redirect_uri</code>必须与A步骤中的相同）</p>
+<p>E. 授权服务器对客户端以及授权码进行认证，认证成功后，授权服务器将返回客户端<code>AccessToken</code>和<code>RefreshToken</code>（可选）</p>
+<br>
+
+<br>
+
+<p>举例：</p>
+<p>登录CSDN时，采用QQ登录。</p>
+<p>前提：CSDN会先去QQ开放平台注册一个应用，获得client_id、client_secret。并配置一些redirect_url</p>
+<ol>
+<li><p>点击QQ登录时，浏览器会跳转到QQ登录页面，并且url中的参数response_type=code表示为授权码模式，client_id为客户端标识</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">https://graph.qq.com/oauth2.0/show?</span><br><span class="line">which=Login</span><br><span class="line">&amp;display=pc</span><br><span class="line">&amp;client_id=100270989</span><br><span class="line">&amp;response_type=code</span><br><span class="line">&amp;redirect_uri=https://passport.csdn.net/account/login?pcAuthType=qq&amp;newAuth=true&amp;state=test</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>对于资源服务器（QQ）来说，会去校验client_id是否合法，也就是是否注册过。还会校验redirect_url是否合法。</p>
+</blockquote>
+</li>
+<li><p>用户输入QQ所需账户密码，点击登录</p>
+</li>
+<li><p>用户确认授权后，QQ会通过302跳转的形式，跳转到<code>redirect_uri</code>，并在URI后面拼上code授权码</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://passport.csdn.net/account/login?pcAuthType=qq&amp;newAuth=true&amp;state=test&amp;code=E3965C5203EDC6410DF2BF4D889740D6">https://passport.csdn.net/account/login?pcAuthType=qq&amp;newAuth=true&amp;state=test&amp;code=E3965C5203EDC6410DF2BF4D889740D6</a></p>
+</blockquote>
+</li>
+<li><p>CSDN（的后端）服务器会通过授权码向QQ服务器索要Token，并与QQ做认证（AK、SK形式）</p>
+</li>
+<li><p>QQ认证成功后，会给CSDN颁发Token，CSDN即可以通过Token调用QQ开放api，也可以据此来创建自己的会话凭证</p>
+</li>
+</ol>
+<br>
+
+<p><strong>为什么不能直接获取AccessToken，而是通过授权码去获得？/ 能不能省略授权码这一步</strong></p>
+<blockquote>
+<p>答：不能。如果去掉授权码这一步骤，授权服务器直接返回AccessToken，类似于隐式授权模式</p>
+<p>AccessToken通过浏览器URL返回，不安全。</p>
+<p>无法确定客户端身份：没办法验证客户端的身份，容易被伪造</p>
+</blockquote>
+<br>
+
+<p><strong>通过授权码获取AccessToken时，为什么必须携带redirect_uri？为什么要与获取授权码时的保持一致?</strong></p>
+<blockquote>
+<p>为了安全考虑（可攻击场景很多，协议规定）</p>
+<p><strong><code>redirect_uri</code> 校验的核心价值是：防止“合法客户端被利用来兑换一个在非预期上下文中生成的授权码”。</strong></p>
+</blockquote>
+<blockquote>
+<p>一个 client_id 可能注册了多个合法的 redirect_uri，利用低级别接口的授权码可以去换取高权限接口的token。不校验redirect_uri可能导致越权或业务逻辑绕过。</p>
+</blockquote>
+<h2 id="隐式授权模式-简化模式"><a href="#隐式授权模式-简化模式" class="headerlink" title="隐式授权模式/简化模式"></a>隐式授权模式/简化模式</h2><p>​    隐式授予类型用于获取访问令牌（不支持签发刷新令牌）</p>
+<p>​    并针对已知可操作特定重定向 URI 的公共客户端进行了优化。 这些客户端通常是在浏览器中使用 JavaScript 等脚本语言实现的。</p>
+<p>​    由于这是一个基于重定向的流程，客户端必须能够与资源所有者的用户代理（通常是浏览器）交互，并能接收来自授权服务器的传入请求（通过重定向）</p>
+<p>​    在授权代码授予类型中，客户端会分别请求授权码和访问令牌，而客户端收到的访问令牌则是授权请求的结果。<br>隐式授予类型不包括客户端身份验证，依赖于资源所有者的存在和重定向 URI 的注册。 由于访问令牌被编码到<br>重定向 URI 中，因此可能会暴露给资源所有者和驻留在同一设备上的其他应用程序。</p>
+<blockquote>
+<p><strong>隐式模式已被 RFC 6749 弃用</strong>，因为它把 token 放在 URL 中，极不安全。</p>
+</blockquote>
+<br>
+
+<img src="/2023/12/18/OAuth2-0/ImplicitGrant.png" class>
+
+<br>
+
+<br>
+
+<p>A. 客户端通过将资源所有者的用户代理指向授权端点来启动流程。 其中携带客户端标识符、请求范围、本地状态和重定向 URI，一旦访问被批准（或拒绝），授权服务器将把用户代理发回至该 URI。</p>
+<p>B. 授权服务器对资源所有者进行验证（通过用户代理），并确定资源所有者是同意还是拒绝客户端的访问请求。</p>
+<p>C. 如果资源所有者同意访问，授权服务器会使用之前提供的重定向 URI 将用户代理重定向回客户端。 重定向 URI 中携带了访问令牌。</p>
+<p>D. 用户代理（浏览器）根据重定向指令，向网络托管的客户端资源发出请求。 </p>
+<p>E. 网络托管的客户端资源会返回一个网页（通常是一个带有嵌入脚本t的HTML 文档），该网页能够访问<br>完整重定向 URI，包括用户代理保留的片段，并提取片段中包含的访问令牌（和其他参数）。</p>
+<p>F. 用户代理在本地执行网络托管客户端资源提供的脚本，提取访问令牌</p>
+<p>G. 用户代理将访问令牌传递给客户端</p>
+<br>
+
+<blockquote>
+<p>适用于公开的浏览器单页应用，令牌直接从授权服务器返回，不支持刷新令牌，且没有授权码的安全保证，令牌容易因为被拦截窃听而泄露。</p>
+</blockquote>
+<br>
+
+<h2 id="密码模式"><a href="#密码模式" class="headerlink" title="密码模式"></a>密码模式</h2><p>​    密码模式适用于资源所有者与客户端之间存在信任关系。（比如自身内部系统）</p>
+<br>
+
+<img src="/2023/12/18/OAuth2-0/ResourceOwnerPasswordCredentialsGrant.png" class>
+
+<br>
+
+<br>
+
+<p>A. 资源所有者向客户端提供用户名和密码</p>
+<p>B. 客户端通过从资源所有处接收到的凭证，向授权服务器请求访问令牌。 发出请求时，客户端与授权服务器进行身份验证。</p>
+<p>C. 授权服务器会对客户端进行身份验证，并验证资源所有者凭证，如果有效，则会发出访问令牌。</p>
+<h2 id="客户端模式"><a href="#客户端模式" class="headerlink" title="客户端模式"></a>客户端模式</h2><p>​    客户端模式不涉及用户的参与</p>
+<br>
+
+<img src="/2023/12/18/OAuth2-0/ClientCredentialsGrant.png" class>
+
+<br>
+
+<p>A. 客户端向授权服务器进行身份验证，然后向令牌端点申请访问令牌。</p>
+<p>B. 授权服务器会对客户端进行身份验证，如果有效，返回令牌。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://www.rfc-editor.org/rfc/rfc6749">https://www.rfc-editor.org/rfc/rfc6749</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://c89757.github.io/2023/12/18/OAuth2-0/" title="OAuth2.0" target="_blank" rel="external">https://c89757.github.io/2023/12/18/OAuth2-0/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://gitee.com/c89757" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://gitee.com/c89757" target="_blank"><span class="text-dark">colin</span><small class="ml-1x">悟已往之不谏，知来者之可追</small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2023/12/20/resilience4j/" title="resilience4j"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2023/09/26/MySql%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8EMVVC/" title="MySql事务隔离级别与MVVC"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2025 John Doe
+        
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+
+
+  <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>
+  <script>
+  //利用 FancyBox 实现点击图片放大
+  $(document).ready(function() {
+    $('article img').not('[hidden]').not('.panel-body img').each(function() {
+      var $image = $(this);
+      var imageCaption = $image.attr('alt');
+      var $imageWrapLink = $image.parent('a');
+      if ($imageWrapLink.length < 1) {
+        var src = this.getAttribute('src');
+        var idx = src.lastIndexOf('?');
+        if (idx != -1) {
+          src = src.substring(0, idx);
+        }
+        $imageWrapLink = $image.wrap('<a href="' + src + '"></a>').parent('a');
+      }
+      $imageWrapLink.attr('data-fancybox', 'images');
+      if (imageCaption) {
+        $imageWrapLink.attr('data-caption', imageCaption);
+      }
+    });
+    $().fancybox({
+      selector: '[data-fancybox="images"]',
+      hash: false,
+      loop: false,
+    });
+  });
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>MySql的锁 | Colin</title>
+  <meta name="description" content="行级锁 一致性读：事务利用MVVC进行读取操作称为一致性读（或者称为快照读），一致性读不会对表中任何记录加锁锁定读：通过加锁的方式   共享锁（S锁）   多个事务可以同时拥有共享锁，但是会排斥独占锁  1select ...... LOCK IN SHARE MODE;  如： 事务1拥有数据行的共享锁，此时事务2可以获取到该数据行的共享锁，但是如果事务2想要获取独占锁的话，会被阻塞，直到事务1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySql的锁">
+<meta property="og:url" content="https://c89757.github.io/2024/04/21/MySql%E7%9A%84%E9%94%81/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="行级锁 一致性读：事务利用MVVC进行读取操作称为一致性读（或者称为快照读），一致性读不会对表中任何记录加锁锁定读：通过加锁的方式   共享锁（S锁）   多个事务可以同时拥有共享锁，但是会排斥独占锁  1select ...... LOCK IN SHARE MODE;  如： 事务1拥有数据行的共享锁，此时事务2可以获取到该数据行的共享锁，但是如果事务2想要获取独占锁的话，会被阻塞，直到事务1">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://c89757.github.io/2024/04/21/MySql%E7%9A%84%E9%94%81/typora-user-images/MySql的锁/image-20240421234713237.png">
+<meta property="article:published_time" content="2024-04-21T07:23:11.000Z">
+<meta property="article:modified_time" content="2025-12-18T17:04:42.900Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://c89757.github.io/2024/04/21/MySql%E7%9A%84%E9%94%81/typora-user-images/MySql的锁/image-20240421234713237.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://c89757.github.io/2024/04/21/MySql%E7%9A%84%E9%94%81/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+    <link href="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.css" rel="stylesheet">
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://gitee.com/c89757" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">colin</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">悟已往之不谏，知来者之可追</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Changsha, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/JDK/">JDK</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JUC/">JUC</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JVM/">JVM</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%8D%8F%E8%AE%AE/">协议</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/">数据结构与算法</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/GC/" rel="tag">GC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/I-O/" rel="tag">I/O</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JDK/" rel="tag">JDK</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JUC/" rel="tag">JUC</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/maven/" rel="tag">maven</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netty/" rel="tag">netty</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nio/" rel="tag">nio</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/other/" rel="tag">other</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/questions/" rel="tag">questions</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/" rel="tag">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/" rel="tag">springboot</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%8F%E8%AE%AE/" rel="tag">协议</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A0%86/" rel="tag">堆</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag">多线程</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" rel="tag">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/GC/" style="font-size: 13px;">GC</a> <a href="/tags/I-O/" style="font-size: 13px;">I/O</a> <a href="/tags/JDK/" style="font-size: 13px;">JDK</a> <a href="/tags/JUC/" style="font-size: 13.5px;">JUC</a> <a href="/tags/JVM/" style="font-size: 13.5px;">JVM</a> <a href="/tags/MySQL/" style="font-size: 14px;">MySQL</a> <a href="/tags/java/" style="font-size: 13.25px;">java</a> <a href="/tags/maven/" style="font-size: 13px;">maven</a> <a href="/tags/netty/" style="font-size: 13px;">netty</a> <a href="/tags/nio/" style="font-size: 13px;">nio</a> <a href="/tags/other/" style="font-size: 13px;">other</a> <a href="/tags/questions/" style="font-size: 13.75px;">questions</a> <a href="/tags/spring/" style="font-size: 13px;">spring</a> <a href="/tags/springboot/" style="font-size: 13px;">springboot</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 13px;">分布式</a> <a href="/tags/%E5%8D%8F%E8%AE%AE/" style="font-size: 13.25px;">协议</a> <a href="/tags/%E5%A0%86/" style="font-size: 13px;">堆</a> <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" style="font-size: 13.5px;">多线程</a> <a href="/tags/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" style="font-size: 13px;">排序算法</a> <a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 13px;">网络</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/06/">六月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">八月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">七月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">五月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">四月 2024</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">三月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/12/">十二月 2023</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/08/">八月 2023</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">三月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/02/">二月 2023</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">十二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/JVM/">JVM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/08/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%A0%86%E5%A4%96%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/" class="title">记一次堆外内存泄漏</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-08-25T14:10:07.000Z" itemprop="datePublished">2025-08-25</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/JDK/">JDK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/" class="title">jdk8~21新特性</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-06-24T12:01:47.000Z" itemprop="datePublished">2025-06-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/03/19/https%E8%AF%A6%E8%A7%A3/" class="title">https详解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-03-19T12:09:40.000Z" itemprop="datePublished">2025-03-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/MySQL/">MySQL</a>
+              </p>
+              <p class="item-title">
+                <a href="/2024/08/07/%E8%AE%B0%E4%B8%80%E6%AC%A1mysql%E6%AD%BB%E9%94%81%E9%97%AE%E9%A2%98/" class="title">记一次mysql死锁问题</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2024-08-07T13:41:21.000Z" itemprop="datePublished">2024-08-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a>
+              </p>
+              <p class="item-title">
+                <a href="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/" class="title">Reactor模型</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2024-07-10T14:55:02.000Z" itemprop="datePublished">2024-07-10</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A1%8C%E7%BA%A7%E9%94%81"><span class="toc-number">1.</span> <span class="toc-text">行级锁</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A1%A8%E7%BA%A7%E9%94%81"><span class="toc-number">2.</span> <span class="toc-text">表级锁</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%84%8F%E5%90%91%E9%94%81"><span class="toc-number">3.</span> <span class="toc-text">意向锁</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%83%E6%95%B0%E6%8D%AE%E9%94%81"><span class="toc-number">4.</span> <span class="toc-text">元数据锁</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#AUTO-INC%E9%94%81"><span class="toc-number">5.</span> <span class="toc-text">AUTO_INC锁</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#INNODB%E4%B8%AD%E7%9A%84%E8%A1%8C%E7%BA%A7%E9%94%81"><span class="toc-number">6.</span> <span class="toc-text">INNODB中的行级锁</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#INNODB%E9%94%81%E7%9A%84%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84"><span class="toc-number">7.</span> <span class="toc-text">INNODB锁的内存结构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AF%AD%E5%8F%A5%E5%8A%A0%E9%94%81%E5%88%86%E6%9E%90"><span class="toc-number">8.</span> <span class="toc-text">语句加锁分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%99%AE%E9%80%9A%E7%9A%84select"><span class="toc-number">8.1.</span> <span class="toc-text">普通的select</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%94%81%E5%AE%9A%E8%AF%BB"><span class="toc-number">8.2.</span> <span class="toc-text">锁定读</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E4%BA%8B%E5%8A%A1%E5%8A%A0%E9%94%81%E6%83%85%E5%86%B5"><span class="toc-number">9.</span> <span class="toc-text">查看事务加锁情况</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-MySql的锁" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      MySql的锁
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2024/04/21/MySql%E7%9A%84%E9%94%81/" class="article-date">
+	  <time datetime="2024-04-21T07:23:11.000Z" itemprop="datePublished">2024-04-21</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/MySQL/">MySQL</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/MySQL/" rel="tag">MySQL</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2024/04/21/MySql%E7%9A%84%E9%94%81/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="行级锁"><a href="#行级锁" class="headerlink" title="行级锁"></a>行级锁</h1><blockquote>
+<p>一致性读：事务利用<code>MVVC</code>进行读取操作称为一致性读（或者称为快照读），一致性读不会对表中任何记录加锁<br>锁定读：通过加锁的方式</p>
+</blockquote>
+<ul>
+<li>共享锁（S锁）</li>
+</ul>
+<blockquote>
+<p>多个事务可以同时拥有共享锁，但是会排斥独占锁</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> ...... LOCK <span class="keyword">IN</span> SHARE MODE;</span><br></pre></td></tr></table></figure>
+
+<p>如： 事务1拥有数据行的共享锁，此时事务2可以获取到该数据行的共享锁，但是如果事务2想要获取独占锁的话，会被阻塞，直到事务1释放共享锁后，才能获取到独占锁</p>
+<ul>
+<li>独占锁（X锁）</li>
+</ul>
+<blockquote>
+<p>只有一个事务可以获取到独占锁，会排斥其他共享锁、独占锁</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> ...... <span class="keyword">FOR</span> UPDATE</span><br></pre></td></tr></table></figure>
+
+<p>如：事务1拥有数据行的独占锁后，此时事务2无论是想获取该数据行的共享锁还是独占锁都将被阻塞，直到事务1释放独占锁为止</p>
+<h1 id="表级锁"><a href="#表级锁" class="headerlink" title="表级锁"></a>表级锁</h1><ul>
+<li>表级S锁</li>
+</ul>
+<p>如果一个事务给表加了S（共享）锁，那么：</p>
+<p>其他事务<strong>可以</strong>继续获得该表的<strong>S</strong>锁</p>
+<p>其他事务<strong>可以</strong>继续获得表中数据行的<strong>S</strong>锁</p>
+<p>其他事务<strong>不能</strong>获得继续获得该表的<strong>X</strong>锁</p>
+<p>其他事务<strong>不能</strong>获得继续获得该表中数据行的<strong>X</strong>锁</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LOCK TABLES `table_name` READ;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>表级X锁</li>
+</ul>
+<p>如果一个事务给表加了X（独占）锁，那么：</p>
+<p>其他事务<strong>不能</strong>继续获得该表的<strong>S</strong>锁</p>
+<p>其他事务<strong>不能</strong>继续获得表中数据行的<strong>S</strong>锁</p>
+<p>其他事务<strong>不能</strong>获得继续获得该表的<strong>X</strong>锁</p>
+<p>其他事务<strong>不能</strong>获得继续获得该表中数据行的<strong>X</strong>锁</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LOCK TABLES `table_name` WRITE;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h1 id="意向锁"><a href="#意向锁" class="headerlink" title="意向锁"></a>意向锁</h1><p>在对表加表级独占锁时，如何知道表中的数据行是否已经被加了行锁呢？</p>
+<ul>
+<li>意向共享锁（Intention Shared Lock）：IS锁，当事务准备在某条记录上加S锁时，需要先在表级别加一个IS锁</li>
+<li>意向独占锁（Intention Exclusive Lock）：IX锁，当事务准备在某条记录上加X锁时，需要现在表级别加一个IX锁</li>
+</ul>
+<blockquote>
+<p>IS锁、IX锁是表级锁，他们的作用仅仅是为了在之后加表级别的S锁和X锁时，可以快速判断表中的记录是否被上锁</p>
+</blockquote>
+<h1 id="元数据锁"><a href="#元数据锁" class="headerlink" title="元数据锁"></a>元数据锁</h1><blockquote>
+<p>MySQL使用元数据锁来管理对数据库对象的并发访问，并确保数据的一致性。元数据锁不仅适用于表，还适用于库、存储过程、函数、触发器等</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/metadata-locking.html">官方文档解释</a></p>
+<p>在对表执行<code>DDL</code>语句时，其实是通过<code>Metadata Lock（MDL）</code>来实现的。一般情况下，也不会使用<code>Innodb</code>引擎的表级锁。</p>
+<p>比如：在对某个表执行<code>ALTER TABLE</code>等<code>DDL</code>语句时，其他事务对该表的<code>SELECT</code>、<code>INSERT</code>、<code>DELETE</code>、<code>UPDATE</code>等语句时，会发生阻塞。</p>
+<blockquote>
+<p>不是所有的都会阻塞，某些情况下，<code>MySql</code>支持<code>online ddl</code>，提供了并发<code>DML</code>的支持，不会对其他事务的读写数据产生阻塞</p>
+</blockquote>
+<h1 id="AUTO-INC锁"><a href="#AUTO-INC锁" class="headerlink" title="AUTO_INC锁"></a>AUTO_INC锁</h1><p>我们可以给表的某个列加上<code>AUTO_INCREMENT</code>属性，让其自增</p>
+<p>系统在给该列递增赋值时，有两种方式，由系统变量<code>innodb_autoinc_lock_mode</code>控制，他有三个可选值</p>
+<ul>
+<li>0：采用<code>AUTO_INC</code>锁，也就是在执行插入语句时，加一个表级别的<code>AUTO_INC</code>锁，然后为每条待插入记录的<code>AUTO_INCREMENT</code>列分配递增的值。在该语句执行结束之后（不是提交事务后），就会把<code>AUTO_INC</code>锁释放掉。</li>
+<li>2：采用轻量级锁，在插入数据，生成<code>AUTO_INCREMENT</code>列的值时，获取这个轻量级锁，然后在生成本次插入语句需要的<code>AUTO_INCREMENT</code>值之后，就把这个锁释放掉，而不需要等到整个插入语句执行完成之后才释放锁</li>
+<li>1：二者混用。当插入条数确定时，采用轻量级锁；当插入条数不确定时，采用轻量级锁采用<code>AUTO_INC</code>锁，如<code>INSERT INTO ... SELECT </code>、<code>REPLACE...SELECT</code>等语句。</li>
+</ul>
+<h1 id="INNODB中的行级锁"><a href="#INNODB中的行级锁" class="headerlink" title="INNODB中的行级锁"></a>INNODB中的行级锁</h1><p><code>INNDODB</code>中，有几种不同类型的行锁</p>
+<ul>
+<li>LOCK_REC_NOT_GAP</li>
+</ul>
+<p>就是最’’普通’的行锁。这种行锁有S锁和X锁的区分的</p>
+<ul>
+<li>LOCK_GAP</li>
+</ul>
+<p>间隙锁，顾名思义，会对数据行之间的间隙加锁</p>
+<p>给一个数据行加上间隙锁之后，会锁住其前面的间隙，不允许其他事务在这个区间执行插入操作。给一条记录加gap锁，并不会影响其他事务对该条记录加行锁或者继续加gap锁</p>
+<p>当我们给<code>Supremum</code>加上gap锁之后，表示从数据最大行 ~ +∞ 这区间，不允许插入数据</p>
+<ul>
+<li>LOCK_ORDINARY</li>
+</ul>
+<p>这种类型的锁，既可以锁住某条记录，也可以给它加gap锁，即可以阻止其他事务在该记录的前面的间隙插入新记录。</p>
+<ul>
+<li>LOCK_INSERT_INTENTION</li>
+</ul>
+<p>插入意向锁</p>
+<p>一个事务在插入一条记录时，需要判断插入位置是否已被别的事务加了gap锁。如果有的话，插入操作需要等待，直到拥有gap锁的那个事务提交为止。在这个等待的过程中，也需要在内存中生成一个锁结构，表明有事务想在某个间隙中插入新记录，但是现在处于等待状态。</p>
+<p>这种类型的锁命名为Insert Intention Lock。</p>
+<ul>
+<li>隐式锁</li>
+</ul>
+<p>一般情况下，执行<code>INSERT</code>语句是不需要在内存中生成锁结构的（如果当前插入的间隙已经被加了gap锁，那么本次insert操作会阻塞，并且当前事务会在该间隙上加入一个插入意向锁。）</p>
+<p>如果当前插入的间隙没有加gap锁，那么当前事务不会为<code>INSERT</code>生成锁结构，但是如果有其他记录，想要获取这个数据，那该怎么办？</p>
+<ul>
+<li><p>情景1：对于聚簇索引记录来说，有一个<code>trx_id</code>隐藏列，该隐藏列记录着最后改动该记录的事务的事务id。</p>
+<p>在当前事务中新插入一条聚簇索引记录后，该记录的<code>trx_id</code>隐藏列代表的就是当前事务的事务id。如果其他十五次是相对该记录添加S锁和X锁，首先会看一下该记录的<code>trx_id</code>隐藏列代表的事务是否是当前活跃事务。如果不是的话就可以正常读取。如果是的话，会帮当前事务创建一个X锁的锁结构，该锁结构的<code>is_waiting</code>属性为false；然后为自己也创建一个锁结构，该锁结构的<code>is_waiting</code>属性为true，之后自己进入等待状态。</p>
+</li>
+</ul>
+<ul>
+<li>情景2：对于二级聚簇索引来说，本身并没有<code>trx_id</code>隐藏列，但是在二级索引页面的<code>Page Header</code>部分有一个<code>PAGE_MAX_TRX_ID</code>属性，该属性代表对该页面做改动的最大的事务id。如果<code>PAGE_MAX_TRX_ID</code>属性值小于当前最小的活动事务id，那就说明对该页面做修改的事务都已经提交了，否则就需要在页面中定位到对应的二级索引记录，然后通过回表找到对应聚簇索引记录，然后再重复情景1的做法。</li>
+</ul>
+<h1 id="INNODB锁的内存结构"><a href="#INNODB锁的内存结构" class="headerlink" title="INNODB锁的内存结构"></a>INNODB锁的内存结构</h1><p>对一条记录加锁的本质就是在内存中创建一个锁结构与之关联。</p>
+<p>如果符合以下条件，这些记录的锁就可以放到一个锁结构中：</p>
+<ul>
+<li>在同一个事务中进行加锁操作</li>
+<li>被加锁的记录在同一个页面中</li>
+<li>加锁的类型是一样</li>
+<li>等待状态的是一样的</li>
+</ul>
+<p>锁结构大致如下所示：</p>
+<p><img src="/2024/04/21/MySql%E7%9A%84%E9%94%81/typora-user-images\MySql的锁\image-20240421234713237.png" alt="image-20240421234713237"></p>
+<ul>
+<li><p>锁所在的事务信息：无论是表级锁还是行级锁，一个锁属于一个事务，这里记载着该锁对应的事务信息</p>
+<blockquote>
+<p>锁所在的事务信息在内存结构中只有一个指针，所以不会占用多大内存空间。通过指针可以找到内存中关于该事务的更多信息</p>
+</blockquote>
+</li>
+<li><p>索引信息：对于行级锁来说，需要记录以下加锁的记录属于哪个索引</p>
+</li>
+<li><p>表级/行锁信息：表级锁结构和行级锁结构在这个位置内容是不同的</p>
+</li>
+<li><p>type_mode：锁的类型</p>
+</li>
+</ul>
+<h1 id="语句加锁分析"><a href="#语句加锁分析" class="headerlink" title="语句加锁分析"></a>语句加锁分析</h1><h2 id="普通的select"><a href="#普通的select" class="headerlink" title="普通的select"></a>普通的select</h2><ul>
+<li><code>READ UNCOMMITTED</code>：不加锁，直接读取记录的最新版本；可能出现脏读、不可重复读和幻读现象</li>
+<li><code>READ COMMITTED</code>：不加锁，在每次执行普通的select语句时，都会生成一个<code>ReadView</code>，这样避免了脏读现象，能避免脏读，但是不能避免不可重复读和幻读现象</li>
+<li><code>REPEATABLE READ </code>：不加锁，只有在第一次执行select时，会生成<code>ReadView</code></li>
+<li><code>SERIALIZABLE</code>：<ul>
+<li><code>autocommit</code> = 0 时，普通的select语句会自动加上共享锁，也就是<code>select ... lock in share mode</code>。</li>
+<li><code>autocommit</code> = 1 时，即启用自动提交，不会加锁，利用<code>MVVC</code>生成<code>ReadView</code>来读取记录。（启用自动提交后，意味着一个事务中只包含一条语句，而一条语句不会出现可重复读、幻读的现象）</li>
+</ul>
+</li>
+</ul>
+<h2 id="锁定读"><a href="#锁定读" class="headerlink" title="锁定读"></a>锁定读</h2><ul>
+<li>SELECT … LOCK IN SHARE MODE</li>
+<li>SELECT … FOR UPDATE</li>
+<li>UPDATE …</li>
+<li>DELETE …</li>
+</ul>
+<blockquote>
+<p> <code>update</code> 和 <code>delete</code> 在执行过程中，需要首先定位到被改动的记录并给记录加锁，因此也能被认定为是一种锁定读</p>
+</blockquote>
+<ul>
+<li><p>匹配模式（match mode）</p>
+<p>在使用索引进行扫描时，查询优化器首先会生成若干个扫描区间。如果对于联合索引 [a，b]，有下面几种情况</p>
+<ul>
+<li>精确匹配：如果形成扫描区间匹配时只有一个值，是一个单点扫描区间。比如where a = 1，扫描区间就是[1,1]。或者where a = 1 and b = 1，也属于精确扫描</li>
+<li>不精确匹配：如果形成的扫描区间有多个值，比如 where a = 1 and b &gt; 1，扫描区间是 [(1,1), (1, +∞)]，这种就不算是单点扫描区间，这种匹配模式就是不精确匹配</li>
+</ul>
+</li>
+<li><p>唯一性搜索（unique search）</p>
+<p>如果在扫描某个区间的记录前，就能事先确定该扫描区间内最多只包含一条记录的话，那么就把这种情况称作唯一性搜索</p>
+<ul>
+<li>匹配模式为精确匹配</li>
+<li>使用的索引是主键或唯一二级索引</li>
+<li>如果使用的索引是唯一二级索引，并且搜索条件不能为”索引列IS NULL”的形式（因为唯一二级索引来说，可以存储多个值为NULL 的记录）</li>
+<li>如果索引中包含多个列，那么在生成扫描区间时，每一个列都得被用到、</li>
+</ul>
+<blockquote>
+<p>也就是说，搜索条件能够确定结果只有唯一一条</p>
+</blockquote>
+</li>
+</ul>
+<p><strong><code>SELECT ... LOCK IN SHARE MODE</code>加锁过程</strong></p>
+<p>隔离级别**不大于<code>READ COMMITED</code>**时，一般情况下，读取某个扫描区间中记录的过程如下：</p>
+<ol>
+<li><p>首先快速在B+树叶子节点中定位到该扫描区间中的第一条记录，把该记录作为当前记录</p>
+</li>
+<li><p>为当前记录加S型行锁</p>
+</li>
+<li><p>判断索引条件下推的条件是否成立</p>
+<p>索引下推：（<code>index condition pushdown</code>,<code>ICP</code>）把一些搜索条件下推到存储引擎中判断，而不是返回到Server层再判断。<code>ICP</code>只适用于二级索引，不适用于聚簇索引。仅适用于select语句，不适用<code>update</code>、<code>delete</code></p>
+</li>
+<li><p>执行回表操作</p>
+<p>如果扫描的是二级索引记录，则可能需要回表获取聚簇索引记录，并且给该聚簇索引记录加S型行锁</p>
+</li>
+<li><p>判断边界条件是否成立</p>
+</li>
+<li><p>server层判断条件是否成立</p>
+</li>
+</ol>
+<blockquote>
+<p>对于上述的查询过程来说，如果走的二级索引，会先将二级索引加行锁，并且回表后，还需要给聚簇索引记录加行锁</p>
+</blockquote>
+<p>在隔离级别不大于<code>READ COMMITED</code>时，在扫描区间时，先给记录加锁，如果记录不满足条件时，则释放锁，如果记录满足条件，则不会释放锁</p>
+<p>隔离级别**不小于<code>REPETATABLE READ</code>**时，对一个select语句来说</p>
+<p>如果扫描的是聚簇索引，则：</p>
+<p>在对区间扫描时，加的是S型的<code>LOCK_ORDINARY</code>，也就是行锁+gap锁。</p>
+<p>如果扫到的记录符合条件，则不会释放锁；如果扫到的记录不符合条件，也不会释放锁。</p>
+<p>如果先扫描二级索引，再回表扫描聚簇索引，则：</p>
+<p>在对二级索引的区间扫描时，先对<strong>二级索引记录</strong>加上<strong>S型</strong>的<code>LOCK_ORDINARY</code>，也就是<strong>行锁+gap锁</strong>，然后回表找到聚簇索引对应行，对该<strong>聚簇索引记录</strong>加一个<strong>S型行锁</strong>。</p>
+<p>存储引擎将查询到的聚簇索引记录返回给Server层，Server层判断记录是否符合条件，如果<strong>符合</strong>，则<strong>不会</strong>释放加在该记录上的锁</p>
+<p>如果Server层判断记录<strong>不符合</strong>条件，则丢弃这条结果数据，并且也<strong>不会</strong>释放加在该记录上的锁</p>
+<blockquote>
+<p>SELECT … FOR UPDATE语句加锁过程与上述的SELECT … LOCK IN SHARE MODE语句类似，只不过加的都是X锁 </p>
+</blockquote>
+<p>如果匹配模式是精确模式</p>
+<ul>
+<li>隔离级别不大于<code>READ_COMMITTED</code>时，不会为扫描区间后面的下一条记录加锁</li>
+<li>隔离级别不小于<code>REPEATABLE_READ</code>时，则会为扫描区间后面的下一条记录加gap锁</li>
+</ul>
+<ul>
+<li>当隔离级别不小于<code>REPEATABLE READ</code>时，如果匹配模式不是精确匹配，并且没有找到精确匹配的记录，则会为该扫描区间后面的下一条记录加<code>LOCK_ORDINARY</code>（行锁+gap锁）</li>
+<li>无论是哪个隔离级别，只要是唯一型搜索，并且读到的记录没有标记为’已删除’（记录头信息中的<code>delete_flag</code> = 1），就为读取到的记录加行锁</li>
+</ul>
+<h1 id="查看事务加锁情况"><a href="#查看事务加锁情况" class="headerlink" title="查看事务加锁情况"></a>查看事务加锁情况</h1><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> information_schema.INNODB_TRX;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>trx_tables_locked</code>：表级锁</li>
+<li><code>trx_rwos_locked</code>：加了多少个行级锁（不包含隐式锁）</li>
+<li><code>trx_lock_structs</code>：表示该事务生成了多少个内存中的锁结构</li>
+</ul>
+<blockquote>
+<p>系统中发生了某个事务因为想要获取锁而被阻塞的情况时，会在这个表中记录</p>
+<p>tips：已过时，在<code>MySql8.0</code>中已经被移除</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> information_schema.INNODB_LOCKS;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> ENGINE INNODB STATUS;</span><br></pre></td></tr></table></figure>
+
+
+
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://c89757.github.io/2024/04/21/MySql%E7%9A%84%E9%94%81/" title="MySql的锁" target="_blank" rel="external">https://c89757.github.io/2024/04/21/MySql的锁/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://gitee.com/c89757" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://gitee.com/c89757" target="_blank"><span class="text-dark">colin</span><small class="ml-1x">悟已往之不谏，知来者之可追</small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2024/04/23/XA%E4%BA%8B%E5%8A%A1%E4%B8%8E%E4%B8%A4%E9%98%B6%E6%AE%B5%E6%8F%90%E4%BA%A4/" title="XA事务与两阶段提交"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2024/04/17/MySql%E5%A2%9E%E5%8A%A0varchar%E9%95%BF%E5%BA%A6/" title="MySql增加varchar长度"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2025 John Doe
+        
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+
+
+  <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>
+  <script>
+  //利用 FancyBox 实现点击图片放大
+  $(document).ready(function() {
+    $('article img').not('[hidden]').not('.panel-body img').each(function() {
+      var $image = $(this);
+      var imageCaption = $image.attr('alt');
+      var $imageWrapLink = $image.parent('a');
+      if ($imageWrapLink.length < 1) {
+        var src = this.getAttribute('src');
+        var idx = src.lastIndexOf('?');
+        if (idx != -1) {
+          src = src.substring(0, idx);
+        }
+        $imageWrapLink = $image.wrap('<a href="' + src + '"></a>').parent('a');
+      }
+      $imageWrapLink.attr('data-fancybox', 'images');
+      if (imageCaption) {
+        $imageWrapLink.attr('data-caption', imageCaption);
+      }
+    });
+    $().fancybox({
+      selector: '[data-fancybox="images"]',
+      hash: false,
+      loop: false,
+    });
+  });
+  </script>
+
+
+
+
+
+</body>
+</html>

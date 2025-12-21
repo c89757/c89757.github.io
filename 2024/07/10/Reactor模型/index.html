@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Reactor模型 | Colin</title>
+  <meta name="description" content="文件描述符 资源的”通行证”  在Linux系统中，文件描述符是一个非负整数，用来标识和管理一个打开的资源。 Linux系统中，一切皆文件。不管是磁盘上的文件、网络链接（Socket），管道（Pipe），还是键盘硬件设备，在Linux系统中都被称为”文件”。文件描述符就像一张”通行证”，让你能对这些资源进行读、写、关闭等操作 怎么使用文件描述符？ 以读取一个文件note.txt为例：  打开文件：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Reactor模型">
+<meta property="og:url" content="https://c89757.github.io/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="文件描述符 资源的”通行证”  在Linux系统中，文件描述符是一个非负整数，用来标识和管理一个打开的资源。 Linux系统中，一切皆文件。不管是磁盘上的文件、网络链接（Socket），管道（Pipe），还是键盘硬件设备，在Linux系统中都被称为”文件”。文件描述符就像一张”通行证”，让你能对这些资源进行读、写、关闭等操作 怎么使用文件描述符？ 以读取一个文件note.txt为例：  打开文件：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://c89757.github.io/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/BIO.png">
+<meta property="og:image" content="https://c89757.github.io/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/BIO-2.png">
+<meta property="og:image" content="https://c89757.github.io/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/NIO.png">
+<meta property="og:image" content="https://c89757.github.io/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/io-select.png">
+<meta property="og:image" content="https://c89757.github.io/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/io-epoll.png">
+<meta property="og:image" content="https://c89757.github.io/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/io-sign.png">
+<meta property="og:image" content="https://c89757.github.io/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/AIO.png">
+<meta property="og:image" content="https://c89757.github.io/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/io-diff.png">
+<meta property="og:image" content="https://c89757.github.io/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/traditional-io.png">
+<meta property="og:image" content="https://c89757.github.io/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/single-thread-single-reactor.png">
+<meta property="og:image" content="https://c89757.github.io/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/single-reactor-thread-pool.png">
+<meta property="og:image" content="https://c89757.github.io/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/multi-reactor-multi-thread.png">
+<meta property="article:published_time" content="2024-07-10T14:55:02.000Z">
+<meta property="article:modified_time" content="2025-12-21T11:13:20.889Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="I&#x2F;O">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://c89757.github.io/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/BIO.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://c89757.github.io/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+    <link href="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.css" rel="stylesheet">
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://gitee.com/c89757" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">colin</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">悟已往之不谏，知来者之可追</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Changsha, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/JDK/">JDK</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JUC/">JUC</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JVM/">JVM</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%8D%8F%E8%AE%AE/">协议</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/">数据结构与算法</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/GC/" rel="tag">GC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/I-O/" rel="tag">I/O</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JDK/" rel="tag">JDK</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JUC/" rel="tag">JUC</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/maven/" rel="tag">maven</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netty/" rel="tag">netty</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nio/" rel="tag">nio</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/other/" rel="tag">other</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/questions/" rel="tag">questions</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/" rel="tag">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/" rel="tag">springboot</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%8F%E8%AE%AE/" rel="tag">协议</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A0%86/" rel="tag">堆</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag">多线程</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" rel="tag">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/GC/" style="font-size: 13px;">GC</a> <a href="/tags/I-O/" style="font-size: 13px;">I/O</a> <a href="/tags/JDK/" style="font-size: 13px;">JDK</a> <a href="/tags/JUC/" style="font-size: 13.5px;">JUC</a> <a href="/tags/JVM/" style="font-size: 13.5px;">JVM</a> <a href="/tags/MySQL/" style="font-size: 14px;">MySQL</a> <a href="/tags/java/" style="font-size: 13.25px;">java</a> <a href="/tags/maven/" style="font-size: 13px;">maven</a> <a href="/tags/netty/" style="font-size: 13px;">netty</a> <a href="/tags/nio/" style="font-size: 13px;">nio</a> <a href="/tags/other/" style="font-size: 13px;">other</a> <a href="/tags/questions/" style="font-size: 13.75px;">questions</a> <a href="/tags/spring/" style="font-size: 13px;">spring</a> <a href="/tags/springboot/" style="font-size: 13px;">springboot</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 13px;">分布式</a> <a href="/tags/%E5%8D%8F%E8%AE%AE/" style="font-size: 13.25px;">协议</a> <a href="/tags/%E5%A0%86/" style="font-size: 13px;">堆</a> <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" style="font-size: 13.5px;">多线程</a> <a href="/tags/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" style="font-size: 13px;">排序算法</a> <a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 13px;">网络</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/06/">六月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">八月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">七月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">五月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">四月 2024</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">三月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/12/">十二月 2023</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/08/">八月 2023</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">三月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/02/">二月 2023</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">十二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/JVM/">JVM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/08/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%A0%86%E5%A4%96%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/" class="title">记一次堆外内存泄漏</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-08-25T14:10:07.000Z" itemprop="datePublished">2025-08-25</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/JDK/">JDK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/" class="title">jdk8~21新特性</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-06-24T12:01:47.000Z" itemprop="datePublished">2025-06-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/03/19/https%E8%AF%A6%E8%A7%A3/" class="title">https详解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-03-19T12:09:40.000Z" itemprop="datePublished">2025-03-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/MySQL/">MySQL</a>
+              </p>
+              <p class="item-title">
+                <a href="/2024/08/07/%E8%AE%B0%E4%B8%80%E6%AC%A1mysql%E6%AD%BB%E9%94%81%E9%97%AE%E9%A2%98/" class="title">记一次mysql死锁问题</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2024-08-07T13:41:21.000Z" itemprop="datePublished">2024-08-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a>
+              </p>
+              <p class="item-title">
+                <a href="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/" class="title">Reactor模型</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2024-07-10T14:55:02.000Z" itemprop="datePublished">2024-07-10</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="toc-number">1.</span> <span class="toc-text">文件描述符</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#I-O%E6%A8%A1%E5%9E%8B"><span class="toc-number">2.</span> <span class="toc-text">I&#x2F;O模型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#BIO"><span class="toc-number">2.1.</span> <span class="toc-text">BIO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NIO"><span class="toc-number">2.2.</span> <span class="toc-text">NIO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8"><span class="toc-number">2.3.</span> <span class="toc-text">IO多路复用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#select-poll"><span class="toc-number">2.3.1.</span> <span class="toc-text">select&#x2F;poll</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#epoll"><span class="toc-number">2.3.2.</span> <span class="toc-text">epoll</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%A1%E5%8F%B7%E9%A9%B1%E5%8A%A8I-O"><span class="toc-number">2.4.</span> <span class="toc-text">信号驱动I&#x2F;O</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AIO"><span class="toc-number">2.5.</span> <span class="toc-text">AIO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">2.6.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%83%8A%E7%BE%A4%E6%95%88%E5%BA%94-C10K"><span class="toc-number">3.</span> <span class="toc-text">惊群效应&#x2F;C10K</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Reactor%E6%A8%A1%E5%9E%8B"><span class="toc-number">4.</span> <span class="toc-text">Reactor模型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%A0%E7%BB%9FIO%E6%A8%A1%E5%9E%8B"><span class="toc-number">4.1.</span> <span class="toc-text">传统IO模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reactor%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8%E6%A8%A1%E5%9E%8B"><span class="toc-number">4.2.</span> <span class="toc-text">Reactor事件驱动模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%95Reactor%E5%8D%95%E7%BA%BF%E7%A8%8B"><span class="toc-number">4.2.1.</span> <span class="toc-text">单Reactor单线程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%95Reactor%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-number">4.2.2.</span> <span class="toc-text">单Reactor多线程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9AReactor%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-number">4.2.3.</span> <span class="toc-text">多Reactor多线程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%9D%E8%80%83"><span class="toc-number">4.2.4.</span> <span class="toc-text">思考</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Java%E4%B8%AD%E5%AF%B9%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E7%9A%84%E6%94%AF%E6%8C%81"><span class="toc-number">5.</span> <span class="toc-text">Java中对多路复用的支持</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%89%A9%E5%B1%95"><span class="toc-number">6.</span> <span class="toc-text">扩展</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#I-O-%E8%B0%83%E5%BA%A6%E7%AD%96%E7%95%A5"><span class="toc-number">6.1.</span> <span class="toc-text">I&#x2F;O 调度策略</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#NOOP"><span class="toc-number">6.1.1.</span> <span class="toc-text">NOOP</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CFQ"><span class="toc-number">6.1.2.</span> <span class="toc-text">CFQ</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">7.</span> <span class="toc-text">参考</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Reactor模型" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Reactor模型
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/" class="article-date">
+	  <time datetime="2024-07-10T14:55:02.000Z" itemprop="datePublished">2024-07-10</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/I-O/" rel="tag">I/O</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="文件描述符"><a href="#文件描述符" class="headerlink" title="文件描述符"></a>文件描述符</h1><blockquote>
+<p>资源的”通行证”</p>
+</blockquote>
+<p>在Linux系统中，文件描述符是一个非负整数，用来标识和管理一个打开的资源。</p>
+<p>Linux系统中，一切皆文件。不管是磁盘上的文件、网络链接（Socket），管道（Pipe），还是键盘硬件设备，在Linux系统中都被称为”文件”。文件描述符就像一张”通行证”，让你能对这些资源进行读、写、关闭等操作</p>
+<p>怎么使用文件描述符？</p>
+<p>以读取一个文件<code>note.txt</code>为例：</p>
+<ol>
+<li>打开文件：程序告诉Linux，”我要用note.txt”，系统返回一个文件描述符（fd=3）</li>
+<li>读写操作：用这个<code>fd</code>去读取或写入数据</li>
+<li>关闭文件：用完后归还”通行证”，释放资源</li>
+</ol>
+<p>文件描述符是用户程序和Linux内核之间的”桥梁”。当你写程序向读文件、发网络数据、或控制设备时，文件描述符帮你把请求传递给内核，内核再去操作底层的资源</p>
+<p><strong>文件描述符的限制</strong></p>
+<p>Linux为了保护系统资源和安全，设置了文件描述符的限制。</p>
+<blockquote>
+<p>资源管理：文件描述符会占用内存和CPU，打开太多会导致系统卡顿</p>
+<p>安全防护：防止恶意程序无限打开文件，搞乱系统</p>
+</blockquote>
+<ol>
+<li>软限制</li>
+</ol>
+<p>软限制可以临时调整，但不能超过硬限制</p>
+<ul>
+<li>查看软限制 <code>ulimit - Sn</code></li>
+<li>修改软限制：<code>ulimit -Sn 修改后的数量</code> ，如<code>ulimit -Sn 2048</code></li>
+</ul>
+<ol start="2">
+<li>硬限制</li>
+</ol>
+<p>硬限制是系统的硬性规定，连管理员也必须遵守，除非修改配置文件</p>
+<ul>
+<li>查看硬限制<code>ulimit -Hn</code></li>
+</ul>
+<ol start="3">
+<li>不同级别的限制</li>
+</ol>
+<ul>
+<li>进程级： 每个程序（进程）有自己的文件描述符”配额”，查看：<code>cat /proc/[pid]/limits</code></li>
+<li>用户级：特定用户或组的限制，配置在：<code>/etc/security/limits.conf</code></li>
+</ul>
+<h1 id="I-O模型"><a href="#I-O模型" class="headerlink" title="I/O模型"></a>I/O模型</h1><h2 id="BIO"><a href="#BIO" class="headerlink" title="BIO"></a>BIO</h2><p>Blocking IO</p>
+<blockquote>
+<p>应用进程被阻塞，直到数据复制到用户缓冲区中才返回</p>
+</blockquote>
+<img src="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/BIO.png" class>
+
+
+
+
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<p>或者如下图：</p>
+<img src="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/BIO-2.png" class>
+
+
+
+
+
+<h2 id="NIO"><a href="#NIO" class="headerlink" title="NIO"></a>NIO</h2><p>Non-blocking IO</p>
+<img src="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/NIO.png" class>
+
+
+
+<br>
+
+
+
+<blockquote>
+<p>应用进程执行系统调用之后，内核返回一个错误码。应用进程可以继续执行，但是需要不断的执行系统调用来获知 I/O 是否完成。</p>
+<p>需要不断轮询内核，数据是否就绪，涉及太多无效频繁的系统调用。</p>
+</blockquote>
+<ul>
+<li>阻塞IO与非阻塞IO的主要区别在于内核中数据尚未就绪时，如何处理</li>
+</ul>
+<p>对于非阻塞IO，则直接返回给用户态<code>EWOULDBLOCK</code>错误；而阻塞IO则一直处于阻塞状态，直到数据就绪并从内核态拷贝到用户态后才返回。</p>
+<blockquote>
+<p>非阻塞I/O在调用<code>recvform</code>时，需要主动参与内核数据到用户空间的拷贝，这一阶段也会阻塞</p>
+</blockquote>
+<h2 id="IO多路复用"><a href="#IO多路复用" class="headerlink" title="IO多路复用"></a>IO多路复用</h2><h3 id="select-poll"><a href="#select-poll" class="headerlink" title="select/poll"></a>select/poll</h3><p>非阻塞IO：涉及多次无用、频繁的系统调用。非阻塞socket在read时，并不知道啥时候数据会准备好，所以需要不断主动询问。</p>
+<img src="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/io-select.png" class>
+
+<br>
+
+
+
+<ul>
+<li>select调用——等待任意socket可读</li>
+</ul>
+<ol>
+<li>应用程序调用<code>select()</code>，传入一组socket文件描述符（如fd10，fd11，fd12）</li>
+<li>内核检查这些socket是否有数据可读</li>
+<li>如果没有数据到达，内核会让当前进程进入阻塞状态，直到一个socket有数据</li>
+</ol>
+<blockquote>
+<p><code>select</code>是默认同步阻塞的，可以设置超时</p>
+</blockquote>
+<br>
+
+<ul>
+<li>当某个socket数据就绪——&gt; 返回可读状态</li>
+</ul>
+<ol>
+<li>当某个socket收到一个数据包</li>
+<li>内核将该socket标记为”可读”</li>
+<li><code>select()</code>返回，告诉应用程序：”现在可以读取数据了”</li>
+<li>应用程序知道哪个socket就绪后，开始调用<code>recvfrom()</code>来获取数据</li>
+</ol>
+<blockquote>
+<p>select的作用就是：一次性检测多个socket的状态，避免轮询每个socket</p>
+</blockquote>
+<br>
+
+<ul>
+<li><code>recvfrom</code>调用——实际接收数据</li>
+</ul>
+<ol>
+<li>应用程序调用<code>recvfrom()</code>，传入socket文件描述符，请求从已知socket读取数据</li>
+<li>内核执行数据拷贝：将数据从内核缓冲区复制到用户空间缓冲区</li>
+<li>这个过程也是阻塞的：如果数据还没完全准备好，进程也会卡住</li>
+</ol>
+<br>
+
+
+
+<p>​    使用 select 或者 poll 等待数据，并且可以等待多个套接字中的任何一个变为可读，这一过程会被阻塞，当某一个套接字可读时返回。之后再使用 <code>recvfrom</code> 把数据从内核复制到进程中。</p>
+<p>​    它可以让单个进程具有处理多个 I/O 事件的能力。又被称为 Event Driven I/O，即事件驱动 I/O。</p>
+<br>
+
+
+
+<blockquote>
+<p>IO多路复用主要复用的是系统调用。</p>
+<p>从原先非阻塞IO的情况下，多个client需要各自发送<code>recvfrom</code>系统调用去不断询问内核数据是否已就绪；转变成了现在通过一次系统调用select/poll，由内核主动通知用户哪些client已就绪（read、write、accept等事件）。大大减少了无效的系统调用次数</p>
+</blockquote>
+<br>
+
+<p>select/poll在调用时，都需从用户态拷贝管理的全量描述符到内核态；</p>
+<p>返回时都从内核态拷贝全量的描述符到用户态；再由用户态遍历全量的描述符判断哪些描述符有就绪事件</p>
+<ul>
+<li><p>优点：利用了一次系统调用select()/poll()就可以实现管理多个client的事件（read、write、accept等）。大大降低了之前非阻塞IO频繁无效的系统调用</p>
+</li>
+<li><p>缺点：每次select()/poll()都需要将注册管理的多个client从用户态拷贝到内核态。在连接数很多上百万时。拷贝带来的资源开销较大，影响性能</p>
+</li>
+</ul>
+<p><strong>select() vs poll()</strong></p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>select()</th>
+<th>poll()</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>fd数量限制</td>
+<td>有（FD_SETSIZE，通常是1024）</td>
+<td>理论上无限制（仅受到系统资源限制）</td>
+</tr>
+<tr>
+<td>fd集合表示</td>
+<td>使用位图</td>
+<td>使用数组</td>
+</tr>
+<tr>
+<td>超时精度</td>
+<td>微秒</td>
+<td>毫秒</td>
+</tr>
+<tr>
+<td>时间复杂度</td>
+<td>O(n)</td>
+<td>O(n)</td>
+</tr>
+</tbody></table>
+<h3 id="epoll"><a href="#epoll" class="headerlink" title="epoll"></a>epoll</h3><blockquote>
+<p>select()/poll()每次调用都需要拷贝管理的全量的fd到内核态，影响性能</p>
+</blockquote>
+<img src="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/io-epoll.png" class>
+
+
+
+<p><strong>epoll的三大系统调用</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/epoll.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 1. 创建 epoll 实例</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_create</span><span class="params">(<span class="keyword">int</span> size)</span></span>; <span class="comment">// size 建议为 1024 或更大，实际由内核自动扩展</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 注册/修改/删除文件描述符</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_ctl</span><span class="params">(<span class="keyword">int</span> epfd, <span class="keyword">int</span> op, <span class="keyword">int</span> fd, struct epoll_event *event)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. 等待事件发生</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_wait</span><span class="params">(<span class="keyword">int</span> epfd, struct epoll_event *events, <span class="keyword">int</span> maxevents, <span class="keyword">int</span> timeout)</span></span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>参数说明</strong></p>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>epoll_create()</code></td>
+<td>创建一个 epoll 实例，返回一个文件描述符（<code>epfd</code>）</td>
+</tr>
+<tr>
+<td><code>epoll_ctl()</code></td>
+<td>控制 epoll 实例:   • <code>EPOLL_CTL_ADD</code>：添加 fd   • <code>EPOLL_CTL_MOD</code>：修改监听事件 • <code>EPOLL_CTL_DEL</code>：删除 fd</td>
+</tr>
+<tr>
+<td><code>epoll_wait()</code></td>
+<td>阻塞等待事件，返回就绪的 fd 列表</td>
+</tr>
+</tbody></table>
+<p><strong>epoll的核心数据结构</strong></p>
+<p>epoll的搞笑源于其内部数据结构设计</p>
+<ol>
+<li>红黑树<ul>
+<li>存储所有被监控的socket（fd）</li>
+<li>支持快速插入、删除、查找</li>
+<li>当调用<code>epo_ctr(ADD)</code>时，内核会把fd插入这棵树</li>
+</ul>
+</li>
+<li>就绪链表<ul>
+<li>存储当前已经就绪（可读/可写）的fd</li>
+<li>当某个socket收到数据时，内核会将其加入此链表</li>
+<li><code>epoll_wait()</code>只需要遍历这个链表，事件复杂度为O(1)</li>
+</ul>
+</li>
+<li>事件回调机制<ul>
+<li>内核在收到数据后，会：<ul>
+<li>把对应的socket（的fd）加入就绪链表</li>
+<li>如果有进程在<code>epoll_wait()</code>上阻塞，就唤醒它</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p><strong>epoll的工作模式</strong></p>
+<p>epoll的描述符事件有两种触发模式：LT（level trigger）和 ET（edge trigger）</p>
+<ul>
+<li><p>LT模式</p>
+<p>当<code>epoll_wait()</code>检测到描述符事件到达时，将此事件通知进程，此进程可以不立即处理该事件，下次调用 <code>epoll_wait()</code> 会再次通知进程。是默认的一种模式，并且同时支持 Blocking 和 No-Blocking。</p>
+</li>
+<li><p>ET模式</p>
+<p>和 LT 模式不同的是，通知之后进程必须立即处理事件，下次再调用 <code>epoll_wait()</code> 时不会再得到事件到达的通知。</p>
+<p>很大程度上减少了 epoll 事件被重复触发的次数，因此效率要比 LT 模式高。只支持 No-Blocking，以避免由于一个文件句柄的阻塞读/阻塞写操作把处理多个文件描述符的任务饿死。</p>
+</li>
+</ul>
+<h2 id="信号驱动I-O"><a href="#信号驱动I-O" class="headerlink" title="信号驱动I/O"></a>信号驱动I/O</h2><p>​    应用进程使用 <code>sigaction</code> 系统调用，内核立即返回，应用进程可以继续执行，也就是说等待数据阶段应用进程是非阻塞的。</p>
+<p>​    内核在数据到达时向应用进程发送 <code>SIGIO</code> 信号，应用进程收到之后在信号处理程序中调用<code>recvfrom</code> 将数据从内核复制到应用进程中。</p>
+<img src="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/io-sign.png" class>
+
+
+
+<h2 id="AIO"><a href="#AIO" class="headerlink" title="AIO"></a>AIO</h2><blockquote>
+<p>异步I/O</p>
+</blockquote>
+<img src="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/AIO.png" class>
+
+
+
+<p>​    进行 <code>aio_read</code> 系统调用会立即返回，应用进程继续执行，不会被阻塞，内核会在所有操作完成之后向应用进程发送信号。</p>
+<p>​    异步I/O与信号驱动I/O的区别在于，信号驱动I/O的信号是通知应用进程可以开始I/O，然后应用进程调用<code>recvfrom</code>将数据从内核拷贝到用户空间。异步I/O的信号是通知应用进程I/O完成。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><blockquote>
+<ul>
+<li><strong>阻塞（Blocking） vs 非阻塞（Non-blocking）</strong>：描述的是 <strong>调用是否立即返回</strong>。(I/O调用是否会挂起进程)</li>
+<li><strong>同步（Synchronous） vs 异步（Asynchronous）</strong>：描述的是 <strong>数据拷贝阶段是否由应用程序参与</strong>。</li>
+</ul>
+</blockquote>
+<p><strong>同步I/O与异步I/O</strong></p>
+<ul>
+<li>同步I/O：应用进程 必须主动参与数据从内核到用户空间的拷贝（即调用<code>recvfrom</code>等，会阻塞）</li>
+<li>异步I/O：不用主动参与数据拷贝。应用程序发起I/O后，内核在后台完成整个操作（包括数据拷贝），完成后通知应用</li>
+</ul>
+<p>BIO、NIO、I/O多路复用、信号驱动I/O都是同步I/O</p>
+<blockquote>
+<p>非阻塞式I/O和信号驱动I/O在等待数据阶段不会阻塞，但是在数据从内核复制到用户空间时会阻塞</p>
+</blockquote>
+<p><strong>区别</strong></p>
+<blockquote>
+<p>前四种I/O模型差异主要在第一阶段，第二阶段是一样的，都是阻塞等待数据从内核拷贝到应用进程</p>
+</blockquote>
+<img src="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/io-diff.png" class>
+
+<br>
+
+
+
+<blockquote>
+<p>这些I/O模式都是要靠操作系统进行支持，应用程序只是提供相应的实现，对操作系统进行调用。</p>
+</blockquote>
+<br>
+
+<blockquote>
+<p>个人理解：I/O多路复用其实没有第二阶段，它只是负责通知应用程序数据可读，只做一件事：通知。具体怎么读取数据，还是需要应用程序自身主动触发，比如使用同步阻塞读或者同步非阻塞读。是一次独立的I/O事件</p>
+</blockquote>
+<p><strong>容易混淆的概念</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Socket socket = <span class="keyword">new</span> Socket(<span class="string">&quot;example.com&quot;</span>, <span class="number">80</span>);</span><br><span class="line">socket.setTimeout(<span class="number">3000</span>); <span class="comment">// 设置读取超时为 3 秒</span></span><br></pre></td></tr></table></figure>
+
+<p>上述代码调用了<code>socket.setTimeout(3000)</code>后，是否为非阻塞I/O？</p>
+<p>答：不是。<code>socket.setTimeout(3000)</code>并不会改变socket的”阻塞/非阻塞”模式，底层 socket 仍然是阻塞模式。</p>
+<p>除非显式的设置socket为非阻塞,</p>
+<p>非阻塞IO：无论数据是否就绪，系统调用立即返回。</p>
+<ul>
+<li>若有数据 → 返回读取字节数；</li>
+<li>若无数据 → 返回 <code>-1</code> 并设置 <code>errno = EAGAIN</code> 或 <code>EWOULDBLOCK</code>。</li>
+</ul>
+<p><code>socket.setTimeout(3000)</code>行为：调用<code>read()</code>后，最多等待3秒，如果3秒内没数据，抛出异常。不是立即返回。而是限时等待后返回，这叫”带超时的阻塞I/O”</p>
+<br>
+
+
+
+<p><strong>serverSocket.accept()为什么会被阻塞?</strong></p>
+<p>服务器线程发起一个accept动作，询问操作系统 是否有新的socket套接字信息从端口X发送过来。</p>
+<p>注意，是询问操作系统。也就是说socket套接字的IO模式支持是基于操作系统的，那么自然同步IO/异步IO的支持就是需要操作系统级别的了。</p>
+<p>它内部的实现是使用的操作系统级别的同步IO（准确来说应该是同步阻塞I/O——BIO）</p>
+<br>
+
+
+
+<h1 id="惊群效应-C10K"><a href="#惊群效应-C10K" class="headerlink" title="惊群效应/C10K"></a>惊群效应/C10K</h1><ul>
+<li>惊群效应</li>
+</ul>
+<p>​    惊群现象就是多进程（多线程）在同时阻塞等待同一个事件的时候（休眠状态），如果等待的这个事件发生，那么他就会唤醒等待的所有进程（或者线程），但是最终却只可能有一个进程（线程）获得这个时间的“控制权”，对该事件进行处理，而其他进程（线程）获取“控制权”失败，只能重新进入休眠状态，这种现象和性能浪费就叫做惊群。</p>
+<ul>
+<li>C10K问题</li>
+</ul>
+<blockquote>
+<p>如何让单台服务器同时处理 10,000 个并发客户端连接？</p>
+</blockquote>
+<p>“C” 代表 <strong>Client（客户端）</strong>，“10K” 即 <strong>10,000</strong>。</p>
+<p>该问题本质是<strong>如何高效管理大量并发 I/O 资源</strong></p>
+<p>解决方案：</p>
+<ul>
+<li>I/O多路复用</li>
+<li>非阻塞I/O</li>
+<li>事件驱动架构（Reactor模式）</li>
+</ul>
+<h1 id="Reactor模型"><a href="#Reactor模型" class="headerlink" title="Reactor模型"></a>Reactor模型</h1><blockquote>
+<p>Reactor 不是一种 I/O 模型，而是一种事件驱动的软件设计模式（架构模式）<br>而上文所说的五种I/O模型 是操作系统层面的 I/O 模型分类。</p>
+</blockquote>
+<p><strong>Reactor = I/O 多路复用（事件监听） + 同步非阻塞 I/O（事件处理）</strong></p>
+<h2 id="传统IO模型"><a href="#传统IO模型" class="headerlink" title="传统IO模型"></a>传统IO模型</h2><p>​    对于传统IO模型，其主要是一个Server对接N个客户端，在客户端连接之后，为每个客户端都分配一个执行线程。如下图是该模型的一个演示：</p>
+<br>
+
+<img src="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/traditional-io.png" class>
+
+<br>
+
+<ol>
+<li>客户都安连接到达之后，服务端会分配一个线程给该客户端，该客户都安处理包括读取数据、解码、计算、编码、发送数据整个过程</li>
+<li>服务端的吞吐量与服务器能提供的线程数量是呈线性关系的</li>
+</ol>
+<p>很显然，在并发量很大时，这种设计模式对于服务器来说压力很大。</p>
+<ul>
+<li>服务端资源有限，可创建线程数有限；且线程切换开销大</li>
+<li>服务端每个线程不仅要进行IO读写，还需要进行业务计算</li>
+<li>服务端在获取客户端连接，读取数据，以及写入数据的过程都是阻塞类型的（accept，read，write），在网络状况不好的情况下，这将极大的降低服务器每个线程的利用率，从而降低服务器吞吐量。</li>
+</ul>
+<h2 id="Reactor事件驱动模型"><a href="#Reactor事件驱动模型" class="headerlink" title="Reactor事件驱动模型"></a>Reactor事件驱动模型</h2><h3 id="单Reactor单线程"><a href="#单Reactor单线程" class="headerlink" title="单Reactor单线程"></a>单Reactor单线程</h3><img src="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/single-thread-single-reactor.png" class>
+
+
+
+
+
+<ul>
+<li>Reactor（反应器）<ul>
+<li>调度中心</li>
+<li>维护一个I/O多路复用器（如epoll/Selector)</li>
+<li>主动调用 <code>select()</code> / <code>poll()</code> / <code>epoll_wait()</code> 等系统调用，<strong>监听所有注册的 socket 是否有事件就绪</strong></li>
+<li>收到事件后，将事件分发给对应的处理器(Acceptor或handler)</li>
+</ul>
+</li>
+<li>Acceptor<ul>
+<li>专门处理新连接建立的组件</li>
+<li>监听服务端socket的<code>OP_ACCEPT</code>事件</li>
+<li>当有新客户端连接时，调用<code>accept()</code>创建新的客户端<code>socket</code></li>
+<li>将新创建的客户端socket注册到Reactor的多路复用器中，并设置为非阻塞</li>
+</ul>
+</li>
+</ul>
+<p>​    Acceptor会不断接收客户端的连接，然后将收到的连接交由Reactor进行分发，最后由具体的handler进行处理。</p>
+<p>该模型中，除了I/O操作在Reactor线程外，业务逻辑处理操作也在Reactor线程上，当业务逻辑处理比较耗时时，会大大降低I/O请求的处理效率</p>
+<h3 id="单Reactor多线程"><a href="#单Reactor多线程" class="headerlink" title="单Reactor多线程"></a>单Reactor多线程</h3><img src="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/single-reactor-thread-pool.png" class>
+
+<br>
+
+<ul>
+<li>使用一个线程进行客户端连接的接收以及网络读写事件的处理</li>
+<li>在接收到客户端连接后，将该连接交给线程池进行数据的处理</li>
+</ul>
+<p>​    引入了线程池，用来专门处理业务逻辑操作，提升了I/O相应速度</p>
+<p>​    但是在百万级连接、高并发大数据量时，会有大量的客户端数据进行网络读写，单个Reactor线程效率会比较低下</p>
+<h3 id="多Reactor多线程"><a href="#多Reactor多线程" class="headerlink" title="多Reactor多线程"></a>多Reactor多线程</h3><p>​    在单Reactor多线程模式中，由于网络读写在高并发的情况下会成为系统的一个瓶颈，因而针对该模型提出了一种改进后的模型。扩展了Reactor线程，引入了多个Reactor线程。</p>
+<blockquote>
+<p>subReactor可以有多个，图中并没有体现出来</p>
+</blockquote>
+<br>
+
+<img src="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/multi-reactor-multi-thread.png" class>
+
+<br>
+
+<ul>
+<li>mainReactor<ul>
+<li>主要用来处理客户端的连接</li>
+<li>监听 服务端  的 <code>OP_ACCEPT</code> 事件；</li>
+<li>当 <code>OP_ACCEPT</code> 就绪时，触发 acceptor 来处理新连接</li>
+</ul>
+</li>
+<li>acceptor<ul>
+<li>是一个事件处理器，被mainReactor回调</li>
+<li>获取新的客户端连接，并将其注册到subReactor上</li>
+</ul>
+</li>
+<li>subReactor<ul>
+<li>接收acceptor注册过来的连接</li>
+<li>监听新连接的读写事件</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>典型实现<ul>
+<li>Netty</li>
+<li>memcached</li>
+</ul>
+</li>
+</ul>
+<br>
+
+
+
+
+
+<h3 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h3><p>Reactor = I/O 多路复用（事件监听） + 同步非阻塞 I/O（事件处理）</p>
+<ol>
+<li><p>既然I/O多路复用已经告知数据已准备好，为什么不直接使用同步阻塞I/O来操作数据呢？</p>
+<p>理论上可行，但是现实不可行。因为 I/O多路复用的通知是”瞬时快照“，而状态可能在通知后发生改变。</p>
+<p>比如数据可能被丢弃，多线程下的竞争（比如两个线程针对同一个socket进行read()操作，当被epoll通知告诉数据可读时，线程1将数据读走后，线程2读取数据为空，如果使用同步阻塞I/O读取，线程2就会卡死</p>
+<blockquote>
+<p>每个TCP socket在内核有一个接收缓冲区，所有对这个socket的read()调用都从同一个缓冲区读取数据；数据一旦被 read() 成功拷贝到用户空间，就从内核缓冲区中移除；</p>
+</blockquote>
+</li>
+</ol>
+<h1 id="Java中对多路复用的支持"><a href="#Java中对多路复用的支持" class="headerlink" title="Java中对多路复用的支持"></a>Java中对多路复用的支持</h1><p><strong>Channel</strong></p>
+<p>通道：是建立一个应用程序和操作系统交互事件、传递内容的渠道（注意是连接到操作系统）。</p>
+<p>一个通道会有一个专属的文件状态描述符。应用程序可以通过通道读取数据，也可以通过通道向操作系统写数据</p>
+<br>
+
+<p><strong>Selector</strong></p>
+<p>选择器，根据Selector的职责，也可以称之为”轮询代理器”</p>
+<p>应用程序将Channel注册到Selector对象上</p>
+<ul>
+<li><p>轮询代理</p>
+<p>应用层不再通过阻塞模式或非阻塞模式直接访问操作系统“事件有没有发生”，而是由Selector代其询问</p>
+</li>
+<li><p>实现不同操作系统的支持</p>
+<p>多路复用I/O是需要操作系统进行支持的，在Java中，要为 不同操作系统的多路复用I/O实现 编写不同的代码</p>
+<p>（也就是说，不同操作系统下，Java针对Selector的实现不同。比如Windows的实现是<code>WindowsSelectorImpl</code>类）</p>
+</li>
+</ul>
+<br>
+
+<p><strong>Buffer</strong></p>
+<p>数据缓冲区：在Java NIO框架中，为了保证每个Channel的数据读写速度，Java NIO框架为每一种需要支持数据读写的通道集成了Buffer的支持。</p>
+<blockquote>
+<p>不是所有的通道都需要支持数据读写。例如<code>ServerScoketChannel</code>它只支持对<code>OP_ACCEPT</code>事件的监听，所以它是不能直接进行网络数据内容的读写的，所以它就不需要也没有集成Buffer</p>
+</blockquote>
+<p>Buffer有两种工作模式：写模式和读模式</p>
+<p>在读模式下，应用程序只能从Buffer中读取数据，不能进行写操作</p>
+<p>但是在写模式下，应用程序是可以进行读操作的。</p>
+<p>案例代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestServerSocket</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();</span><br><span class="line">        serverSocketChannel.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line">        ServerSocket socket = serverSocketChannel.socket();</span><br><span class="line">        socket.bind(<span class="keyword">new</span> InetSocketAddress(<span class="number">8080</span>));</span><br><span class="line"></span><br><span class="line">        Selector selector = Selector.open();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 服务端只能注册`OP_ACCEPT`事件</span></span><br><span class="line">        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (selector.select(<span class="number">3000</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">                    System.out.println(<span class="string">&quot;no event....&quot;</span>);</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 这里就是本次询问操作系统，所获取到的“所关心的事件”的事件类型(每一个通道都是独立的)</span></span><br><span class="line">                Iterator&lt;SelectionKey&gt; selectionKeys = selector.selectedKeys().iterator();</span><br><span class="line">                <span class="keyword">while</span> (selectionKeys.hasNext()) &#123;</span><br><span class="line">                    SelectionKey readyKey = selectionKeys.next();</span><br><span class="line">                    selectionKeys.remove(); <span class="comment">// 已经处理的事件key要移除，不然还会在selectedKeys集合中</span></span><br><span class="line">                    SelectableChannel selectableChannel = readyKey.channel();</span><br><span class="line">                    <span class="keyword">if</span> (readyKey.isValid() &amp;&amp; readyKey.isAcceptable()) &#123;</span><br><span class="line">                        System.out.println(<span class="string">&quot;OP_ACCEPT event&quot;</span>);</span><br><span class="line">                        ServerSocketChannel channel = (ServerSocketChannel) selectableChannel;</span><br><span class="line"></span><br><span class="line">                        <span class="comment">// 在serverSocketChannel接收到/准备好 一个新的 TCP连接后， 会向程序返回一个新的socketChannel， 我们需要将其注册到Selector中</span></span><br><span class="line">                        SocketChannel socketChannel = channel.accept();</span><br><span class="line">                        socketChannel.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line">                        <span class="comment">// socketChannel可以且只可以注册三种事件SelectionKey.OP_READ | SelectionKey.OP_WRITE | SelectionKey.OP_CONNECT</span></span><br><span class="line">                        socketChannel.register(selector, SelectionKey.OP_READ , ByteBuffer.allocate(<span class="number">2048</span>));</span><br><span class="line">                    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (readyKey.isValid() &amp;&amp; readyKey.isReadable()) &#123;</span><br><span class="line">                        System.out.println(<span class="string">&quot;OP_READ event&quot;</span>);</span><br><span class="line">                        readData(readyKey);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            serverSocketChannel.close();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">readData</span><span class="params">(SelectionKey readyKey)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        SocketChannel clientSocketChannel = (SocketChannel)readyKey.channel();</span><br><span class="line">        <span class="comment">// 拿到这个socket channel使用的缓存区，准备读取数据</span></span><br><span class="line">        ByteBuffer contextBytes = (ByteBuffer)readyKey.attachment();</span><br><span class="line">        <span class="comment">//将通道的数据写入到缓存区，注意是写入到缓存区。</span></span><br><span class="line">        <span class="comment">//由于之前设置了ByteBuffer的大小为2048 byte，所以可以存在写入不完的情况</span></span><br><span class="line">        <span class="comment">//没关系，我们后面来调整代码。这里我们暂时理解为一次接受可以完成</span></span><br><span class="line">        <span class="keyword">int</span> realLen = -<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            realLen = clientSocketChannel.read(contextBytes);</span><br><span class="line">        &#125; <span class="keyword">catch</span>(Exception e) &#123;</span><br><span class="line">            <span class="comment">// 这里抛出了异常，一般就是客户端因为某种原因终止了。所以关闭channel就行了</span></span><br><span class="line">            clientSocketChannel.close();</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 如果缓存区中没有任何数据</span></span><br><span class="line">        <span class="keyword">if</span>(realLen == -<span class="number">1</span>) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;no data...&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 将缓存区从写状态切换为读状态(实际上这个方法是读写模式互切换)。</span></span><br><span class="line">        <span class="comment">// 这是java nio框架中的这个socket channel的写请求将全部等待。</span></span><br><span class="line">        contextBytes.flip();</span><br><span class="line">        <span class="comment">//注意中文乱码的问题，我个人喜好是使用URLDecoder/URLEncoder，进行解编码。</span></span><br><span class="line">        <span class="comment">//当然java nio框架本身也提供编解码方式，看个人咯</span></span><br><span class="line">        <span class="keyword">byte</span>[] messageBytes = contextBytes.array();</span><br><span class="line">        String messageEncode = <span class="keyword">new</span> String(messageBytes , <span class="string">&quot;UTF-8&quot;</span>);</span><br><span class="line">        String message = URLDecoder.decode(messageEncode, <span class="string">&quot;UTF-8&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 如果收到了“over”关键字，才会清空buffer，并回发数据；</span></span><br><span class="line">        <span class="comment">// 否则不清空缓存，还要还原buffer的“写状态”</span></span><br><span class="line">        <span class="keyword">if</span>(message.indexOf(<span class="string">&quot;over&quot;</span>) != -<span class="number">1</span>) &#123;</span><br><span class="line">            <span class="comment">// 清空已经读取的缓存，并从新切换为写状态(这里要注意clear()和capacity()两个方法的区别)</span></span><br><span class="line">            contextBytes.clear();</span><br><span class="line">            System.out.println((<span class="string">&quot;receive message from client: &quot;</span> + message));</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 回发数据，并关闭channel</span></span><br><span class="line">            ByteBuffer sendBuffer = ByteBuffer.wrap(URLEncoder.encode(<span class="string">&quot;回发处理结果&quot;</span>, <span class="string">&quot;UTF-8&quot;</span>).getBytes());</span><br><span class="line">            clientSocketChannel.write(sendBuffer);</span><br><span class="line">            clientSocketChannel.close();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            System.out.println((<span class="string">&quot;客户端信息还未接受完，继续接受======message : &quot;</span> + message));</span><br><span class="line">            <span class="comment">// 这是，limit和capacity的值一致，position的位置是realLen的位置</span></span><br><span class="line">            contextBytes.position(realLen);</span><br><span class="line">            contextBytes.limit(contextBytes.capacity());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h1 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h1><h2 id="I-O-调度策略"><a href="#I-O-调度策略" class="headerlink" title="I/O 调度策略"></a>I/O 调度策略</h2><h3 id="NOOP"><a href="#NOOP" class="headerlink" title="NOOP"></a>NOOP</h3><p>No Operation。该算法是实现了简单的FIFO队列，所有I/O请求大致按照先来后到的顺序进行操作。</p>
+<blockquote>
+<p>NOOP 会在FIFO的基础上还做了相邻I/O请求的合并</p>
+</blockquote>
+<h3 id="CFQ"><a href="#CFQ" class="headerlink" title="CFQ"></a>CFQ</h3><p>Completely Fair Queuing。该算法特点是：按照I/O请求地址进行排序，而不是按照先来后到的顺序。</p>
+<p>CFQ是默认的磁盘调度算法。</p>
+<p>先来的I/O请求并不一定被满足，可能出现饥饿现象</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/yinwenjie/article/details/48274255">https://blog.csdn.net/yinwenjie/article/details/48274255</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://c89757.github.io/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/" title="Reactor模型" target="_blank" rel="external">https://c89757.github.io/2024/07/10/Reactor模型/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://gitee.com/c89757" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://gitee.com/c89757" target="_blank"><span class="text-dark">colin</span><small class="ml-1x">悟已往之不谏，知来者之可追</small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2024/08/07/%E8%AE%B0%E4%B8%80%E6%AC%A1mysql%E6%AD%BB%E9%94%81%E9%97%AE%E9%A2%98/" title="记一次mysql死锁问题"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2024/05/11/%E7%A7%91%E5%AD%A6%E4%B8%8A%E7%BD%91-%E8%87%AA%E5%BB%BA%E6%A2%AF%E5%AD%90/" title="科学上网-自建梯子"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2025 John Doe
+        
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+
+
+  <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>
+  <script>
+  //利用 FancyBox 实现点击图片放大
+  $(document).ready(function() {
+    $('article img').not('[hidden]').not('.panel-body img').each(function() {
+      var $image = $(this);
+      var imageCaption = $image.attr('alt');
+      var $imageWrapLink = $image.parent('a');
+      if ($imageWrapLink.length < 1) {
+        var src = this.getAttribute('src');
+        var idx = src.lastIndexOf('?');
+        if (idx != -1) {
+          src = src.substring(0, idx);
+        }
+        $imageWrapLink = $image.wrap('<a href="' + src + '"></a>').parent('a');
+      }
+      $imageWrapLink.attr('data-fancybox', 'images');
+      if (imageCaption) {
+        $imageWrapLink.attr('data-caption', imageCaption);
+      }
+    });
+    $().fancybox({
+      selector: '[data-fancybox="images"]',
+      hash: false,
+      loop: false,
+    });
+  });
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>MySql的日志 | Colin</title>
+  <meta name="description" content="binlog 二进制日志，记录了数据库发生的变化。如新建了一个数据库或者表、表结构发生改变、表中的数据发生了变化时都会记录相应的binlog日志。  主要作用  用于复制  MySql主从复制就依赖binlog，主服务器将数据同步给各个从服务器  用于恢复  数据误删后可以通过binlog恢复 配置可以通过如下命令查看是否当前服务器是否开启了binlog 1show variables like">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySql的日志">
+<meta property="og:url" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="binlog 二进制日志，记录了数据库发生的变化。如新建了一个数据库或者表、表结构发生改变、表中的数据发生了变化时都会记录相应的binlog日志。  主要作用  用于复制  MySql主从复制就依赖binlog，主服务器将数据同步给各个从服务器  用于恢复  数据误删后可以通过binlog恢复 配置可以通过如下命令查看是否当前服务器是否开启了binlog 1show variables like">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240414192757001.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240415224554545.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240415225620019.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240415233226592.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240417000328320.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240417232524707.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240418222559688.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240418223900310.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240418233324254.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240419000257852.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240420135406839.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240420135942889.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240420141005150.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240420142227528.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240420143626870.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240420144120007.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240420144551844.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240420150428571.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240420154213392.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240420215420389.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240420215801433.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240420230059192.png">
+<meta property="article:published_time" content="2024-04-14T10:06:02.000Z">
+<meta property="article:modified_time" content="2025-12-18T17:04:35.551Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images/MySql的日志/image-20240414192757001.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+    <link href="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.css" rel="stylesheet">
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://gitee.com/c89757" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">colin</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">悟已往之不谏，知来者之可追</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Changsha, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/JDK/">JDK</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JUC/">JUC</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JVM/">JVM</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%8D%8F%E8%AE%AE/">协议</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/">数据结构与算法</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/GC/" rel="tag">GC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/I-O/" rel="tag">I/O</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JDK/" rel="tag">JDK</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JUC/" rel="tag">JUC</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/maven/" rel="tag">maven</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netty/" rel="tag">netty</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nio/" rel="tag">nio</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/other/" rel="tag">other</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/questions/" rel="tag">questions</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/" rel="tag">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/" rel="tag">springboot</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%8F%E8%AE%AE/" rel="tag">协议</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A0%86/" rel="tag">堆</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag">多线程</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" rel="tag">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/GC/" style="font-size: 13px;">GC</a> <a href="/tags/I-O/" style="font-size: 13px;">I/O</a> <a href="/tags/JDK/" style="font-size: 13px;">JDK</a> <a href="/tags/JUC/" style="font-size: 13.5px;">JUC</a> <a href="/tags/JVM/" style="font-size: 13.5px;">JVM</a> <a href="/tags/MySQL/" style="font-size: 14px;">MySQL</a> <a href="/tags/java/" style="font-size: 13.25px;">java</a> <a href="/tags/maven/" style="font-size: 13px;">maven</a> <a href="/tags/netty/" style="font-size: 13px;">netty</a> <a href="/tags/nio/" style="font-size: 13px;">nio</a> <a href="/tags/other/" style="font-size: 13px;">other</a> <a href="/tags/questions/" style="font-size: 13.75px;">questions</a> <a href="/tags/spring/" style="font-size: 13px;">spring</a> <a href="/tags/springboot/" style="font-size: 13px;">springboot</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 13px;">分布式</a> <a href="/tags/%E5%8D%8F%E8%AE%AE/" style="font-size: 13.25px;">协议</a> <a href="/tags/%E5%A0%86/" style="font-size: 13px;">堆</a> <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" style="font-size: 13.5px;">多线程</a> <a href="/tags/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" style="font-size: 13px;">排序算法</a> <a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 13px;">网络</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/06/">六月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">八月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">七月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">五月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">四月 2024</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">三月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/12/">十二月 2023</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/08/">八月 2023</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">三月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/02/">二月 2023</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">十二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/JVM/">JVM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/08/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%A0%86%E5%A4%96%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/" class="title">记一次堆外内存泄漏</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-08-25T14:10:07.000Z" itemprop="datePublished">2025-08-25</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/JDK/">JDK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/" class="title">jdk8~21新特性</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-06-24T12:01:47.000Z" itemprop="datePublished">2025-06-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/03/19/https%E8%AF%A6%E8%A7%A3/" class="title">https详解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-03-19T12:09:40.000Z" itemprop="datePublished">2025-03-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/MySQL/">MySQL</a>
+              </p>
+              <p class="item-title">
+                <a href="/2024/08/07/%E8%AE%B0%E4%B8%80%E6%AC%A1mysql%E6%AD%BB%E9%94%81%E9%97%AE%E9%A2%98/" class="title">记一次mysql死锁问题</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2024-08-07T13:41:21.000Z" itemprop="datePublished">2024-08-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a>
+              </p>
+              <p class="item-title">
+                <a href="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/" class="title">Reactor模型</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2024-07-10T14:55:02.000Z" itemprop="datePublished">2024-07-10</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#binlog"><span class="toc-number">1.</span> <span class="toc-text">binlog</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE"><span class="toc-number">1.1.</span> <span class="toc-text">配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8Bbinlog"><span class="toc-number">1.2.</span> <span class="toc-text">查看binlog</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#redolog"><span class="toc-number">2.</span> <span class="toc-text">redolog</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E6%A0%BC%E5%BC%8F"><span class="toc-number">2.1.</span> <span class="toc-text">日志格式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E7%9A%84%E6%97%A5%E5%BF%97%E7%B1%BB%E5%9E%8B"><span class="toc-number">2.2.</span> <span class="toc-text">简单的日志类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%8D%E6%9D%82%E7%9A%84%E6%97%A5%E5%BF%97%E7%B1%BB%E5%9E%8B"><span class="toc-number">2.3.</span> <span class="toc-text">复杂的日志类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Mini-Transication"><span class="toc-number">2.4.</span> <span class="toc-text">Mini-Transication</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#redo-log-block"><span class="toc-number">2.5.</span> <span class="toc-text">redo log block</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#log-buffer"><span class="toc-number">2.6.</span> <span class="toc-text">log buffer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#redo%E6%97%A5%E5%BF%97%E5%88%B7%E7%9B%98%E6%97%B6%E6%9C%BA"><span class="toc-number">2.7.</span> <span class="toc-text">redo日志刷盘时机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#redo%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E7%BB%84"><span class="toc-number">2.8.</span> <span class="toc-text">redo日志文件组</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#checkpointredo%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="toc-number">2.9.</span> <span class="toc-text">checkpointredo日志文件格式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#log-sequence-number"><span class="toc-number">2.10.</span> <span class="toc-text">log sequence number</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#flushed-to-disk-lsn"><span class="toc-number">2.11.</span> <span class="toc-text">flushed_to_disk_lsn</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#flush%E9%93%BE%E8%A1%A8%E4%B8%AD%E7%9A%84lsn"><span class="toc-number">2.12.</span> <span class="toc-text">flush链表中的lsn</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#checkpoint"><span class="toc-number">2.13.</span> <span class="toc-text">checkpoint</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E5%90%84%E7%A7%8Dlsn%E5%80%BC"><span class="toc-number">2.14.</span> <span class="toc-text">查看系统中的各种lsn值</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#innodb-flush-log-at-trx-commit"><span class="toc-number">2.15.</span> <span class="toc-text">innodb_flush_log_at_trx_commit</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#undolog"><span class="toc-number">3.</span> <span class="toc-text">undolog</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1id"><span class="toc-number">3.1.</span> <span class="toc-text">事务id</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E6%A0%BC%E5%BC%8F-1"><span class="toc-number">3.2.</span> <span class="toc-text">日志格式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#insert%E6%93%8D%E4%BD%9C%E5%AF%B9%E5%BA%94%E7%9A%84undo%E6%97%A5%E5%BF%97"><span class="toc-number">3.3.</span> <span class="toc-text">insert操作对应的undo日志</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#delete%E6%93%8D%E4%BD%9C%E5%AF%B9%E5%BA%94%E7%9A%84undo%E6%97%A5%E5%BF%97"><span class="toc-number">3.4.</span> <span class="toc-text">delete操作对应的undo日志</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#update%E6%93%8D%E4%BD%9C%E5%AF%B9%E5%BA%94%E7%9A%84undo%E6%97%A5%E5%BF%97"><span class="toc-number">3.5.</span> <span class="toc-text">update操作对应的undo日志</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FIL-PAGE-UNDO-LOG"><span class="toc-number">3.6.</span> <span class="toc-text">FIL_PAGE_UNDO_LOG</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Undo-Page-Header"><span class="toc-number">3.6.1.</span> <span class="toc-text">Undo Page Header</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#undo%E9%A1%B5%E9%9D%A2%E9%93%BE%E8%A1%A8"><span class="toc-number">3.7.</span> <span class="toc-text">undo页面链表</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-MySql的日志" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      MySql的日志
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/" class="article-date">
+	  <time datetime="2024-04-14T10:06:02.000Z" itemprop="datePublished">2024-04-14</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/MySQL/">MySQL</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/MySQL/" rel="tag">MySQL</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="binlog"><a href="#binlog" class="headerlink" title="binlog"></a>binlog</h1><blockquote>
+<p>二进制日志，记录了数据库发生的变化。如新建了一个数据库或者表、表结构发生改变、表中的数据发生了变化时都会记录相应的<code>binlog</code>日志。</p>
+</blockquote>
+<p>主要作用</p>
+<ul>
+<li>用于复制</li>
+</ul>
+<p><code>MySql</code>主从复制就依赖<code>binlog</code>，主服务器将数据<strong>同步</strong>给各个从服务器</p>
+<ul>
+<li>用于恢复</li>
+</ul>
+<p>数据误删后可以通过<code>binlog</code>恢复</p>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>可以通过如下命令查看是否当前服务器是否开启了<code>binlog</code></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;log_bin&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><code>binlog</code>日志并不是仅写到一个文件中，而是写入一组文件中，这组文件的命名如下：</p>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">basename.<span class="number">000001</span></span><br><span class="line">basename.<span class="number">000002</span></span><br><span class="line">basename.<span class="number">000003</span></span><br><span class="line">basename.<span class="number">000004</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>启动选项<code>log-bin[=base_name]</code>中的<code>base_name</code>就是这组<code>binlog</code>日志文件名称都包含的部分。</p>
+<p>如果不配置<code>basename</code>，<code>MySQL</code>服务器会默认将<code>主机名-bin</code>作为<code>binlog</code>日志文件的<code>basename</code>。</p>
+<p>除了这些真正存储的<code>binlog</code>日志文件以外，<code>MySql</code>服务器还会在相同的路径下生成一个关于<code>binlog</code>的索引文件。</p>
+<p>文件名为<code>.index</code>结尾，同时他是他是一个文本文件，里面存储的是各个<code>binlog</code>文件的路径</p>
+<h2 id="查看binlog"><a href="#查看binlog" class="headerlink" title="查看binlog"></a>查看binlog</h2><p><code>binlog</code>中记录数据库发生更改的各种事件（events），这些事件的种类非常多，我们熟悉的有：</p>
+<ul>
+<li>WRITE_ROWS_EVENT：插入记录。</li>
+<li>UPDATE_ROWS_EVENT：更新记录。</li>
+<li>DELETE_ROWS_EVENT：删除记录。</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> BINLOG EVENTS</span><br><span class="line">   [<span class="keyword">IN</span> <span class="string">&#x27;log_name&#x27;</span>]</span><br><span class="line">   [<span class="keyword">FROM</span> pos]</span><br><span class="line">   [LIMIT [<span class="keyword">offset</span>,] row_count]</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li><p><code>[IN &#39;log_name&#39;]</code>：<code>log_name</code>表示我们要查看哪个<code>binlog</code>日志文件的内容。</p>
+</li>
+<li><p><code>[FROM pos]</code>：<code>pos</code>表示我们要查看<code>binlog</code>文件的起始偏移量（通过指定这个值可以直接去查看某个偏移量处的事件）。</p>
+</li>
+<li><p><code>offset</code>表示我们要从哪个事件开始查看，<code>row_count</code>表示我们要查看多少个事件。</p>
+</li>
+</ul>
+<p><strong>mysqlbinlog</strong></p>
+<blockquote>
+<p>由于<code>binlog</code>是二进制格式的，我们不能直接以文本的形式查看。使用<code>SHOW BINLOG EVENTS</code>又只能看到粗略的信息，如果我们想查看<code>binlog</code>日志文件的详细信息的话，就需要使用<code>MySQL</code>给我们提供的实用工具——<code>mysqlbinlog</code>。</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqlbinlog ./basename.000001</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h1 id="redolog"><a href="#redolog" class="headerlink" title="redolog"></a>redolog</h1><blockquote>
+<p>事务已经提交，但是还没有刷到磁盘，但是如果此时服务宕机，可能会造成数据丢失。</p>
+<p>比如：数据刚提交，或者只更改了buffer pool中的数据，但是还没有刷新到磁盘，服务宕机，内存中的数据就没了。</p>
+<p><code>redolog</code>记录的就是，对数据的更改操作。如把某个页的地址偏移量为1000的数据更改为2。这样即使服务宕机，重启后，只需要按照<code>redolog</code>记录的步骤重新更新数据页即可。</p>
+<p>为了让已经提交的事务对数据的更改能永久生效，即使服务器崩溃，也能通过<code>redolog</code>恢复</p>
+<p><code>redolog</code>是顺序写入磁盘的。</p>
+</blockquote>
+<h2 id="日志格式"><a href="#日志格式" class="headerlink" title="日志格式"></a>日志格式</h2><p><code>redolog</code>本质上只是记录了一下事务对数据库进行了哪些修改。</p>
+<p><code>MySql</code>针对不同的修改场景，定义了多种类型的redo日志，但大部分类型的redo日志都有以下这种通用格式</p>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240414192757001.png" alt="image-20240414192757001"></p>
+<ul>
+<li>type：这条redo日志的类型</li>
+<li>space ID：表空间ID</li>
+<li>page number：页号</li>
+<li>data：这条redo日志的具体内容</li>
+</ul>
+<h2 id="简单的日志类型"><a href="#简单的日志类型" class="headerlink" title="简单的日志类型"></a>简单的日志类型</h2><p>有些极其简单的修改，只需要记录一些某个页面的某个偏移量处修改了几个字节、修改后的内容，这种极其简单的<code>redolog</code>称为物理日志，并且根据在页面中写入数据的多少划分为几种不同类型的<code>redo</code>日志类型.</p>
+<ul>
+<li><code>MLOG_1BYTE</code>（type字段对应的十进制数字为1）：表示在某个页面偏移量处写了1字节的redo日志类型</li>
+<li><code>MLOG_2BYTE</code>（type字段对应的十进制数字为2）：表示在某个页面偏移量处写了2字节的redo日志类型</li>
+<li><code>MLOG_4BYTE</code>（type字段对应的十进制数字为4）：表示在某个页面偏移量处写了4字节的redo日志类型</li>
+<li><code>MLOG_8BYTE</code>（type字段对应的十进制数字为8）：表示在某个页面偏移量处写了8字节的redo日志类型</li>
+<li><code>MLOG_WRITE_STRING</code>（type字段对应的十进制数字为30）：表示在某个页面偏移量处写入1个 <code>字节序列</code> 的redo日志类型</li>
+</ul>
+<p>对于<code>MLOG_ n BYTE</code>格式的日志，他们的通用日志格式如下：</p>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240415224554545.png" alt="image-20240415224554545"></p>
+<p>对于``MLOG_WRITE_STRING`类型的日志来说，格式都差不多，只不过具体数据中包含的字节数量不同。格式如下：</p>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240415225620019.png" alt="image-20240415225620019"></p>
+<p><code>MLOG_WRITE_STRING</code>类型的<code>redolog</code>因为不确定写入的具体数据占用多少字节，所以需要在日志结构中添加一个<code>len</code>字段。</p>
+<h2 id="复杂的日志类型"><a href="#复杂的日志类型" class="headerlink" title="复杂的日志类型"></a>复杂的日志类型</h2><p>对于一个<code>INSERT</code>语句来说，他对B+树的影响如下</p>
+<ol>
+<li>表中有几个索引，一条<code>INSERT</code>语句就有可能更新多少棵<code>B+</code>树</li>
+<li>针对一棵<code>B+</code>树来说，有可能只更新叶子节点，也有可能需要更新内节点页面，还可能新增内节点页面（比如新增后的页面不够了，需要页分类，此时就需要在内节点新增目录记录）</li>
+</ol>
+<p>其实需要更新的东西很多，比如Page Director中的槽信息，Page Header中的各种统计信息，数据会按照索引列的大小排成一个单向链表，所以还需要更新上一条记录的记录头中的指针，也就是<code>next record</code>属性</p>
+<p>针对这种比较复杂的更改，需要记录的东西太多，我们又不能把整个页面记录下来，太浪费了，于是就有了新的<code>redolog</code>日志类型</p>
+<ul>
+<li><p><code>MLOG_REC_INSERT</code>（type字段对应的十进制数字为9）：表示在插入一条使用非紧凑行格式（redundant）的记录时，redo日志的类型</p>
+</li>
+<li><p><code>MLOG_COMP_REC_INSERT</code>（type字段对应的十进制数字为38）：表示在插入一条使用紧凑行格式（compact、dynamic、compressed）的记录时，redo日志的类型</p>
+</li>
+<li><p><code>MLOG_COMP_PAGE_CREATE</code>（type字段对应的十进制数字为58）：表示在创建一个存储紧凑行格式记录的页面时，redo日志的类型</p>
+</li>
+<li><p>……</p>
+</li>
+</ul>
+<p><code>MLOG_COMP_REC_INSERT</code>类型的<code>redolog</code>格式如下：</p>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240415233226592.png" alt="image-20240415233226592"></p>
+<h2 id="Mini-Transication"><a href="#Mini-Transication" class="headerlink" title="Mini-Transication"></a>Mini-Transication</h2><ul>
+<li>以组的形式写入<code>redolog</code></li>
+</ul>
+<p>比如<code>INSERT</code>语句，再插入时，可能会产生很多条<code>redolog</code>；例如：再插入时，叶子节点空间不足，就需要页分裂，同时向父节点加一个目录项，如果此时父节点的页面空间也不足，就需要再次分裂。如果我们再插入的过程中，只记录了一部分的<code>redolog</code>，此时系统崩溃，待系统重启恢复后，按照<code>redolog</code>的记录去恢复，就会形成一条不正确的 <code>B+</code> 树。</p>
+<p>所以<code>MySql</code>为了保证这个操作的原子性，记录<code>redolog</code>时，都是以组的形式来记录。在进行恢复时，对于一个组内的<code>redolog</code>，要么全部恢复，要么一条都不会恢复。</p>
+<blockquote>
+<p> 如何区分日志属于哪一组呢？</p>
+<p><code>MySql</code>会在每个组的日志结尾处，插入一条特殊类型的<code>redolog</code>，叫做<code>MLOG_MUTIL_REC_END</code>，以这个日志结尾的就属于一组<code>redolog</code></p>
+</blockquote>
+<h2 id="redo-log-block"><a href="#redo-log-block" class="headerlink" title="redo log block"></a>redo log block</h2><p>一个<code>MTR</code>（<code>Mini-Transication</code>）生成的<code>redo</code>日志都放在了大小为512字节的页中，称为<code>block</code>。</p>
+<p><code>redo block</code>的格式示意图：</p>
+<img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240417000328320.png" alt="image-20240417000328320" style="zoom:80%;">
+
+
+
+<ul>
+<li><code>LOG_BLOCK_HDR_NO</code>：每一个<code>block</code>都有一个大于0的唯一编号，该属性就表示该编号值</li>
+<li><code>LOG_BLOCK_HDR_DATA_LEN</code>：表示<code>block</code>中已经使用了多少字节；初始值12（因为<code>log block body</code>从第12个字节处开始）。随着往<code>block</code>中写入的<code>redo</code>日志越来越多，该属性也跟着增长。</li>
+<li><code>LOG_BLOCK_FIRST_REC_GROUP</code>：一个<code>redo</code>日志也可以称为一条<code>redo</code>日志记录（<code>redo log record</code>）。一个<code>MTR</code>会生成多条<code>redo</code>日志记录，这个<code>MTR</code>生成的这些<code>redo</code>日志记录被称为一个<code>redo</code>日志记录组（<code>redo log record group</code>）。<code>LOG_BLOCK_FIRST_REC_GROUP</code>就代表该<code>block</code>中第一个<code>MTR</code>生成的<code>redo</code>日志记录组的偏移量，其实也就是这个<code>block</code>中第一个<code>MTR</code>生成的第一条<code>redo</code>日志记录的偏移量。</li>
+<li><code>LOG_BLOCK_CHECKPOINT_NO</code>：表示<code>checkpoint</code>的序列</li>
+<li><code>LOG_BLOCK_CHECKSUM</code>：表示该<code>block</code>的校验值，用于正确性校验。</li>
+</ul>
+<h2 id="log-buffer"><a href="#log-buffer" class="headerlink" title="log buffer"></a>log buffer</h2><p>​    写入<code>redo</code>日志时，其实也是写在<code>redo log buffer</code>日志缓冲区的。</p>
+<p>​    <code>MySql</code>服务器在启动时就向操作系统申请了一大片连续的内存空间，称为<code>redo log buffer</code>日志缓冲区。这片连续的内存空间被划分若干连续的<code>redo log block</code>。</p>
+<img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240417232524707.png" alt="image-20240417232524707">
+
+<p>​    向<code>log buffer</code>中写入undo日志的过程中是顺序写入的，也就是先往前面的<code>block</code>中写，当该<code>block</code>的空闲空间用完之后再往下一个<code>block</code>中写。<code>MySql</code>维护了一个全局变量<code>buf_free</code>，记录偏移量，指明后续写入的<code>redo</code>日志应该写到<code>log buffer</code>中的哪个位置。</p>
+<p>​    一个<code>MTR</code>执行过程中可能产生若干条<code>redo</code>日志，这些<code>redo</code>是一个不可分割的组，所以并不是每生成一条<code>redo</code>日志就该将其插入到<code>log buffer</code>中，而是将每个<code>MTR</code>运行过程中产生的日志暂存到一个地方；当该<code>MTR</code>结束时，再将过程中产生的一组<code>redo</code>日志全部复制到<code>log buffer</code>中。</p>
+<h2 id="redo日志刷盘时机"><a href="#redo日志刷盘时机" class="headerlink" title="redo日志刷盘时机"></a>redo日志刷盘时机</h2><ul>
+<li>log buffer 空间不足时</li>
+</ul>
+<p><code>log buffer</code>的大小是有限的，通过系统变量<code>innodb_log_buffer指定</code>，当写入<code>log buffer</code>的<code>redo</code>日志超过<code>log buffer</code>总容量的50%时，就需要把这些日志刷新到磁盘中</p>
+<ul>
+<li>事务提交时</li>
+</ul>
+<p>为了持久性，也为了保证系统崩溃后，能够恢复事务对页面的更改</p>
+<ul>
+<li>当某个脏页刷新到磁盘前，会保证先将该脏页对应的redo日志刷新磁盘中</li>
+</ul>
+<p>因为redo日志是顺序写入的，所以将某个脏页对应的redo日志从<code>redo log buffer</code>刷新到磁盘时，也会保证在其之前产生的redo日志也刷新到磁盘</p>
+<ul>
+<li>后台线程，定时刷新</li>
+</ul>
+<p>大约以每秒1次的频率将<code>log buffer</code>中的<code>redo</code>日志刷新到磁盘</p>
+<ul>
+<li>正常关闭服务器时</li>
+</ul>
+<h2 id="redo日志文件组"><a href="#redo日志文件组" class="headerlink" title="redo日志文件组"></a>redo日志文件组</h2><p>使用命令</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;datadir&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>可以查看redo日志的保存文件位置。</p>
+<p>默认在数据目录下的<code>ib_logfile()</code>和<code>ib_logfile1()</code>两个文件中</p>
+<p>下面是关于<code>redo log</code>的一些参数</p>
+<ul>
+<li><code>innodb_log_group_home_dir</code>：指定了<code>redo</code>日志文件所在的目录，默认就是当前的数据目录</li>
+<li><code>innodb_log_file_size</code>：指定了每个<code>redo</code>日志文件的大小，在<code>MySql5.7</code>版本中的默认值就是48MB</li>
+<li><code>innodb_log_files_in_group</code>：指定了redo日志文件的个数，默认值为2，最大值100</li>
+</ul>
+<p>redo日志是循环写入日志文件的，也就是先写入第一个文件，第一个文件满了，再写入第二个文件，以此类推，当最后一个文件写满了时，再写入第一个文件。</p>
+<p>所以可能会有覆盖的风险。（如何解决：<a href="#checkpoint">checkpoint</a>)</p>
+<h2 id="checkpointredo日志文件格式"><a href="#checkpointredo日志文件格式" class="headerlink" title="checkpointredo日志文件格式"></a>checkpointredo日志文件格式</h2><p><code>log buffer</code>本质上一片连续的内存空间，被划分为若干个<code>512</code>字节大小的<code>block</code>。将<code>log buffer</code>中的<code>redo</code>日志刷新到磁盘的本值就是把<code>block</code>镜像写入日志文件中，所以<code>redo</code>日志文件其实也是由若干个<code>512</code>字节大小的<code>block</code>组成。</p>
+<p>在<code>redo</code><strong>日志文件组</strong>中，每个文件格式大小都一样，都是由下面两部分组成：</p>
+<ul>
+<li>前2048个字节（前4个block）用来存储一些管理信息</li>
+<li>从第2048字节往后的字节用来存储<code>log buffer</code>中<code>block</code>镜像</li>
+</ul>
+<p>前4个<code>block</code>的结构如下：</p>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240418222559688.png" alt="image-20240418222559688"></p>
+<p><strong>log file header</strong></p>
+<ul>
+<li><code>LOG_HEADER_FORMAT</code>：4字节，redo日志的版本，在<code>MySql5.7</code>中基本都为1</li>
+<li><code>LOG_HEADER_PAD1</code>：4字节，用于字节填充，无实在意义</li>
+<li><code>LOG_HEDAER_START_LSN</code>：8字节，标记本<code>redo</code>日志文件偏移量为2048字节处对应的<code>lsn</code>值</li>
+<li><code>LOG_HEADER_CRETOR</code>：32字节 ，一个字节串，标记本<code>redo</code>日志文件的创建者是谁，正常运行时该值为<code>MySql</code>的版本号；在使用<code>mysqlbackup</code>命令创建<code>redo</code>日志文件时，该值为<code>ibbackup</code>和创建时间</li>
+<li><code>LOG_BLOCK_CHECKSUM</code>：4字节，本<code>block</code>的校验值；所有的<code>block</code>都有该值，</li>
+</ul>
+<p><strong>checkpoint1</strong></p>
+<img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240418223900310.png" alt="image-20240418223900310">
+
+<ul>
+<li><code>LOG_CHECKPOINT_NO</code>：8字节，服务器执行checkpoint编号，每执行一次<code>checkpoint</code>，该值就加1</li>
+<li><code>LOG_CHECKPOINT_LSN</code>：8字节，服务器在结束<code>checkpoint</code>时对应的<code>lsn</code>值；系统崩溃后恢复将从该值开始</li>
+<li><code>LOG_CHECKPOINT_OFFSET</code>：8字节，上个属性中的<code>lsn</code>值在<code>redo</code>日志文件组中的偏移量</li>
+<li><code>LOG_CHECKPOINT_LOG_BUF_SIZE</code>：8字节，服务器在执行<code>checkpoint</code>操作时对应的<code>log buffer</code>的大小</li>
+<li><code>LOG_BLOCK_CHECKSUM</code>：4字节，本<code>block</code>的校验值；所有<code>block</code>都有该值</li>
+</ul>
+<p><code>checkpoint2</code>结构与<code>checkpoint1</code>一样</p>
+<h2 id="log-sequence-number"><a href="#log-sequence-number" class="headerlink" title="log sequence number"></a>log sequence number</h2><p><code>INNODB</code>设计了一个为<code>lsn(log sequence number)</code>的全局变量，用来记录当前总共已经写入的<code>redo</code>日志量。</p>
+<p><code>lsn</code>的值为<code>8704</code>，也就是一条<code>redo</code>日志也没写入时，<code>lsn</code>的值就是<code>8704</code></p>
+<p>向<code>log buffer</code>中不断写入日志，其实是以<code>MTR</code>生成的一组<code>redo</code>日志为单位写入的，而且实际上是把日志写在了<code>log buffe body</code>处。但是在统计<code>lsn</code>的增长值时，是按照实际写入的日志量加上占用的<code>log buffer header</code>和<code>log buffer trailer</code>来计算的。</p>
+<p>如下图：<code>buf_free</code>用来标记下一条redo日志应该写到<code>log buffer</code>中的哪个位置。</p>
+<p><code>MTR1</code>写完以后，对于<code>MTR2</code>，一个页面装不下，跨页了，此时，<code>lsn</code>的偏移量应该加上第一个<code>block</code>的 <code>log block trailer</code>和第二个<code>block</code>的<code>log block header</code>。</p>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240418233324254.png" alt="image-20240418233324254"></p>
+<blockquote>
+<p>每一组由<code>MTR</code>生成的redo日志都有一个唯一的<code>lsn</code>值与其对应；<code>lsn</code>值越小，说明<code>redo</code>日志产生得越早。</p>
+</blockquote>
+<h2 id="flushed-to-disk-lsn"><a href="#flushed-to-disk-lsn" class="headerlink" title="flushed_to_disk_lsn"></a>flushed_to_disk_lsn</h2><p>全局变量<code>flushed_to_disk_lsn</code>，用来表示刷新到磁盘的redo日志的总量</p>
+<blockquote>
+<p><code>lsn</code>是用来记录redo日志在<code>log buffer</code>中的日志量</p>
+</blockquote>
+<p>在系统第一次启动时，<code>flushed_to_disk_lsn</code>的值与<code>lsn</code>的值是相同的，都是8704。</p>
+<p>随着系统的运行，<code>flushed_to_disk_lsn</code>的值，会逐渐被<code>lsn</code>甩开。因为先写log buffer，再刷新磁盘，毕竟磁盘的刷新没那么快，也没那么及时</p>
+<p>他们的关系如下图：</p>
+<p><code>buf_next_to_write</code>表示下一段将要刷新到磁盘的偏移量</p>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240419000257852.png" alt="image-20240419000257852"></p>
+<blockquote>
+<p>个人理解：<code>flushed_to_disk_lsn</code>是全局累加的，记录系统总共刷新了多少日志量。</p>
+<p>但是<code>buf_next_to_write</code>是一个指针，用于记录当前刷新到了哪里，随着log buffer清空，这个值也会被复位，指向log buffer开头</p>
+</blockquote>
+<p>如果<code>lsn</code>的值和<code>flushed_to_disk_lsn</code>的值相同，则表示所有的redo日志都刷新到了磁盘。</p>
+<h2 id="flush链表中的lsn"><a href="#flush链表中的lsn" class="headerlink" title="flush链表中的lsn"></a>flush链表中的lsn</h2><blockquote>
+<p>当第一次修改buffer pool中的某页面时，会把该页面对应的控制块加入到flush链表的头部。（之后再次修改时，由于已经存在flush链表中，所以不再插入了）。也就是说，flush链表中的脏页按照页面的第一次修改时间进行排序的，。</p>
+</blockquote>
+<p>在flush链表的控制块中，记录着两个关于页面何时修改的属性。</p>
+<ul>
+<li>oldest_modification：第一次修改<code>buffer pool</code>中某个缓冲页时，就将修改该页面的<code>MTR</code>开始时的<code>lsn</code>值写入这个属性</li>
+<li>newest_modification：每修改一次页面，都会将 修改该页面的<code>MTR</code>结束时对应的<code>lsn</code>值写入这个属性。也就是说，该属性表示页面最近一次需修改后对应的<code>lsn</code>值</li>
+</ul>
+<h2 id="checkpoint"><a href="#checkpoint" class="headerlink" title="checkpoint"></a>checkpoint</h2><p>redo日志文件是有限的，循环写入时，可能新的内容会覆盖旧的内容</p>
+<blockquote>
+<p>redo日志只是为了在系统崩溃后恢复脏页用的，如果对应的脏页已经被刷盘了，那么即使现在系统崩溃后，重启后也没必要使用redo日志恢复该页面了。也就是说该段redo日志就没用的了。</p>
+</blockquote>
+<p>所以判断某个redo日志占用的磁盘空间是否可以被覆盖，就是看对应脏页是否已经被刷新到磁盘</p>
+<p><code>MySql</code>维护一个全部变量<code>checkpoint_lsn</code>，用来表示当前系统中可以被覆盖的redo日志总量是多少。当某个<code>MTR</code>生成的redo日志，被刷新到磁盘中，那么就可以执行一个增加<code>checkpoint_lsn</code>操作，这个操作称为执行一个<code>checkpoint</code></p>
+<p>执行一个<code>checkpoint</code>可以分为两个步骤</p>
+<ol>
+<li>计算当前系统中可以被覆盖的redo日志对应的<code>lsn</code>值最大是多少</li>
+<li>将<code>checkpoint_lsn</code>与对应的<code>redo</code>日志文件组偏移量以及此次<code>checkpoint</code>的编号写到日志文件的管理信息（<code>checkpoint1</code>或者<code>checkpoint2</code>）中</li>
+</ol>
+<p><code>MySql</code>维护了一个<code>checkpoint_no</code>变量，用来统计目前系统执行了多少次<code>checkpoint</code>；每执行一次<code>checkpoint</code>，该变量的值就加1。</p>
+<p>当<code>checkpoint_no</code>的值是偶数时，就写到<code>checkpoint1</code>中，是奇数时，就写到<code>checkpoint2</code>中</p>
+<h2 id="查看系统中的各种lsn值"><a href="#查看系统中的各种lsn值" class="headerlink" title="查看系统中的各种lsn值"></a>查看系统中的各种lsn值</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> innodb engine status;</span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>-–<br>LOG<br>-–<br>Log sequence number 78434369<br>Log flushed up to   78434369<br>Pages flushed up to 78434369<br>Last checkpoint at  78434360<br>0 pending log flushes, 0 pending chkp writes<br>98 log i/o’s done, 0.00 log i/o’s/second<br>-——————— </p>
+</blockquote>
+<ul>
+<li>Log sequence number：表示系统中的<code>lsn</code>值，也就是当前系统已经写入的redo日志量，包括写入到log buffer中的redo日志</li>
+<li>Log flushed up to：表示<code>flused_to_disk_lsn</code>值，也就是当前系统已经写入磁盘的redo日志量</li>
+<li>Pages flushed up to：表示flush链表中最早被修改的那个页面对应的<code>old_nodification</code>属性值</li>
+<li>Last checkpoint at：表示当前系统的<code>checkpoint_lsn</code>值</li>
+</ul>
+<h2 id="innodb-flush-log-at-trx-commit"><a href="#innodb-flush-log-at-trx-commit" class="headerlink" title="innodb_flush_log_at_trx_commit"></a>innodb_flush_log_at_trx_commit</h2><p>该系统变量<code>innodb_flush_log_at_trx_commit</code>的系统变量的值</p>
+<ul>
+<li>0：表示在事务提交时，不立即向磁盘同步redo日志，这个任务交给后台线程来处理。</li>
+<li>1：表示在事务提交时需要将redo日志同步到磁盘。默认值就是1</li>
+<li>2：当该系统变量的值为2时，表示在事务提交时，需要将redo日志写到操作系统的缓冲区中，但并不需要保证将日志真正地刷新磁盘。</li>
+</ul>
+<h1 id="undolog"><a href="#undolog" class="headerlink" title="undolog"></a>undolog</h1><blockquote>
+<p>用于事务回滚后的数据恢复</p>
+</blockquote>
+<p>比如：</p>
+<p>对于insert语句，我们把这条记录的主键值记下来，回滚时只需要把这条记录删掉即可</p>
+<p>对于delete语句，我们把这条记录的内容都记下来，回滚时再把这些内容组成的记录插入到表里就好了</p>
+<p>对于update语句，需要把更新前的旧值记下来，回滚时把这些列更新为旧值即可</p>
+<p>select语句并不会修改任何记录，所以也不会产生<code>undolog</code></p>
+<h2 id="事务id"><a href="#事务id" class="headerlink" title="事务id"></a>事务id</h2><ul>
+<li><p>只读事务：<code>START TRANSCATION READ ONLY</code>开启只读事务，在只读事务中，不允许对普通的表进行增删改操作，但是可以对用户临时表进行增删改操作。（这里说的用户临时表是指 <code>create temporary table</code>创建的表，不是语句执行过程中的那个<code>using temporary</code>，那个是系统临时表）</p>
+</li>
+<li><p>读写事务：<code>START TRANSCATION READ WRITE</code>开启读写事务，<code>BEGIN</code>和<code>START TRANSCATION</code>语句开启的也是读写事务。在读写事务中可以对表进行增删改操作。</p>
+</li>
+</ul>
+<p>如果某个事务，在执行过程中，对某个表执行了写操作，也就是增删改，那么<code>InnoDB</code>存储引擎就会给它分配一个第一无二的事务id。</p>
+<ul>
+<li>对于只读事务来说，只有第一次对用户临时表进行增删改时，才会对其分配一个事务id。如果没有更改，则不会分配</li>
+<li>对于读写事务来说，只有它第一次对某个表执行增删改操作时，才会为这个事务分配一个事务id，否则不分配事务id</li>
+</ul>
+<h2 id="日志格式-1"><a href="#日志格式-1" class="headerlink" title="日志格式"></a>日志格式</h2><h2 id="insert操作对应的undo日志"><a href="#insert操作对应的undo日志" class="headerlink" title="insert操作对应的undo日志"></a>insert操作对应的undo日志</h2><blockquote>
+<p>insert语句导致的结果就是插入了一条记录，回滚操作就是把这条记录删除就好了。所以我们只要把这条记录的主键信息记录上就好了</p>
+</blockquote>
+<p><code>MySql</code>类型为<code>TRX_UNDO_INSERT_REC</code>的<code>undo</code>日志，其完整结构如下</p>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240420135406839.png" alt="image-20240420135406839"></p>
+<ul>
+<li><code>undo no</code>：在一个事务是从0开始递增的。事务没提交时，每生成一条undo日志，那么该条日志的undo no就加1</li>
+<li><code>table id</code>：每个表都会分配一个唯一的<code>table id</code>，可以通过<code>infomation_schema</code>的<code>innodb_sys_tables</code>表来查看对应的<code>table id</code></li>
+<li>如果记录中主键只包含一列，那么在类型为<code>TRX_UNDO_INSERT_REC</code>的<code>undo</code>日志中，只需要把该列占用的存储空间大小和真实值记录下来。如果记录中的逐渐包含多个列，那么每个列占用的存储空间大小和对应的真实值都需要记录下来。（真实值就是指 对应的主键id）</li>
+</ul>
+<blockquote>
+<p>在向表中插入一条记录时，其实聚簇索引和二级索引都需要插入记录。不过在记录undo日志时，只需要根据聚簇索引记录一条undo日志就好了。</p>
+</blockquote>
+<p><strong>by the way</strong>：<code>innodb</code>行格式</p>
+<p>聚簇索引的记录除了会记录完整的用户数据以外，还会记录几个隐藏列：</p>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240420135942889.png" alt="image-20240420135942889"></p>
+<blockquote>
+<p>row_id就是隐藏id，不是必须的</p>
+</blockquote>
+<p>这个<code>roll_pointer</code>，其实本质就是一个指向记录对应的undo日志指针。</p>
+<p>当我们在一次事务中，插入了两条记录后，假如分配的事务id为100，其对应的关系如下图</p>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240420141005150.png" alt="image-20240420141005150"></p>
+<h2 id="delete操作对应的undo日志"><a href="#delete操作对应的undo日志" class="headerlink" title="delete操作对应的undo日志"></a>delete操作对应的undo日志</h2><p>数据页中的数据会根据记录头中的<code>next_record</code>属性组成一个单向链表。</p>
+<p>被删除的记录也会根据记录头中的<code>next_record</code>属性组成一个链表，不过这个链表中的记录占用的存储空间可以被重新利用，所以这个链表也被称为<strong>垃圾链表</strong></p>
+<p>Page Header部分中有一个名为<code>PAGE FREE</code>的属性，它指向垃圾链表的头节点</p>
+<img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240420142227528.png" alt="image-20240420142227528" style="zoom:80%;">
+
+
+
+<p>数据行中的记录头信息中，有一个<code>delete_flag</code>标识，用来标记数据是否被删除。</p>
+<p>假如现在数据状态如下：</p>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240420143626870.png" alt="image-20240420143626870"></p>
+<p>我们要把正常记录的最后一条记录删掉，这个删除过程需要经历两个过程</p>
+<ul>
+<li><p>阶段1：仅仅将该记录的<code>delete_flag</code>标识位设置为1。这个过程称为<strong>delete mark</strong></p>
+<blockquote>
+<p>其实也会修改<code>trx_id</code>、<code>roll_pointer</code>这些隐藏列的值</p>
+</blockquote>
+</li>
+</ul>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240420144120007.png" alt="image-20240420144120007"></p>
+<ul>
+<li><p>阶段2：当该删除语句提交事务后，会有专门的线程来真正地把记录删除掉（也就是将记录移到垃圾链表）。这个过程阶段称为<strong>purge</strong></p>
+<blockquote>
+<p>被删除的记录，以头插法加到垃圾链表的头节点</p>
+</blockquote>
+</li>
+</ul>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240420144551844.png" alt="image-20240420144551844"></p>
+<p>在阶段2执行完成之后，这条记录就算是被真正删除了，占用的存储空间也就可以被重新利用了。</p>
+<p>事务一旦提交，也就不需要考虑回滚的事了，所以只需要针对第一阶段<code>delete mark</code>进行回滚就好了</p>
+<p><code>MySql</code>设计了一种名为<code>TRX_UNDO_DEL_MARK_REC</code>类型的undo日志</p>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240420150428571.png" alt="image-20240420150428571"></p>
+<ul>
+<li><p>在对一条记录进行delete mark操作之前，需要把该记录的<code>trx_id</code>和<code>roll_pointer</code>隐藏列的旧值都记录到对应的undo日志中的 <code>trx_id</code> 和 <code>roll_pointer</code>属性中。</p>
+<blockquote>
+<p>这样可以通过undo日志的<code>roll pointer</code>属性找到上一次对该记录进行改动时产生的<code>undo</code>日志</p>
+<p>比如：现在有两个事务，一个对其更新，一个对其删除，更新在前，删除在后，删除后如果要回滚，应该回滚到更新后的状态，这个东西其实就是版本链</p>
+</blockquote>
+</li>
+<li><p>索引各列信息：如果某个列，加到了索引列中，就会把索引的相关信息记录到这里。</p>
+<blockquote>
+<p>&lt;pos，len,  value&gt;：pos表示该列在记录中的位置，len该列占用的存储空间大小，value表示该列实际值</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="update操作对应的undo日志"><a href="#update操作对应的undo日志" class="headerlink" title="update操作对应的undo日志"></a>update操作对应的undo日志</h2><ul>
+<li><p>不更新主键</p>
+<ul>
+<li>就地更新（in-place update)<ul>
+<li>在更新时，对于被更新的列来说，如果更新前后 占用的存储空间一样大，那么就可以直接在原记录的基础上修改对应列的值（必须一样大，更新后存储空间变大或变小，都不能就地更新）</li>
+</ul>
+</li>
+<li>先删除旧记录，再插入新记录<ul>
+<li>如果更新前后占用的存储空间大小不一致，就需要先把这条旧记录删除，再根据更新后的值插入一条新记录</li>
+<li>这里说的删除不是delete mark，而是真正的删除，也就是加入到垃圾链表。这里执行删除操作的也并不是delete语句中进行purge操作时使用的后台线程，而是用户线程执行的同步删除</li>
+<li>如果新创建的记录占用的存储空间不超过旧记录占用的存储空间，那么可以直接重用旧记录的存储空间；否则需要在页面中新申请一块记录供新记录使用</li>
+</ul>
+</li>
+</ul>
+<p>针对这种不更新主键的情况（包括上面两种情况），<code>MySql</code>设计了一种类型为<code>TRX_UNDO_UPD_EXIST_REC</code>类型的undo日志</p>
+</li>
+</ul>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240420154213392.png" alt="image-20240420154213392"></p>
+<blockquote>
+<p>如果update语句中更新的列包含了索引列，那么就会添加”索引列各列信息”这个部分，否则不会添加这个部分</p>
+</blockquote>
+<ul>
+<li><p>更新主键</p>
+<ul>
+<li>在聚簇索引中，记录按照主键值的大小连成一个单向链表。如果更新了主键，那么这个主键在聚簇索引中的位置将要发生变化。</li>
+</ul>
+<p>对于这种更新主键的update语句，分两步进行处理</p>
+</li>
+</ul>
+<ol>
+<li>将旧记录执行<code>delete mark</code>操作</li>
+<li>根据更新后各列的值，创建一条新记录，插入到聚簇索引中</li>
+</ol>
+<p>如果被更新的列包含了二级索引列。就需要更新二级索引的数据</p>
+<ol>
+<li>将旧记录执行<code>delete mark</code>操作</li>
+<li>根据更新后各列的值，创建一条新的二级索引记录，插入到二级索引中</li>
+</ol>
+<h2 id="FIL-PAGE-UNDO-LOG"><a href="#FIL-PAGE-UNDO-LOG" class="headerlink" title="FIL_PAGE_UNDO_LOG"></a>FIL_PAGE_UNDO_LOG</h2><p>undo日志存放在类型为 <code>FIL_PAGE_UNDO_LOG</code>的页面中。这种页面的通用结构如下：</p>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240420215420389.png" alt="image-20240420215420389"></p>
+<h3 id="Undo-Page-Header"><a href="#Undo-Page-Header" class="headerlink" title="Undo Page Header"></a>Undo Page Header</h3><p>Undo Page Header是undo日志独有的，结构如下</p>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240420215801433.png" alt="image-20240420215801433"></p>
+<ul>
+<li><p><code>TRX_UNDO_PAGE_TYPE</code>：本页面存放的undo日志类型</p>
+<p>undo日志主要分为两个大类</p>
+<ul>
+<li><code>TRX_UNDO_INSERT</code>：一般由insert语句产生，更新语句更新主键时也会产生此类型的undo日志，<code>TRX_UNDO_INSERT_REC</code>的undo日志就属于这个大类。（这种类型的日志，在事务提交之后，可以直接删掉。下面这个类型的还需要为<code>MVVC</code>服务）</li>
+<li><code>TRX_UNDO_UPDATE</code>：除了类型为<code>TRX_UNDO_INSERT_REC</code>的undo日志，其他类型的undo日志都属于这个大类。一般由DELETE、UPDATE语句产生的undo日志都属于这个大类。</li>
+</ul>
+<p><code>TRX_UNDO_PAGE_TYPE</code>属性的可选值就是上面两个，用来标记本页面用于存储哪个大类的undo日志。不同大类的undo日志不能混着存储。</p>
+</li>
+</ul>
+<ul>
+<li><code>TRX_UNDO_PAGE_START</code>：第一条undo日志在本页面中的起始偏移量。</li>
+<li><code>TRX_UNDO_PAGE_FREE</code>：与上面的<code>TRX_UNDO_PAGE_START</code>对应，表示当前页面中存储的最后一条undo日志结束时的偏移量。</li>
+<li><code>TRX_UNDO_PAGE_NODE</code>：代表一个链表节点结构。</li>
+</ul>
+<h2 id="undo页面链表"><a href="#undo页面链表" class="headerlink" title="undo页面链表"></a>undo页面链表</h2><p>一个事务可能包含多个语句，一个语句也可能对多个聚簇索引的记录进行改动。在对每条聚簇索引记录改动前，都需要记录1条或2条undo日志。</p>
+<p>一个事务执行过程中可能产生很多undo日志。这些日志可能一个页面放不下，需要放到多个页面中，这些页面通过<code>TRX_UNDO_PAGE_NODE</code>属性连成一个链表 </p>
+<p>一个事务执行过程中，可能会混合执行多种类型的语句，产生不同类型的undo日志。但是一个undo页面只能存储一个类型的undo日志。</p>
+<p>所以一个事务的执行过程中，可能需要两个undo页面的链表。一条<code>insert undo</code>链表，另一条称为<code>unpdate undo</code>链表。</p>
+<p>在对普通表和用户临时表的记录改动时所产生的undo日志要分别记录。所以一个事务最多有4个以undo页面为节点组成的链表。</p>
+<p><img src="/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/typora-user-images\MySql的日志\image-20240420230059192.png" alt="image-20240420230059192"></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://c89757.github.io/2024/04/14/MySql%E7%9A%84%E6%97%A5%E5%BF%97/" title="MySql的日志" target="_blank" rel="external">https://c89757.github.io/2024/04/14/MySql的日志/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://gitee.com/c89757" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://gitee.com/c89757" target="_blank"><span class="text-dark">colin</span><small class="ml-1x">悟已往之不谏，知来者之可追</small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2024/04/17/MySql%E5%A2%9E%E5%8A%A0varchar%E9%95%BF%E5%BA%A6/" title="MySql增加varchar长度"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2024/04/14/MySql-BufferPool/" title="InnoDB-BufferPool"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2025 John Doe
+        
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+
+
+  <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>
+  <script>
+  //利用 FancyBox 实现点击图片放大
+  $(document).ready(function() {
+    $('article img').not('[hidden]').not('.panel-body img').each(function() {
+      var $image = $(this);
+      var imageCaption = $image.attr('alt');
+      var $imageWrapLink = $image.parent('a');
+      if ($imageWrapLink.length < 1) {
+        var src = this.getAttribute('src');
+        var idx = src.lastIndexOf('?');
+        if (idx != -1) {
+          src = src.substring(0, idx);
+        }
+        $imageWrapLink = $image.wrap('<a href="' + src + '"></a>').parent('a');
+      }
+      $imageWrapLink.attr('data-fancybox', 'images');
+      if (imageCaption) {
+        $imageWrapLink.attr('data-caption', imageCaption);
+      }
+    });
+    $().fancybox({
+      selector: '[data-fancybox="images"]',
+      hash: false,
+      loop: false,
+    });
+  });
+  </script>
+
+
+
+
+
+</body>
+</html>

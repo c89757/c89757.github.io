@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>jvm常见命令 | Colin</title>
+  <meta name="description" content="JstatJIT相关 jstata  -compiler [pid]  查看JIT编译器编译过的方法、耗时等  jstat -printcompilation  输出已经被JIT编译的方法 垃圾回收相关 -gc    显示与GC相关的对信息。包括Eden区、两个Survivor区、老年代、永久代等容量、已用空间  jstat -gc [pid] 1000 10: 每隔一秒（1000ms ）打印一次">
+<meta property="og:type" content="article">
+<meta property="og:title" content="jvm常见命令">
+<meta property="og:url" content="https://c89757.github.io/2023/08/16/jvm%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="JstatJIT相关 jstata  -compiler [pid]  查看JIT编译器编译过的方法、耗时等  jstat -printcompilation  输出已经被JIT编译的方法 垃圾回收相关 -gc    显示与GC相关的对信息。包括Eden区、两个Survivor区、老年代、永久代等容量、已用空间  jstat -gc [pid] 1000 10: 每隔一秒（1000ms ）打印一次">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-08-16T12:55:41.000Z">
+<meta property="article:modified_time" content="2025-12-18T17:13:05.789Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="JVM">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://c89757.github.io/2023/08/16/jvm%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+    <link href="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.css" rel="stylesheet">
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://gitee.com/c89757" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">colin</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">悟已往之不谏，知来者之可追</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Changsha, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/JDK/">JDK</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JUC/">JUC</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JVM/">JVM</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%8D%8F%E8%AE%AE/">协议</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/">数据结构与算法</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/GC/" rel="tag">GC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/I-O/" rel="tag">I/O</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JDK/" rel="tag">JDK</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JUC/" rel="tag">JUC</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/maven/" rel="tag">maven</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netty/" rel="tag">netty</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nio/" rel="tag">nio</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/other/" rel="tag">other</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/questions/" rel="tag">questions</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/" rel="tag">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/" rel="tag">springboot</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%8F%E8%AE%AE/" rel="tag">协议</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A0%86/" rel="tag">堆</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag">多线程</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" rel="tag">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/GC/" style="font-size: 13px;">GC</a> <a href="/tags/I-O/" style="font-size: 13px;">I/O</a> <a href="/tags/JDK/" style="font-size: 13px;">JDK</a> <a href="/tags/JUC/" style="font-size: 13.5px;">JUC</a> <a href="/tags/JVM/" style="font-size: 13.5px;">JVM</a> <a href="/tags/MySQL/" style="font-size: 14px;">MySQL</a> <a href="/tags/java/" style="font-size: 13.25px;">java</a> <a href="/tags/maven/" style="font-size: 13px;">maven</a> <a href="/tags/netty/" style="font-size: 13px;">netty</a> <a href="/tags/nio/" style="font-size: 13px;">nio</a> <a href="/tags/other/" style="font-size: 13px;">other</a> <a href="/tags/questions/" style="font-size: 13.75px;">questions</a> <a href="/tags/spring/" style="font-size: 13px;">spring</a> <a href="/tags/springboot/" style="font-size: 13px;">springboot</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 13px;">分布式</a> <a href="/tags/%E5%8D%8F%E8%AE%AE/" style="font-size: 13.25px;">协议</a> <a href="/tags/%E5%A0%86/" style="font-size: 13px;">堆</a> <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" style="font-size: 13.5px;">多线程</a> <a href="/tags/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" style="font-size: 13px;">排序算法</a> <a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 13px;">网络</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/06/">六月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">八月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">七月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">五月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">四月 2024</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">三月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/12/">十二月 2023</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/08/">八月 2023</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">三月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/02/">二月 2023</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">十二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/JVM/">JVM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/08/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%A0%86%E5%A4%96%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/" class="title">记一次堆外内存泄漏</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-08-25T14:10:07.000Z" itemprop="datePublished">2025-08-25</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/JDK/">JDK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/" class="title">jdk8~21新特性</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-06-24T12:01:47.000Z" itemprop="datePublished">2025-06-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/03/19/https%E8%AF%A6%E8%A7%A3/" class="title">https详解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-03-19T12:09:40.000Z" itemprop="datePublished">2025-03-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/MySQL/">MySQL</a>
+              </p>
+              <p class="item-title">
+                <a href="/2024/08/07/%E8%AE%B0%E4%B8%80%E6%AC%A1mysql%E6%AD%BB%E9%94%81%E9%97%AE%E9%A2%98/" class="title">记一次mysql死锁问题</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2024-08-07T13:41:21.000Z" itemprop="datePublished">2024-08-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a>
+              </p>
+              <p class="item-title">
+                <a href="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/" class="title">Reactor模型</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2024-07-10T14:55:02.000Z" itemprop="datePublished">2024-07-10</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Jstat"><span class="toc-number">1.</span> <span class="toc-text">Jstat</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#JIT%E7%9B%B8%E5%85%B3"><span class="toc-number">1.1.</span> <span class="toc-text">JIT相关</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9B%B8%E5%85%B3"><span class="toc-number">1.2.</span> <span class="toc-text">垃圾回收相关</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Jinfo"><span class="toc-number">2.</span> <span class="toc-text">Jinfo</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B"><span class="toc-number">2.1.</span> <span class="toc-text">查看</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9"><span class="toc-number">2.2.</span> <span class="toc-text">修改</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E4%BB%96"><span class="toc-number">2.3.</span> <span class="toc-text">其他</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#jmap"><span class="toc-number">3.</span> <span class="toc-text">jmap</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#jhat"><span class="toc-number">4.</span> <span class="toc-text">jhat</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#jstack"><span class="toc-number">5.</span> <span class="toc-text">jstack</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#jcmd"><span class="toc-number">6.</span> <span class="toc-text">jcmd</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3jvm%E5%8F%82%E6%95%B0"><span class="toc-number">7.</span> <span class="toc-text">相关jvm参数</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-jvm常见命令" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      jvm常见命令
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2023/08/16/jvm%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4/" class="article-date">
+	  <time datetime="2023-08-16T12:55:41.000Z" itemprop="datePublished">2023-08-16</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/JVM/">JVM</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/JVM/" rel="tag">JVM</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2023/08/16/jvm%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Jstat"><a href="#Jstat" class="headerlink" title="Jstat"></a>Jstat</h1><h2 id="JIT相关"><a href="#JIT相关" class="headerlink" title="JIT相关"></a>JIT相关</h2><ul>
+<li>jstata  -compiler [pid]</li>
+</ul>
+<p>查看JIT编译器编译过的方法、耗时等</p>
+<ul>
+<li>jstat -printcompilation</li>
+</ul>
+<p>输出已经被JIT编译的方法</p>
+<h2 id="垃圾回收相关"><a href="#垃圾回收相关" class="headerlink" title="垃圾回收相关"></a>垃圾回收相关</h2><ul>
+<li>-gc</li>
+</ul>
+<blockquote>
+<p> 显示与GC相关的对信息。包括Eden区、两个Survivor区、老年代、永久代等容量、已用空间</p>
+</blockquote>
+<p><code>jstat -gc [pid] 1000 10</code>: 每隔一秒（1000ms ）打印一次gc信息，总共打印10次</p>
+<p><code>jstat -gc -t</code>: 会多一列Timestamp，表示Java进程启动的总时间；</p>
+<p>我们可以比较Java进程启动的总时间以及总GC时间（GCT列），或者两次测量的间隔时间以及GC总时间的增量，得到GC时间占运行时间的比例</p>
+<p>如果该比例超过20%，则说明目前堆压力较大；如果超过90%，则说明堆里几乎没有可用空间，随时都可能抛出OOM异常</p>
+<ul>
+<li>-gccapacoty</li>
+</ul>
+<blockquote>
+<p>显示内容与-gc基本相同，但输出主要关注Java堆各个区域使用到的最大、最小空间。</p>
+</blockquote>
+<ul>
+<li>-gcutil</li>
+</ul>
+<blockquote>
+<p>显示内容与-gc基本相同。但输出主要关注已使用空间占总空间的百分比</p>
+</blockquote>
+<ul>
+<li>-gccause</li>
+</ul>
+<blockquote>
+<p>与-gcutil功能一样，但会额外输出导致最后一次或当前正在发生的GC产生的原因</p>
+</blockquote>
+<ul>
+<li>-gcnew</li>
+</ul>
+<blockquote>
+<p>显示新生代GC情况</p>
+</blockquote>
+<ul>
+<li>-gcnewcapacity</li>
+</ul>
+<blockquote>
+<p>显示内容与-gcnew基本相同，输出主要关注使用到的最大、最小空间</p>
+</blockquote>
+<ul>
+<li>-geold</li>
+</ul>
+<blockquote>
+<p>显示老年代GC情况</p>
+</blockquote>
+<ul>
+<li>-gcolccapacity</li>
+</ul>
+<blockquote>
+<p>显示内容与-gcold基本相同，输出主要关注使用到的最大、最小空间</p>
+</blockquote>
+<ul>
+<li>-gcpermcapacity</li>
+</ul>
+<blockquote>
+<p>显示永久代使用到的最大、最小空间</p>
+</blockquote>
+<p>jstat还可以用来判断是否出现内存泄漏</p>
+<p>1、在长时间运行的Java程序中，我们可以运行jstat命令连续获取多行性能数据，并取这几行数据中OU列（即已占用的老年代内存）的最小值</p>
+<p>2、然后我们每隔一段较长的时间重复一次上述操作，来获得多组OU最小值。如果这些值呈上升趋势，则说明该Java程序的老年代内存已使用量在不断上涨，这意味着无法回收的对象在不断增加，因此很有可能存在内存泄漏</p>
+<h1 id="Jinfo"><a href="#Jinfo" class="headerlink" title="Jinfo"></a>Jinfo</h1><p>查看虚拟机配置参数信息，也可用于调整虚拟机的配置参数</p>
+<h2 id="查看"><a href="#查看" class="headerlink" title="查看"></a>查看</h2><p>PID必须要加上</p>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>no optition</td>
+<td>输出全部的参数和系统属性</td>
+</tr>
+<tr>
+<td>-flag name</td>
+<td>输出对应名称的参数</td>
+</tr>
+<tr>
+<td>-flag [+-name]</td>
+<td>开启或关闭对应名称的参数，只有被编辑为manageable的参数才可以被动态修改</td>
+</tr>
+<tr>
+<td>-flag name=value</td>
+<td>设定对应名称的参数</td>
+</tr>
+<tr>
+<td>-flags</td>
+<td>输出全部的参数</td>
+</tr>
+<tr>
+<td>-sysprops</td>
+<td>输出系统属性</td>
+</tr>
+</tbody></table>
+<h2 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h2><p>jinfo甚至可以在运行时修改部分参数，并使之立即生效</p>
+<p>但是，并非所有参数都支持动态修改，参数只有标记为manageable的flag可以被实时修改，其实，这个修改能力都是及其有限的</p>
+<p>可以查看被标记为manageable的参数</p>
+<p><code>java -XX:+PrintFlagsFinal -version |grep manageable</code></p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p><code>java -XX:+PrintFlagInitial</code></p>
+<p>查看所有JVM参数启动的初始值</p>
+<p><code>java -XX:+PrintFlagsFinal</code></p>
+<p>查看所有JVM参数的最终只</p>
+<p><code>java -XX+PrintCommandLineFlags</code></p>
+<p>查看那些已经被用户或者JVM设置过的详细的XX参数的名称和值</p>
+<h1 id="jmap"><a href="#jmap" class="headerlink" title="jmap"></a>jmap</h1><p>​    作用一方面是获取dump文件（堆转储快照文件，二进制文件），它还可以获取目标java进程的内存相关信息，包括Java堆各区域的使用情况、堆中对象的统计信息、类加载信息等。</p>
+<p>​    由于jmap将访问堆中的所有对象，为了保证在此过程中不被应用线程干扰，jmap需要借助安全点机制，让所有线程留在不改变堆中数据的状态。也就是说，由jmap导出的堆快照必定是安全点位置的。这可能导致基于该堆快照的分析结果存在偏差。</p>
+<p>​    另外，如果某个线程长时间无法跑到安全点，jmap将一直等下去，与jstat则不同，垃圾回收器会主动将jstat所需要的摘要数据保存至固定位置之中，则jstat只需直接读取即可。</p>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/en/java/javase/11/tools/jmap.html"> 官方文档</a></p>
+<ul>
+<li><code>-dump</code></li>
+</ul>
+<p>生成Java堆转储快照：dump文件</p>
+<p>-<code>dumplive</code>: 只保存堆中的存活对象</p>
+<p>导出内存映像文件</p>
+<blockquote>
+<p>手动的方式</p>
+</blockquote>
+<p><code>jmap -dump:format=b,file=&lt;filename.hprof&gt; &lt;pid&gt;</code></p>
+<p><code>jmap -dump:live,format=b,file=&lt;filename.hprof&gt;&lt;pid&gt;</code></p>
+<p>format作用：使jmap生成文件与.hprof格式匹配起来</p>
+<blockquote>
+<p>自动的方式</p>
+</blockquote>
+<p><code>-XX:+HeapDumpOnOutOfMemoryError</code></p>
+<p><code>-XX:+HeapDumpPath=&lt;filename.hprof&gt;</code></p>
+<ul>
+<li><code>-heap</code></li>
+</ul>
+<p>输出整个堆空间的详细信息，包括GC的使用、堆配置信息，以及内存的使用信息等</p>
+<ul>
+<li><code>-histo</code></li>
+</ul>
+<p>输出堆中对象的统计信息，包括类、实例数量的合计容量</p>
+<p><code>-histo:live</code>: 只统计堆中的存活对象（注意，此命令慎重使用，会引发FullGc）</p>
+<ul>
+<li><code>-permstat</code></li>
+</ul>
+<p>以ClassLoader为统计口径输出永久代的内存状态信息</p>
+<p>仅linux/solaris平台有效</p>
+<ul>
+<li><code>-finalizerinfo</code></li>
+</ul>
+<p>显示在F-Queue中等待Finailzer线程执行finalize方法的对象</p>
+<p>仅linux/solaris平台有效</p>
+<ul>
+<li><code>-F</code></li>
+</ul>
+<p>当虚拟机进程对-dump选项没有任何响应时，可使用此选项强制执行生成dump文件</p>
+<p>仅linux/solaris平台有效</p>
+<ul>
+<li><code>-J &lt;flag&gt;</code></li>
+</ul>
+<p>传递参数给jmap启动的jvm</p>
+<h1 id="jhat"><a href="#jhat" class="headerlink" title="jhat"></a>jhat</h1><p>​    Sun JDK提供的jhat命令与jmap命令搭配使用，用于分析jmap生成的heap dump文件（堆转储快照）。hgat内置了一个微型的HTTP/HTML服务器，生成dump文件的分析结果后，用户可以在浏览器中查看分析结果</p>
+<p>​    使用了jhat命令，就启动了一个http服务器，端口是7000，则<a target="_blank" rel="noopener" href="http://localhost:7000/">http://localhost:7000</a></p>
+<p>​    注意：jhat命令在JDK9后，已经被删除</p>
+<p>基本使用语法：</p>
+<p><code>jhat [option] [dumpfile]</code></p>
+<h1 id="jstack"><a href="#jstack" class="headerlink" title="jstack"></a>jstack</h1><p>​    用于生成虚拟机指定进程当前时刻的线程快照（虚拟机堆栈跟踪）。线程快照就是当前虚拟机内指定进程的每一条线程正在执行的方法堆栈的集合</p>
+<p>​    </p>
+<ul>
+<li><code>-F</code></li>
+</ul>
+<p>当正常输出的请求不被响应时，强制输出线程堆栈</p>
+<ul>
+<li><code>-l</code></li>
+</ul>
+<p>除堆栈外，显示关于锁的附加信息</p>
+<ul>
+<li>-m</li>
+</ul>
+<p>如果调用到本地方法的话，可以显示C/C++的堆栈</p>
+<p>在thread dump中，要留意下面几种状态</p>
+<ul>
+<li><p>死锁，Deadlock (重点关注)</p>
+</li>
+<li><p>等待资源，Waiting on condition (重点关注)</p>
+</li>
+<li><p>等待获取监视器，Waiting on monitor entry (重点关注)</p>
+</li>
+<li><p>阻塞，Blocked （重点关注）</p>
+</li>
+<li><p>执行中，Runnable</p>
+</li>
+<li><p>暂停，Suspended</p>
+</li>
+<li><p>对象等待中，Object.wait() 或 TIMED_WAITING</p>
+</li>
+<li><p>停止， Parked</p>
+</li>
+</ul>
+<h1 id="jcmd"><a href="#jcmd" class="headerlink" title="jcmd"></a>jcmd</h1><p>在JDK 1.7以后，新增了一个命令行工具jcmd</p>
+<p>它是一个多功能的工具，可以用来实现前面除了jstat之外的所有命令的功能 。比如：用它来导出堆、内存使用、查看Java进程、导出线程信息、执行GC、JVM运行时间等。</p>
+<h1 id="相关jvm参数"><a href="#相关jvm参数" class="headerlink" title="相关jvm参数"></a>相关jvm参数</h1><ul>
+<li><code>-verbose:gc</code></li>
+</ul>
+<p>输出gc日志信息，默认输出到标准输出</p>
+<ul>
+<li><code>-XX:+PrintGc</code></li>
+</ul>
+<p>等同于<code>-verbose:gc</code>，表示打开简化的GC日志</p>
+<ul>
+<li><code>-XX:+PrintGCDetails</code></li>
+</ul>
+<p>在发生垃圾回收时打印内存回收详细的日志</p>
+<ul>
+<li><code>-XX:+PrintGCDateStamps</code></li>
+</ul>
+<p>输出GC发生时的时间戳</p>
+<ul>
+<li>-XX:+PrintHeapAtGc</li>
+</ul>
+<p>每一个GC前和GC后，都打印堆信息</p>
+<ul>
+<li><code>-Xlogg&lt;file&gt;</code> </li>
+</ul>
+<p>把GC日志写入到一个文件中去，而不是打印到标准输出中</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://c89757.github.io/2023/08/16/jvm%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4/" title="jvm常见命令" target="_blank" rel="external">https://c89757.github.io/2023/08/16/jvm常见命令/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://gitee.com/c89757" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://gitee.com/c89757" target="_blank"><span class="text-dark">colin</span><small class="ml-1x">悟已往之不谏，知来者之可追</small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2023/09/26/MySql%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8EMVVC/" title="MySql事务隔离级别与MVVC"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2023/08/09/%E7%BA%BF%E4%B8%8Acpu%E9%A3%99%E5%8D%87%E6%8E%92%E6%9F%A5/" title="线上cpu飙升排查"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2025 John Doe
+        
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+
+
+  <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>
+  <script>
+  //利用 FancyBox 实现点击图片放大
+  $(document).ready(function() {
+    $('article img').not('[hidden]').not('.panel-body img').each(function() {
+      var $image = $(this);
+      var imageCaption = $image.attr('alt');
+      var $imageWrapLink = $image.parent('a');
+      if ($imageWrapLink.length < 1) {
+        var src = this.getAttribute('src');
+        var idx = src.lastIndexOf('?');
+        if (idx != -1) {
+          src = src.substring(0, idx);
+        }
+        $imageWrapLink = $image.wrap('<a href="' + src + '"></a>').parent('a');
+      }
+      $imageWrapLink.attr('data-fancybox', 'images');
+      if (imageCaption) {
+        $imageWrapLink.attr('data-caption', imageCaption);
+      }
+    });
+    $().fancybox({
+      selector: '[data-fancybox="images"]',
+      hash: false,
+      loop: false,
+    });
+  });
+  </script>
+
+
+
+
+
+</body>
+</html>

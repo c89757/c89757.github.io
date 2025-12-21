@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>jdk8~21新特性 | Colin</title>
+  <meta name="description" content="JDK9 接口可以定义私有方法  1234567891011121314151617181920212223242526272829public interface MyInterface &amp;#123;    void interfaceMethod();    private void before() &amp;#123;        System.out.println(&quot;before">
+<meta property="og:type" content="article">
+<meta property="og:title" content="jdk8~21新特性">
+<meta property="og:url" content="https://c89757.github.io/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="JDK9 接口可以定义私有方法  1234567891011121314151617181920212223242526272829public interface MyInterface &amp;#123;    void interfaceMethod();    private void before() &amp;#123;        System.out.println(&quot;before">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://c89757.github.io/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/typora-user-images/jdk8-21新特性/image-20250818202313388.png">
+<meta property="og:image" content="https://c89757.github.io/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/typora-user-images/jdk8-21新特性/image-20250626210910223.png">
+<meta property="og:image" content="https://c89757.github.io/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/typora-user-images/jdk8-21新特性/image-20251211170457727.png">
+<meta property="og:image" content="https://c89757.github.io/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/typora-user-images/jdk8-21新特性/image-20251211180102122.png">
+<meta property="article:published_time" content="2025-06-24T12:01:47.000Z">
+<meta property="article:modified_time" content="2025-12-11T15:02:37.891Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="JDK">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://c89757.github.io/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/typora-user-images/jdk8-21新特性/image-20250818202313388.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://c89757.github.io/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+    <link href="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.css" rel="stylesheet">
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://gitee.com/c89757" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">colin</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">悟已往之不谏，知来者之可追</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Changsha, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/JDK/">JDK</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JUC/">JUC</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JVM/">JVM</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%8D%8F%E8%AE%AE/">协议</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/">数据结构与算法</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/GC/" rel="tag">GC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/I-O/" rel="tag">I/O</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JDK/" rel="tag">JDK</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JUC/" rel="tag">JUC</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/maven/" rel="tag">maven</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netty/" rel="tag">netty</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nio/" rel="tag">nio</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/other/" rel="tag">other</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/questions/" rel="tag">questions</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/" rel="tag">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/" rel="tag">springboot</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%8F%E8%AE%AE/" rel="tag">协议</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A0%86/" rel="tag">堆</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag">多线程</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" rel="tag">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/GC/" style="font-size: 13px;">GC</a> <a href="/tags/I-O/" style="font-size: 13px;">I/O</a> <a href="/tags/JDK/" style="font-size: 13px;">JDK</a> <a href="/tags/JUC/" style="font-size: 13.5px;">JUC</a> <a href="/tags/JVM/" style="font-size: 13.5px;">JVM</a> <a href="/tags/MySQL/" style="font-size: 14px;">MySQL</a> <a href="/tags/java/" style="font-size: 13.25px;">java</a> <a href="/tags/maven/" style="font-size: 13px;">maven</a> <a href="/tags/netty/" style="font-size: 13px;">netty</a> <a href="/tags/nio/" style="font-size: 13px;">nio</a> <a href="/tags/other/" style="font-size: 13px;">other</a> <a href="/tags/questions/" style="font-size: 13.75px;">questions</a> <a href="/tags/spring/" style="font-size: 13px;">spring</a> <a href="/tags/springboot/" style="font-size: 13px;">springboot</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 13px;">分布式</a> <a href="/tags/%E5%8D%8F%E8%AE%AE/" style="font-size: 13.25px;">协议</a> <a href="/tags/%E5%A0%86/" style="font-size: 13px;">堆</a> <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" style="font-size: 13.5px;">多线程</a> <a href="/tags/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" style="font-size: 13px;">排序算法</a> <a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 13px;">网络</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/06/">六月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">八月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">七月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">五月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">四月 2024</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">三月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/12/">十二月 2023</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/08/">八月 2023</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">三月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/02/">二月 2023</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">十二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/JVM/">JVM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/08/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%A0%86%E5%A4%96%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/" class="title">记一次堆外内存泄漏</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-08-25T14:10:07.000Z" itemprop="datePublished">2025-08-25</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/JDK/">JDK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/" class="title">jdk8~21新特性</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-06-24T12:01:47.000Z" itemprop="datePublished">2025-06-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/03/19/https%E8%AF%A6%E8%A7%A3/" class="title">https详解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-03-19T12:09:40.000Z" itemprop="datePublished">2025-03-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/MySQL/">MySQL</a>
+              </p>
+              <p class="item-title">
+                <a href="/2024/08/07/%E8%AE%B0%E4%B8%80%E6%AC%A1mysql%E6%AD%BB%E9%94%81%E9%97%AE%E9%A2%98/" class="title">记一次mysql死锁问题</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2024-08-07T13:41:21.000Z" itemprop="datePublished">2024-08-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a>
+              </p>
+              <p class="item-title">
+                <a href="/2024/07/10/Reactor%E6%A8%A1%E5%9E%8B/" class="title">Reactor模型</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2024-07-10T14:55:02.000Z" itemprop="datePublished">2024-07-10</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK9"><span class="toc-number">1.</span> <span class="toc-text">JDK9</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK10"><span class="toc-number">2.</span> <span class="toc-text">JDK10</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK11"><span class="toc-number">3.</span> <span class="toc-text">JDK11</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK12"><span class="toc-number">4.</span> <span class="toc-text">JDK12</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK13"><span class="toc-number">5.</span> <span class="toc-text">JDK13</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK14"><span class="toc-number">6.</span> <span class="toc-text">JDK14</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK15"><span class="toc-number">7.</span> <span class="toc-text">JDK15</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK16"><span class="toc-number">8.</span> <span class="toc-text">JDK16</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK17"><span class="toc-number">9.</span> <span class="toc-text">JDK17</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK18"><span class="toc-number">10.</span> <span class="toc-text">JDK18</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK19"><span class="toc-number">11.</span> <span class="toc-text">JDK19</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK21"><span class="toc-number">12.</span> <span class="toc-text">JDK21</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-jdk8-21新特性" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      jdk8~21新特性
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/" class="article-date">
+	  <time datetime="2025-06-24T12:01:47.000Z" itemprop="datePublished">2025-06-24</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/JDK/">JDK</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/JDK/" rel="tag">JDK</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="JDK9"><a href="#JDK9" class="headerlink" title="JDK9"></a>JDK9</h1><ol>
+<li>接口可以定义私有方法</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">MyInterface</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">interfaceMethod</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">before</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;before method.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">after</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;static after method.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">default</span> <span class="keyword">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        before();</span><br><span class="line">        System.out.println(<span class="string">&quot;default method.&quot;</span>);</span><br><span class="line">        after();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        after();</span><br><span class="line">        <span class="keyword">new</span> MyInterface() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">interfaceMethod</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;.func();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<ol start="2">
+<li><p>try-with-resources新写法</p>
+<p>jdk8写法</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> (FileInputStream fis = <span class="keyword">new</span> FileInputStream(<span class="string">&quot;&quot;</span>);</span><br><span class="line">         FileOutputStream fos = <span class="keyword">new</span> FileOutputStream(<span class="string">&quot;&quot;</span>);) &#123;</span><br><span class="line"></span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>​        jdk9新写法</p>
+<p>变量可以定义在外面</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> FileNotFoundException </span>&#123;</span><br><span class="line">       FileInputStream fis = <span class="keyword">new</span> FileInputStream(<span class="string">&quot;&quot;</span>);</span><br><span class="line">       FileOutputStream fos = <span class="keyword">new</span> FileOutputStream(<span class="string">&quot;&quot;</span>);</span><br><span class="line">       <span class="keyword">try</span> (fis; fos) &#123;</span><br><span class="line"></span><br><span class="line">       &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">       &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ol start="3">
+<li>@Deprecated注解变化</li>
+</ol>
+<p>源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="meta">@Target(value=&#123;CONSTRUCTOR, FIELD, LOCAL_VARIABLE, METHOD, PACKAGE, MODULE, PARAMETER, TYPE&#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Deprecated &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Returns the version in which the annotated element became deprecated.</span></span><br><span class="line"><span class="comment">     * The version string is in the same format and namespace as the value of</span></span><br><span class="line"><span class="comment">     * the &#123;<span class="doctag">@code</span> <span class="doctag">@since</span>&#125; javadoc tag. The default value is the empty</span></span><br><span class="line"><span class="comment">     * string.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> the version string</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@since</span> 9</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function">String <span class="title">since</span><span class="params">()</span> <span class="keyword">default</span> &quot;&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Indicates whether the annotated element is subject to removal in a</span></span><br><span class="line"><span class="comment">     * future version. The default value is &#123;<span class="doctag">@code</span> false&#125;.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> whether the element is subject to removal</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@since</span> 9</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">forRemoval</span><span class="params">()</span> <span class="keyword">default</span> <span class="keyword">false</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>String since default “” : 标识是从哪个版本开始废弃</p>
+<p>boolean forRemoval() default false：标识该废弃的内容会在未来某个版本中移除</p>
+<ol start="4">
+<li>String字符串的变化</li>
+</ol>
+<p>在jdk8之前，String内部采用char数组存储字符串</p>
+<p>Jdk9之后，采用byte数组存储字符串，节省一般内存</p>
+<blockquote>
+<p>因为大多时候String存储的都是英文字符或者数字（对于老外而言），而英文字符只需要一个字节即可，用char数组来存储的话，浪费了一半的空间，所以为了节省，Jdk9之后，改成了byte数组</p>
+</blockquote>
+<p>byte数组如何存储中文？</p>
+<blockquote>
+<p>中文需要两个字节</p>
+</blockquote>
+<p>String中增加了下面2个成员变量</p>
+<ul>
+<li>COMPACT_STRINGS：判断是否压缩，默认时true，若为false，则不压缩，使用UTF16编码</li>
+<li>coder：用来区分使用的字符编码。分别为LATIN1（值为0）和 UTF-16（值为1）</li>
+</ul>
+<p>在使用中文字符串时，1个中文会被存储到byte数组中的两个元素上，即存储1个中文，byte数组长度为2，存储2个中文，byte数组长度为4。（通过String.length()获取中文字符长度时，会除以2得到真实长度）</p>
+<blockquote>
+<p> 当字符串中存储了中英混合的内容时，1个英文字符会占用2个byte数组位置</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">String(<span class="keyword">char</span>[] value, <span class="keyword">int</span> off, <span class="keyword">int</span> len, Void sig) &#123;</span><br><span class="line">    <span class="keyword">if</span> (len == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">this</span>.value = <span class="string">&quot;&quot;</span>.value;</span><br><span class="line">        <span class="keyword">this</span>.coder = <span class="string">&quot;&quot;</span>.coder;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (COMPACT_STRINGS) &#123;</span><br><span class="line">        <span class="comment">// 如果含有中文，此处返回null</span></span><br><span class="line">        <span class="keyword">byte</span>[] val = StringUTF16.compress(value, off, len);</span><br><span class="line">        <span class="keyword">if</span> (val != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">this</span>.value = val;</span><br><span class="line">            <span class="keyword">this</span>.coder = LATIN1;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">this</span>.coder = UTF16;</span><br><span class="line">    <span class="keyword">this</span>.value = StringUTF16.toBytes(value, off, len);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">compress</span><span class="params">(<span class="keyword">char</span>[] src, <span class="keyword">int</span> srcOff, <span class="keyword">byte</span>[] dst, <span class="keyword">int</span> dstOff, <span class="keyword">int</span> len)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; len; i++) &#123;</span><br><span class="line">        <span class="keyword">char</span> c = src[srcOff];</span><br><span class="line">        <span class="keyword">if</span> (c &gt; <span class="number">0xFF</span>) &#123; <span class="comment">// 是否超过了1个字节</span></span><br><span class="line">            len = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        dst[dstOff] = (<span class="keyword">byte</span>)c;</span><br><span class="line">        srcOff++;</span><br><span class="line">        dstOff++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> len;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ol start="5">
+<li>模块化</li>
+</ol>
+<p>java8中有一个非常重要的包rt.jar，里面涵盖了java提供的类文件，在程序员运行java程序时jvm会加载rt.jar。</p>
+<blockquote>
+<p>这里的问题是rt.jar中的某些文件我们是不会使用的，比如使用java开发服务器端程序的时候通常用不到图形化界面的库java.awt，这就造成了内存的浪费</p>
+</blockquote>
+<p>java9中将rt.jar分成了不同的模块，一个模块下可以包含多个包，模块之间存在着依赖关系，其中java.base模块是基础模块，不依赖其他模块。这样在不适用这个模块的时候，就无需让jvm加载，减少内存浪费，让jvm加载程序的必要模块，并非全部模块，达到了瘦身效果</p>
+<p><img src="/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/typora-user-images\jdk8-21新特性\image-20250818202313388.png" alt="image-20250818202313388"></p>
+<ul>
+<li>java17中还有一个jmods目录</li>
+</ul>
+<p><img src="/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/typora-user-images\jdk8-21新特性\image-20250626210910223.png" alt="image-20250626210910223"></p>
+<p>jar包中含有.class文件，配置文件。jmods目录下都是jmod文件，jmod文件除了包含这两个文件之外，还有native library，legal licenses等，两个的主要区别是jmod主要用来编译器和链接期，并非运行期，因此对于很多开发者来说，在运行期仍然需要使用jar包。</p>
+<p>模块化的优点：</p>
+<ul>
+<li>精简jvm加载的class类，提升加载速度</li>
+<li>对包更精细的控制，提高安全                                           </li>
+</ul>
+<ol start="6">
+<li>jshell</li>
+</ol>
+<p>Jdk9中提供了一个交互式编程环境jshell。类似于python中的小窗口</p>
+<ol start="7">
+<li>集合新API</li>
+</ol>
+<p>为List，Set 和Map接口添加了静态工厂方法，如of和copyOf()，用于创建不可变集合实例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; list = List.of(<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="JDK10"><a href="#JDK10" class="headerlink" title="JDK10"></a>JDK10</h1><ol>
+<li>局部类型推断</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> num = <span class="number">100</span>;</span><br></pre></td></tr></table></figure>
+
+<p>jvm会自动推断该变量是什么类型的。</p>
+<blockquote>
+<p>注意：var的使用，仅适用于局部变量，增强for循环的索引，以及普通for循环的本地变量。</p>
+<p>不能用于方法形参，构造方法形参，方法返回类型等。</p>
+</blockquote>
+<h1 id="JDK11"><a href="#JDK11" class="headerlink" title="JDK11"></a>JDK11</h1><ol>
+<li>直接运行</li>
+</ol>
+<p>在之前的版本中，写完java代码之后，我们需要先通过<code>javac</code>命令编译，得到class文件，然后再通过<code>java</code> + 文件名的方法来运行。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">javac HelloWorld.java</span><br><span class="line">java HelloWorld</span><br></pre></td></tr></table></figure>
+
+
+
+<p>Jdk11中，可以通过<code>java</code>命令 + .java文件直接运行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java HelloWorld.java</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<ol start="2">
+<li>String新增API</li>
+</ol>
+<ul>
+<li>strip()</li>
+</ul>
+<p>去除首尾空白字符。与trim()相比，它能去除unicode编码的空白字符</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">char</span> c = <span class="string">&#x27;\u2000&#x27;</span>;</span><br><span class="line">String str = c + <span class="string">&quot;abc&quot;</span> + c;</span><br><span class="line">System.out.println(str.trim());</span><br><span class="line">System.out.println(str.strip());</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line">——————————————————————</span><br><span class="line"> abc </span><br><span class="line">abc</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>isBlank()</li>
+</ul>
+<p>判断字符串是否为空（如果字符串仅仅只包含空白字符，也会判断为空）</p>
+<h1 id="JDK12"><a href="#JDK12" class="headerlink" title="JDK12"></a>JDK12</h1><ol>
+<li>switch语句升级</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> month = <span class="number">3</span>;</span><br><span class="line"><span class="keyword">switch</span> (month) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span> -&gt; System.out.println(<span class="string">&quot;spring&quot;</span>);</span><br><span class="line">    <span class="keyword">case</span> <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span> -&gt; System.out.println(<span class="string">&quot;summer&quot;</span>);</span><br><span class="line">    <span class="keyword">default</span> -&gt; System.out.println(<span class="string">&quot;default&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h1 id="JDK13"><a href="#JDK13" class="headerlink" title="JDK13"></a>JDK13</h1><ol>
+<li>switch语句升级</li>
+</ol>
+<blockquote>
+<p>13又对switch语句进行了升级，可以拥有返回值</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> month = <span class="number">3</span>;</span><br><span class="line">String str = <span class="keyword">switch</span> (month) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span> -&gt; <span class="string">&quot;spring&quot;</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span> -&gt; <span class="string">&quot;summer&quot;</span>;</span><br><span class="line">    <span class="keyword">default</span> -&gt; <span class="string">&quot;default&quot;</span>;</span><br><span class="line">&#125;;</span><br><span class="line">System.out.println(str);</span><br></pre></td></tr></table></figure>
+
+
+
+<ol start="2">
+<li>文本块的变化</li>
+</ol>
+<blockquote>
+<p>使用三重双引号包裹多行文本，可以自动管理换行和缩进</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">String str = <span class="string">&quot;&quot;</span><span class="string">&quot;</span></span><br><span class="line"><span class="string">        第一行</span></span><br><span class="line"><span class="string">        第二行</span></span><br><span class="line"><span class="string">        &quot;</span><span class="string">&quot;&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="JDK14"><a href="#JDK14" class="headerlink" title="JDK14"></a>JDK14</h1><ol>
+<li>instanceof模式匹配</li>
+</ol>
+<blockquote>
+<p>如果匹配，会自动帮你强转</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Object obj = <span class="string">&quot;ab&quot;</span>;</span><br><span class="line"><span class="keyword">if</span> (obj <span class="keyword">instanceof</span> String str) &#123;</span><br><span class="line"> 	String str2 = str + <span class="string">&quot;c&quot;</span>;</span><br><span class="line"> 	System.out.println(str2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ol start="2">
+<li>友好的空指针提示</li>
+</ol>
+<blockquote>
+<p>针对空指针的报错，提示会更详细更友好</p>
+</blockquote>
+<ol start="3">
+<li>record类型</li>
+</ol>
+<blockquote>
+<p>预览版，16成为正式版<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/395">JEP 395: Records</a></p>
+</blockquote>
+<p>Record 提供了一种紧凑的语法来定义只包含不可变数据的类，自动生成诸如 equals(), hashCode(), 和 toString() 等方法，简化了数据类的编写。</p>
+<p>之前定义类，类中属性不可变时需要手动加上final修饰</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LoginForm</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> String userName;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> String password;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">LoginForm</span><span class="params">(String userName, String password)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.userName = userName;</span><br><span class="line">        <span class="keyword">this</span>.password = password;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>record写法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> record <span class="title">LoginFormReocrd</span><span class="params">(String username, String password)</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>反编译后的class代码：会自动生成构造方法，get方法，但是没有setter，因为不许改变</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> record <span class="title">LoginFormReocrd</span><span class="params">(String username, String password)</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">LoginFormReocrd</span><span class="params">(String username, String password)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.username = username;</span><br><span class="line">        <span class="keyword">this</span>.password = password;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">username</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.username;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">password</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.password;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="JDK15"><a href="#JDK15" class="headerlink" title="JDK15"></a>JDK15</h1><ol>
+<li>Sealed Classes</li>
+</ol>
+<p>密封类和接口，作用是限制一个类可以有哪些子类继承或实现</p>
+<ul>
+<li>如果指定模块的话，sealed class和其子类必须在同一个模块下</li>
+<li>sealed class指定的子类必须直接继承该sealed class</li>
+<li>sealed class的子类要用final修饰</li>
+<li>sealed class的子类如果不想用final修饰的话，可以将子类声明为sealed class</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> sealed <span class="class"><span class="keyword">class</span> <span class="title">Animal</span> <span class="title">permits</span> <span class="title">Cat</span>, <span class="title">Dog</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Dog</span> <span class="keyword">extends</span> <span class="title">Animal</span></span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> sealed <span class="class"><span class="keyword">class</span> <span class="title">Cat</span> <span class="keyword">extends</span> <span class="title">Animal</span> <span class="title">permits</span> <span class="title">OtherObject</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h1 id="JDK16"><a href="#JDK16" class="headerlink" title="JDK16"></a>JDK16</h1><ol>
+<li>record成为正式特性。</li>
+</ol>
+<h1 id="JDK17"><a href="#JDK17" class="headerlink" title="JDK17"></a>JDK17</h1><ol>
+<li>switch表达式的模式匹配</li>
+</ol>
+<blockquote>
+<p>预览版</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">func</span><span class="params">(Animal a)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (a) &#123;</span><br><span class="line">            <span class="comment">// 判断a是否时Dog类型，如果是，则强转之后赋值给dog</span></span><br><span class="line">            <span class="keyword">case</span> Dog dog -&gt; dog.toString();</span><br><span class="line">            <span class="comment">// 增加了对null值的判断</span></span><br><span class="line">            <span class="keyword">case</span> <span class="keyword">null</span> -&gt; System.out.println(<span class="string">&quot;null&quot;</span>);</span><br><span class="line">            <span class="keyword">default</span> -&gt; System.out.println(<span class="string">&quot;default&quot;</span>);</span><br><span class="line">      &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ol start="2">
+<li>废弃安全管理器</li>
+</ol>
+<blockquote>
+<p>废弃 Java 安全管理器及其相关API，标志着Java安全模型的一个重大变化，因为安全策略现在更倾向于使用操作系统级别的安全措施。</p>
+</blockquote>
+<h1 id="JDK18"><a href="#JDK18" class="headerlink" title="JDK18"></a>JDK18</h1><ol>
+<li>默认使用UTF-8字符集</li>
+</ol>
+<blockquote>
+<p>Java平台默认的字符集现在是UTF-8，这简化了跨平台的字符编码处理，减少了因操作系统和环境差异导致的问题。</p>
+</blockquote>
+<ol start="2">
+<li>简单的Web服务器</li>
+</ol>
+<blockquote>
+<p>可以通过jwebserver命令启动jdk18中提供的静态web服务器</p>
+</blockquote>
+<ol start="3">
+<li>方法移除</li>
+</ol>
+<blockquote>
+<p>在jdk18中标记了Object中的finalize方法，Thread中的stop方法将在未来被移除</p>
+</blockquote>
+<ol start="4">
+<li>@snippet注解</li>
+</ol>
+<blockquote>
+<p>以前在文档注释中编写代码时需要添加code标签，不太方便，现在可以通过@snippet注解，更加方便的将文档注释中的代码展示在api文档中</p>
+</blockquote>
+<h1 id="JDK19"><a href="#JDK19" class="headerlink" title="JDK19"></a>JDK19</h1><ol>
+<li>虚拟线程 Virtual Threads</li>
+</ol>
+<blockquote>
+<p>预览版。也称为纤程，虚拟线程主要作用是用来提升服务器端的吞吐量</p>
+</blockquote>
+<p><img src="/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/typora-user-images\jdk8-21新特性\image-20251211170457727.png" alt="image-20251211170457727"></p>
+<p>多个虚拟线程可以使用同一个操作系统线程，其创建所耗费的资源也是极其低廉的，无需系统调用和系统级别的上下文切换，且虚拟线程的生命周期短暂，不会有很深的栈调用，一个虚拟线程的生命周期只运行一个任务，因此我们可以创建大量的虚拟线程，且虚拟线程无需池化。</p>
+<p><strong>虚拟线程的应用场景</strong></p>
+<p>在服务器的应用程序中，可能会有大量的并发任务需要执行，而虚拟线程能够明显的提高应用的吞吐量。</p>
+<ul>
+<li>至少几千的并发任务量</li>
+<li>任务为IO密集型</li>
+</ul>
+<p><strong>平台线程和虚拟线程</strong></p>
+<p>平台线程（platform thread）：指java中的线程，比如通过Executors.newFixedThreadPool() 创建出来的线程，我们称之为平台线程。</p>
+<p>虚拟线程并不会直接分配给cpu去执行，而是通过调度器分配给平台线程，平台线程再被调度器管理。java中虚拟线程的调度器采用了工作窃取的模式进行FIFO的操作，调度器的并行数默认是jvm获取的处理器数量（通过该方法获取的数量Runtime.getRuntime().availableProcessors()），调度器并非分时的。在使用虚拟线程编写程序时，不能控制虚拟线程何时分配给平台线程，也不能控制平台线程何时分配给cpu</p>
+<p><img src="/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/typora-user-images\jdk8-21新特性\image-20251211180102122.png" alt="image-20251211180102122"></p>
+<p><strong>携带器</strong></p>
+<p>调度器将虚拟线程挂载到平台线程后，该平台线程叫做虚拟线程的携带器。</p>
+<p>调度器并不维护虚拟线程和携带器之间的关联关系，因此在一个虚拟线程的生命周期中，可以被分配到不同的携带器，即虚拟线程运行了一小段代码后，可能会脱离当前携带器，此时其他的虚拟线程会被分配到这个携带器上。</p>
+<p>携带器和虚拟线程是相互独立的，比如：</p>
+<ul>
+<li>虚拟线程不能同时使用携带器的标识，Thread.current()方法获取的就是虚拟线程本身</li>
+<li>两者有各自的栈空间</li>
+<li>两者不能访问对方的Thread Local变量</li>
+</ul>
+<p>在程序的执行过程中，虚拟线程遇到阻塞的操作时大部分情况下会被解除挂载，阻塞结束后，虚拟线程会被调度器重新挂载到携带器上，因此虚拟线程会频繁的挂载和解除挂载，这并不会导致操作系统线程的阻塞。</p>
+<p>有些阻塞操作并不会导致虚拟线程解除挂载，这样会同时阻塞携带器和操作系统线程，例如：操作系统基本的文件操作，java中的Object.wait()方法。下面两种情况不会导致虚拟线程的解除挂载：</p>
+<ol>
+<li>执行synchronized同步代码（会导致携带器阻塞，所以建议使用ReentrantLock替换synchronized)</li>
+<li>执行本地方法或外部函数</li>
+</ol>
+<p><strong>虚拟线程和平台线程api的区别</strong></p>
+<p>从内存空间上来说，虚拟线程的栈空间可以看作是一个大块的栈对象，它被存储在了java堆中。</p>
+<p>可以重复利用这部分栈空间，不用多次申请开辟新的内存地址</p>
+<p>虚拟线程的栈空间最大可以达到平台线程的栈空间容量</p>
+<p>虚拟线程并不是GC Root，其中的引用不会出现stop word，当虚拟线程被阻塞之后，比如BlockingQueue.take()，平台线程既不能获取到虚拟线程，也不能获取到queue队列，这样该平台线程可能会被回收掉，虚拟线程在运行或阻塞时不会被GC</p>
+<ul>
+<li>通过Thread构造方法创建的线程都是平台线程</li>
+<li>虚拟线程是守护线程，不能通过setDaemon方法改成非守护线程</li>
+<li>虚拟线程的优先级默认是5，不能被修改</li>
+<li>虚拟线程不支持stop()，suspend()，resume()方法</li>
+</ul>
+<p><strong>创建虚拟线程的方法</strong></p>
+<ul>
+<li>Thread.startVirtualThread()方式创建</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Runnable task = () -&gt; &#123;</span><br><span class="line">    <span class="comment">// 输出为空，获取不到name</span></span><br><span class="line">    System.out.println(Thread.currentThread().getName());</span><br><span class="line">    System.out.println(<span class="string">&quot;execute task.&quot;</span>);</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 创建虚拟线程，创建完成之后无需再手动调用 thread.start()</span></span><br><span class="line">Thread thread = Thread.startVirtualThread(task);</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>Thread.ofVirtual()方式创建</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Runnable task = () -&gt; &#123;</span><br><span class="line">    <span class="comment">// 输出thread-01</span></span><br><span class="line">    System.out.println(Thread.currentThread().getName());</span><br><span class="line">    System.out.println(<span class="string">&quot;execute task.&quot;</span>);</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 创建虚拟线程</span></span><br><span class="line">Thread thread = Thread.ofVirtual().name(<span class="string">&quot;thread-01&quot;</span>).unstarted(task);</span><br><span class="line"><span class="comment">// 手动启动虚拟线程</span></span><br><span class="line">thread.start();</span><br><span class="line">TimeUnit.SECONDS.sleep(<span class="number">3</span>);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>我们可以通过boolean virtual = thread.isVirtual() ，来判断当前线程是否为虚拟线程。</p>
+<h1 id="JDK21"><a href="#JDK21" class="headerlink" title="JDK21"></a>JDK21</h1><blockquote>
+<p>虚拟线程成为正式版。</p>
+</blockquote>
+<ol>
+<li>字符串模板</li>
+</ol>
+<p>字符串模板可以让开发者更简洁的进行字符串拼接（例如拼接sql，json等）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">String title = <span class="string">&quot;Hello&quot;</span>;</span><br><span class="line">String content = STR.<span class="string">&quot;Hello \&#123;title&#125;&quot;</span>;</span><br><span class="line">System.out.println(content);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>为预览功能，需要添加启动参数：–enable-preview</p>
+</blockquote>
+<ol start="2">
+<li>scope values</li>
+</ol>
+<p>scoped values是一个隐藏的方法参数，只有方法可以访问scoped values，它可以让两个方法之间传递参数时无需声明形参。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> ScopedValue&lt;String&gt; MESSAGE = ScopedValue.newInstance();</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sendMessage</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    ScopedValue.where(MESSAGE, <span class="string">&quot;hello!&quot;</span>)</span><br><span class="line">            .run(() -&gt; receiveMessage());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">receiveMessage</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    String s = MESSAGE.get();</span><br><span class="line">    System.out.println(s);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>为预览功能，需要添加启动参数：–enable-preview</p>
+</blockquote>
+<ol start="3">
+<li>record pattern</li>
+</ol>
+<p>通过该特性可以结构record类型中的值</p>
+<p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/440">JEP 440: Record Patterns</a></p>
+<ol start="4">
+<li>switch模式匹配</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/441">JEP 441: Pattern Matching for switch</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> String <span class="title">formatterPatternSwitch</span><span class="params">(Object obj)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">switch</span> (obj) &#123;</span><br><span class="line">        <span class="keyword">case</span> Integer i -&gt; String.format(<span class="string">&quot;int %d&quot;</span>, i);</span><br><span class="line">        <span class="keyword">case</span> Long l    -&gt; String.format(<span class="string">&quot;long %d&quot;</span>, l);</span><br><span class="line">        <span class="keyword">case</span> Double d  -&gt; String.format(<span class="string">&quot;double %f&quot;</span>, d);</span><br><span class="line">        <span class="keyword">case</span> String s  -&gt; String.format(<span class="string">&quot;String %s&quot;</span>, s);</span><br><span class="line">        <span class="keyword">default</span>        -&gt; obj.toString();</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>还可以在case中使用when子句</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">testStringNew</span><span class="params">(String response)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (response) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="keyword">null</span> -&gt; &#123; &#125;</span><br><span class="line">        <span class="keyword">case</span> String s</span><br><span class="line">        when s.equalsIgnoreCase(<span class="string">&quot;YES&quot;</span>) -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;You got it&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> String s</span><br><span class="line">        when s.equalsIgnoreCase(<span class="string">&quot;NO&quot;</span>) -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Shame&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> String s -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Sorry?&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://c89757.github.io/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/" title="jdk8~21新特性" target="_blank" rel="external">https://c89757.github.io/2025/06/24/jdk8-21新特性/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://gitee.com/c89757" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://gitee.com/c89757" target="_blank"><span class="text-dark">colin</span><small class="ml-1x">悟已往之不谏，知来者之可追</small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2025/08/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%A0%86%E5%A4%96%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/" title="记一次堆外内存泄漏"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2025/03/19/https%E8%AF%A6%E8%A7%A3/" title="https详解"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2025 John Doe
+        
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+
+
+  <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>
+  <script>
+  //利用 FancyBox 实现点击图片放大
+  $(document).ready(function() {
+    $('article img').not('[hidden]').not('.panel-body img').each(function() {
+      var $image = $(this);
+      var imageCaption = $image.attr('alt');
+      var $imageWrapLink = $image.parent('a');
+      if ($imageWrapLink.length < 1) {
+        var src = this.getAttribute('src');
+        var idx = src.lastIndexOf('?');
+        if (idx != -1) {
+          src = src.substring(0, idx);
+        }
+        $imageWrapLink = $image.wrap('<a href="' + src + '"></a>').parent('a');
+      }
+      $imageWrapLink.attr('data-fancybox', 'images');
+      if (imageCaption) {
+        $imageWrapLink.attr('data-caption', imageCaption);
+      }
+    });
+    $().fancybox({
+      selector: '[data-fancybox="images"]',
+      hash: false,
+      loop: false,
+    });
+  });
+  </script>
+
+
+
+
+
+</body>
+</html>
