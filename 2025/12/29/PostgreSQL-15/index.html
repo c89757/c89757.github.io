@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>PostgreSQL-15 | Colin</title>
+  <meta name="description" content="简介PostgreSQL是一个基于POSTGRES 4.2 版本的对象关系数据库管理系统 ( ORDBMS ) ，POSTGRES 由加州大学伯克利分校计算机科学系开发。 PostgreSQL是伯克利原始代码的开源后代。它支持 SQL 标准的大部分内容，并提供了许多现代功能：  复杂查询 外键 触发器 可更新视图 交易完整性 多版本并发控制  此外，PostgreSQL可以通过多种方式由用户进行扩">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PostgreSQL-15">
+<meta property="og:url" content="https://c89757.github.io/2025/12/29/PostgreSQL-15/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="简介PostgreSQL是一个基于POSTGRES 4.2 版本的对象关系数据库管理系统 ( ORDBMS ) ，POSTGRES 由加州大学伯克利分校计算机科学系开发。 PostgreSQL是伯克利原始代码的开源后代。它支持 SQL 标准的大部分内容，并提供了许多现代功能：  复杂查询 外键 触发器 可更新视图 交易完整性 多版本并发控制  此外，PostgreSQL可以通过多种方式由用户进行扩">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://c89757.github.io/2025/12/29/PostgreSQL-15/image-20251229013318887.png">
+<meta property="og:image" content="https://c89757.github.io/2025/12/29/PostgreSQL-15/image-20251229013626870.png">
+<meta property="og:image" content="https://c89757.github.io/2025/12/29/PostgreSQL-15/image-20251229014017619.png">
+<meta property="og:image" content="https://c89757.github.io/2025/12/29/PostgreSQL-15/typora-user-images/PostgreSQL/image-20251230174528559.png">
+<meta property="article:published_time" content="2025-12-28T17:03:20.000Z">
+<meta property="article:modified_time" content="2026-01-29T13:54:55.140Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="PostgreSQL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://c89757.github.io/2025/12/29/PostgreSQL-15/image-20251229013318887.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://c89757.github.io/2025/12/29/PostgreSQL-15/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+    <link href="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.css" rel="stylesheet">
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://gitee.com/c89757" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">colin</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">悟已往之不谏，知来者之可追</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Changsha, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/JDK/">JDK</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JUC/">JUC</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JVM/">JVM</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%8D%8F%E8%AE%AE/">协议</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/">数据结构与算法</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/GC/" rel="tag">GC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/I-O/" rel="tag">I/O</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JDK/" rel="tag">JDK</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JUC/" rel="tag">JUC</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PostgreSQL/" rel="tag">PostgreSQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/maven/" rel="tag">maven</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netty/" rel="tag">netty</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nio/" rel="tag">nio</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/other/" rel="tag">other</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/questions/" rel="tag">questions</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/" rel="tag">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/" rel="tag">springboot</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%8F%E8%AE%AE/" rel="tag">协议</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A0%86/" rel="tag">堆</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag">多线程</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" rel="tag">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/GC/" style="font-size: 13px;">GC</a> <a href="/tags/I-O/" style="font-size: 13px;">I/O</a> <a href="/tags/JDK/" style="font-size: 13px;">JDK</a> <a href="/tags/JUC/" style="font-size: 13.5px;">JUC</a> <a href="/tags/JVM/" style="font-size: 13.5px;">JVM</a> <a href="/tags/MySQL/" style="font-size: 14px;">MySQL</a> <a href="/tags/PostgreSQL/" style="font-size: 13px;">PostgreSQL</a> <a href="/tags/java/" style="font-size: 13.25px;">java</a> <a href="/tags/maven/" style="font-size: 13px;">maven</a> <a href="/tags/netty/" style="font-size: 13px;">netty</a> <a href="/tags/nio/" style="font-size: 13px;">nio</a> <a href="/tags/other/" style="font-size: 13.25px;">other</a> <a href="/tags/questions/" style="font-size: 13.75px;">questions</a> <a href="/tags/spring/" style="font-size: 13px;">spring</a> <a href="/tags/springboot/" style="font-size: 13px;">springboot</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 13.25px;">分布式</a> <a href="/tags/%E5%8D%8F%E8%AE%AE/" style="font-size: 13.25px;">协议</a> <a href="/tags/%E5%A0%86/" style="font-size: 13px;">堆</a> <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" style="font-size: 13.5px;">多线程</a> <a href="/tags/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" style="font-size: 13px;">排序算法</a> <a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 13px;">网络</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/01/">一月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/12/">十二月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/06/">六月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">四月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">八月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">七月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">五月 2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">四月 2024</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">三月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/12/">十二月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/08/">八月 2023</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">五月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">三月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/02/">二月 2023</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">十二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2026/01/28/%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6%E6%A8%A1%E5%9E%8B/" class="title">访问控制模型</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-01-28T15:23:30.000Z" itemprop="datePublished">2026-01-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2025/12/29/PostgreSQL-15/" class="title">PostgreSQL-15</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-12-28T17:03:20.000Z" itemprop="datePublished">2025-12-29</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/JVM/">JVM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/08/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%A0%86%E5%A4%96%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/" class="title">记一次堆外内存泄漏</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-08-25T14:10:07.000Z" itemprop="datePublished">2025-08-25</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/JDK/">JDK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/06/24/jdk8-21%E6%96%B0%E7%89%B9%E6%80%A7/" class="title">jdk8~21新特性</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-06-24T12:01:47.000Z" itemprop="datePublished">2025-06-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/04/25/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" class="title">分布式事务</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-04-25T10:26:01.000Z" itemprop="datePublished">2025-04-25</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C"><span class="toc-number">1.1.</span> <span class="toc-text">数据库操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A1%A8%E6%93%8D%E4%BD%9C"><span class="toc-number">1.2.</span> <span class="toc-text">表操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E6%95%B0%E6%8D%AE"><span class="toc-number">1.3.</span> <span class="toc-text">查询数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B0"><span class="toc-number">1.4.</span> <span class="toc-text">聚合函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%96%E9%94%AE"><span class="toc-number">1.5.</span> <span class="toc-text">外键</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1"><span class="toc-number">1.6.</span> <span class="toc-text">事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0"><span class="toc-number">1.7.</span> <span class="toc-text">窗口函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%A7%E6%89%BF"><span class="toc-number">1.8.</span> <span class="toc-text">继承</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%80%BC%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="toc-number">2.</span> <span class="toc-text">值表达式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%AE%9A%E4%B9%89"><span class="toc-number">3.</span> <span class="toc-text">数据定义</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E5%88%97"><span class="toc-number">3.1.</span> <span class="toc-text">生成列</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BA%A6%E6%9D%9F%E6%9D%A1%E4%BB%B6"><span class="toc-number">4.</span> <span class="toc-text">约束条件</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A3%80%E6%9F%A5%E7%BA%A6%E6%9D%9F"><span class="toc-number">4.1.</span> <span class="toc-text">检查约束</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9D%9E%E7%A9%BA%E7%BA%A6%E6%9D%9F"><span class="toc-number">4.2.</span> <span class="toc-text">非空约束</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%94%AF%E4%B8%80%E7%BA%A6%E6%9D%9F"><span class="toc-number">4.3.</span> <span class="toc-text">唯一约束</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E9%94%AE%E7%BA%A6%E6%9D%9F"><span class="toc-number">4.4.</span> <span class="toc-text">主键约束</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%96%E9%94%AE%E7%BA%A6%E6%9D%9F"><span class="toc-number">4.5.</span> <span class="toc-text">外键约束</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%92%E9%99%A4%E7%BA%A6%E6%9D%9F"><span class="toc-number">4.6.</span> <span class="toc-text">排除约束</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E5%88%97"><span class="toc-number">5.</span> <span class="toc-text">系统列</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A8%A1%E5%BC%8F"><span class="toc-number">6.</span> <span class="toc-text">模式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E6%A8%A1%E5%BC%8F"><span class="toc-number">6.1.</span> <span class="toc-text">创建模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A8%A1%E5%BC%8F%E6%90%9C%E7%B4%A2%E8%B7%AF%E5%BE%84"><span class="toc-number">6.2.</span> <span class="toc-text">模式搜索路径</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A8%A1%E5%BC%8F%E5%92%8C%E6%9D%83%E9%99%90"><span class="toc-number">6.3.</span> <span class="toc-text">模式和权限</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E7%9B%AE%E5%BD%95%E6%9E%B6%E6%9E%84"><span class="toc-number">6.4.</span> <span class="toc-text">系统目录架构</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A1%A8%E5%88%86%E5%8C%BA"><span class="toc-number">7.</span> <span class="toc-text">表分区</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A3%B0%E6%98%8E%E5%BC%8F%E5%88%86%E5%8C%BA"><span class="toc-number">7.1.</span> <span class="toc-text">声明式分区</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E5%8C%BA%E7%BB%B4%E6%8A%A4"><span class="toc-number">7.2.</span> <span class="toc-text">分区维护</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E7%BB%A7%E6%89%BF%E8%BF%9B%E8%A1%8C%E5%88%86%E5%8C%BA"><span class="toc-number">7.3.</span> <span class="toc-text">使用继承进行分区</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%A7%E6%89%BF%E5%88%86%E5%8C%BA%E7%BB%B4%E6%8A%A4"><span class="toc-number">7.4.</span> <span class="toc-text">继承分区维护</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E5%8C%BA%E4%BF%AE%E5%89%AA"><span class="toc-number">7.5.</span> <span class="toc-text">分区修剪</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E5%8C%BA%E5%92%8C%E7%BA%A6%E6%9D%9F%E6%8E%92%E9%99%A4"><span class="toc-number">7.6.</span> <span class="toc-text">分区和约束排除</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-PostgreSQL-15" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      PostgreSQL-15
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2025/12/29/PostgreSQL-15/" class="article-date">
+	  <time datetime="2025-12-28T17:03:20.000Z" itemprop="datePublished">2025-12-29</time>
+	</a>
+</span>
+        
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/PostgreSQL/" rel="tag">PostgreSQL</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2025/12/29/PostgreSQL-15/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>PostgreSQL是一个基于<a target="_blank" rel="noopener" href="https://dsf.berkeley.edu/postgres.html">POSTGRES 4.2 版本</a>的对象关系数据库管理系统 ( ORDBMS ) ，POSTGRES 由加州大学伯克利分校计算机科学系开发。</p>
+<p>PostgreSQL是伯克利原始代码的开源后代。它支持 SQL 标准的大部分内容，并提供了许多现代功能：</p>
+<ul>
+<li>复杂查询</li>
+<li>外键</li>
+<li>触发器</li>
+<li>可更新视图</li>
+<li>交易完整性</li>
+<li>多版本并发控制</li>
+</ul>
+<p>此外，PostgreSQL可以通过多种方式由用户进行扩展，例如添加新的功能模块。</p>
+<ul>
+<li>数据类型</li>
+<li>函数</li>
+<li>算子</li>
+<li>聚合函数</li>
+<li>索引方法</li>
+<li>过程语言</li>
+</ul>
+<h2 id="数据库操作"><a href="#数据库操作" class="headerlink" title="数据库操作"></a>数据库操作</h2><blockquote>
+<p>PG安装完后，会创建一个默认的postgres用户。pg是rdbc模型，</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">su postgres</span><br></pre></td></tr></table></figure>
+
+<p>运行后会出现一个bash交互窗口，在这里可以执行pg的相关指令</p>
+<br>
+
+<img src="/2025/12/29/PostgreSQL-15/image-20251229013318887.png" class>
+
+<br>
+
+<ol>
+<li>创建数据库</li>
+</ol>
+<blockquote>
+<p>createdb + databaseName</p>
+</blockquote>
+<p>例如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">createdb mydb</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>数据库名称必须以字母开头，且长度限制为 63 个字节。</p>
+<p><code>createdb</code>命令用于创建一个与当前用户名相同的数据库。许多工具会将此数据库名称视为默认值。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">createdb</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<ol start="2">
+<li>删除数据库</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dropdb + databaseName</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dropdb mydb</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>此命令必须显式指定数据库名（不会像createdb命令一样，缺省默认使用用户账户名）</p>
+<p>此操作会物理删除与数据库关联的所有文件，并且无法撤销。</p>
+</blockquote>
+<ol start="3">
+<li>访问数据库</li>
+</ol>
+<blockquote>
+<p>有几种访问pg的方式，包括图形化客户端如dbeaver，pg自身也提供了一个shell交互端：psql</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">psql mydb</span><br></pre></td></tr></table></figure>
+
+<br>
+
+<img src="/2025/12/29/PostgreSQL-15/image-20251229013626870.png" class>
+
+
+
+<br>
+
+<blockquote>
+<p>同样的，如果不显示指定数据库名称，默认使用用户账户名</p>
+</blockquote>
+<p>之后可以执行一些命令，如:</p>
+<br>
+
+<img src="/2025/12/29/PostgreSQL-15/image-20251229014017619.png" class>
+
+
+
+<br>
+
+
+
+<blockquote>
+<p>“\“开头的命令是内部命令，可以输入\h查看帮助</p>
+</blockquote>
+<h2 id="表操作"><a href="#表操作" class="headerlink" title="表操作"></a>表操作</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> weather (</span><br><span class="line">    city            <span class="type">varchar</span>(<span class="number">80</span>),</span><br><span class="line">    temp_lo         <span class="type">int</span>,           <span class="comment">-- 最低温度</span></span><br><span class="line">    temp_hi         <span class="type">int</span>,           <span class="comment">-- 最高温度</span></span><br><span class="line">    prcp            <span class="type">real</span>,          <span class="comment">-- 降水量</span></span><br><span class="line">    <span class="type">date</span>            <span class="type">date</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>两个破折号（“ <code>--</code>”）用于添加注释。破折号之后的内容直到行尾都会被忽略。</p>
+<p>SQL 对关键字和标识符不区分大小写，除非标识符用双引号括起来以保持大小写</p>
+</blockquote>
+<ul>
+<li>删除表</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> tablename;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>插入数据</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> weather <span class="keyword">VALUES</span> (<span class="string">&#x27;旧金山&#x27;</span>, <span class="number">46</span>, <span class="number">50</span>, <span class="number">0.25</span>, <span class="string">&#x27;1994-11-27&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>或显示列出列</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> weather (city, temp_lo, temp_hi, prcp, <span class="type">date</span>)</span><br><span class="line">    <span class="keyword">VALUES</span>（<span class="string">&#x27;旧金山&#x27;</span>，<span class="number">43</span>，<span class="number">57</span>，<span class="number">0.0</span>，<span class="string">&#x27;1994-11-29&#x27;</span>）;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<ul>
+<li>copy数据</li>
+</ul>
+<p><code>COPY </code>命令允许pg从本地磁盘加载数据</p>
+<p>如:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">COPY</span> weather <span class="keyword">FROM</span> <span class="string">&#x27;/home/user/weather.txt&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><code>weather.txt</code>数据格式如下，列与列之间用制表符隔开</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">San</span> <span class="string">Francisco    46    50    0.25    1994-11-27</span></span><br><span class="line"><span class="attr">San</span> <span class="string">Francisco    43    57    0.0    1994-11-29</span></span><br><span class="line"><span class="attr">Hayward</span>    <span class="string">37    54    \N    1994-11-29	</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="查询数据"><a href="#查询数据" class="headerlink" title="查询数据"></a>查询数据</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> weather;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">DISTINCT</span> city</span><br><span class="line">    <span class="keyword">FROM</span> weather</span><br><span class="line">    <span class="keyword">ORDER</span> <span class="keyword">BY</span> city;</span><br></pre></td></tr></table></figure>
+
+<p>PostgreSQL 的旧版本中，DISTINCT 会自动对记录进行排序，因此不需要 ORDER BY。</p>
+<p>当前的 PostgreSQL 也不保证 DISTINCT 会导致记录排序。</p>
+<blockquote>
+<p>跟sql标准差不多，没有太多出入</p>
+</blockquote>
+<ul>
+<li>连表查询</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> weather <span class="keyword">JOIN</span> cities <span class="keyword">ON</span> city <span class="operator">=</span> name;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>上面这种连接，也可以这样写</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> </span><br><span class="line">    <span class="keyword">FROM</span> weather, cities </span><br><span class="line">    <span class="keyword">WHERE</span> city <span class="operator">=</span> name</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>PG早于SQL-92标准引入的JOIN语法</p>
+</blockquote>
+<h2 id="聚合函数"><a href="#聚合函数" class="headerlink" title="聚合函数"></a>聚合函数</h2><p>与其他大多数关系型数据库产品一样，PostgreSQL支持<em>聚合函数</em>。聚合函数可以根据多行输入数据计算单个结果。例如：count、sum、avg（平均值）、max（最大值）和 min（最小值）。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="built_in">max</span>(temp_lo) <span class="keyword">FROM</span> weather;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> city, <span class="built_in">count</span>(<span class="operator">*</span>), <span class="built_in">max</span>(temp_lo)</span><br><span class="line">    <span class="keyword">FROM</span> weather</span><br><span class="line">    <span class="keyword">WHERE</span> city <span class="keyword">LIKE</span> <span class="string">&#x27;S%&#x27;</span>           </span><br><span class="line">    <span class="keyword">GROUP</span> <span class="keyword">BY</span> city;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>FILTER</li>
+</ul>
+<p>用于聚合函数的条件过滤</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> city, <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">FILTER</span> (<span class="keyword">WHERE</span> temp_lo <span class="operator">&lt;</span> <span class="number">45</span>), <span class="built_in">max</span>(temp_lo)</span><br><span class="line">    <span class="keyword">FROM</span> weather</span><br><span class="line">    <span class="keyword">GROUP</span> <span class="keyword">BY</span> city;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>FILTER 与 WHERE 很相似，不同之处在于它只从与之相连的特定聚合函数的输入中删除记录。在这里，count 聚合函数只计算 temp_lo 低于 45 的记录；但 max 聚合函数仍应用于所有记录</p>
+</blockquote>
+<h2 id="外键"><a href="#外键" class="headerlink" title="外键"></a>外键</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> cities (</span><br><span class="line">        name     <span class="type">varchar</span>(<span class="number">80</span>) <span class="keyword">primary</span> key,</span><br><span class="line">        location point</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> weather (</span><br><span class="line">        city      <span class="type">varchar</span>(<span class="number">80</span>) <span class="keyword">references</span> cities(name),</span><br><span class="line">        temp_lo   <span class="type">int</span>,</span><br><span class="line">        temp_hi   <span class="type">int</span>,</span><br><span class="line">        prcp      <span class="type">real</span>,</span><br><span class="line">        <span class="type">date</span>      <span class="type">date</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line">UPDATE accounts <span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">-</span> <span class="number">100.00</span></span><br><span class="line">    <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;Alice&#x27;</span>;</span><br><span class="line"><span class="keyword">COMMIT</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>保存点</strong>：可以更精细地控制事务中的语句。保存点允许您选择性地丢弃事务的部分内容，同时提交其余部分。</p>
+<p>如果需要，可以使用 ROLLBACK TO 回滚到该保存点。在定义保存点和回滚到它之间的所有事务数据库更改都将被丢弃，但保留早于保存点的更改</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line">UPDATE accounts <span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">-</span> <span class="number">100.00</span></span><br><span class="line">    <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;Alice&#x27;</span>;</span><br><span class="line"><span class="keyword">SAVEPOINT</span> my_savepoint;</span><br><span class="line">UPDATE accounts <span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">+</span> <span class="number">100.00</span></span><br><span class="line">    <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;Bob&#x27;</span>;</span><br><span class="line"><span class="comment">-- oops ... forget that and use Wally&#x27;s account</span></span><br><span class="line"><span class="keyword">ROLLBACK</span> <span class="keyword">TO</span> my_savepoint;</span><br><span class="line">UPDATE accounts <span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">+</span> <span class="number">100.00</span></span><br><span class="line">    <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;Wally&#x27;</span>;</span><br><span class="line"><span class="keyword">COMMIT</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="窗口函数"><a href="#窗口函数" class="headerlink" title="窗口函数"></a>窗口函数</h2><p>窗口函数对与当前行以某种方式相关的一组表行执行计算。这与可以使用聚合函数完成的计算类型相当。但是，窗口函数不会像非窗口聚合调用那样导致行分组为单个输出行。</p>
+<p>窗口函数调用总是在窗口函数名称和参数之后直接包含一个 OVER 子句。OVER 子句确切地决定了窗口函数如何分割查询行以进行处理。OVER 中的 PARTITION BY 子句将记录分为多个组或分区，这些组或分区共享相同的 PARTITION BY 表达式值</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> depname, empno, salary, <span class="built_in">avg</span>(salary) <span class="keyword">OVER</span> (<span class="keyword">PARTITION</span> <span class="keyword">BY</span> depname) <span class="keyword">FROM</span> empsalary;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">  <span class="attr">depname</span>  <span class="string">| empno | salary |          avg</span></span><br><span class="line"><span class="attr">-----------+-------+--------+-----------------------</span></span><br><span class="line"> <span class="attr">develop</span>   <span class="string">|    11 |   5200 | 5020.0000000000000000</span></span><br><span class="line"> <span class="attr">develop</span>   <span class="string">|     7 |   4200 | 5020.0000000000000000</span></span><br><span class="line"> <span class="attr">develop</span>   <span class="string">|     9 |   4500 | 5020.0000000000000000</span></span><br><span class="line"> <span class="attr">develop</span>   <span class="string">|     8 |   6000 | 5020.0000000000000000</span></span><br><span class="line"> <span class="attr">develop</span>   <span class="string">|    10 |   5200 | 5020.0000000000000000</span></span><br><span class="line"> <span class="attr">personnel</span> <span class="string">|     5 |   3500 | 3700.0000000000000000</span></span><br><span class="line"> <span class="attr">personnel</span> <span class="string">|     2 |   3900 | 3700.0000000000000000</span></span><br><span class="line"> <span class="attr">sales</span>     <span class="string">|     3 |   4800 | 4866.6666666666666667</span></span><br><span class="line"> <span class="attr">sales</span>     <span class="string">|     1 |   5000 | 4866.6666666666666667</span></span><br><span class="line"> <span class="attr">sales</span>     <span class="string">|     4 |   4800 | 4866.6666666666666667</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>还可以使用 OVER 中的 ORDER BY 来控制窗口函数处理行的顺序</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> depname, empno, salary,</span><br><span class="line">       <span class="built_in">rank</span>() <span class="keyword">OVER</span> (<span class="keyword">PARTITION</span> <span class="keyword">BY</span> depname <span class="keyword">ORDER</span> <span class="keyword">BY</span> salary <span class="keyword">DESC</span>)</span><br><span class="line"><span class="keyword">FROM</span> empsalary;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">  <span class="attr">depname</span>  <span class="string">| empno | salary | rank</span></span><br><span class="line"><span class="attr">-----------+-------+--------+------</span></span><br><span class="line"> <span class="attr">develop</span>   <span class="string">|     8 |   6000 |    1</span></span><br><span class="line"> <span class="attr">develop</span>   <span class="string">|    10 |   5200 |    2</span></span><br><span class="line"> <span class="attr">develop</span>   <span class="string">|    11 |   5200 |    2</span></span><br><span class="line"> <span class="attr">develop</span>   <span class="string">|     9 |   4500 |    4</span></span><br><span class="line"> <span class="attr">develop</span>   <span class="string">|     7 |   4200 |    5</span></span><br><span class="line"> <span class="attr">personnel</span> <span class="string">|     2 |   3900 |    1</span></span><br><span class="line"> <span class="attr">personnel</span> <span class="string">|     5 |   3500 |    2</span></span><br><span class="line"> <span class="attr">sales</span>     <span class="string">|     1 |   5000 |    1</span></span><br><span class="line"> <span class="attr">sales</span>     <span class="string">|     4 |   4800 |    2</span></span><br><span class="line"> <span class="attr">sales</span>     <span class="string">|     3 |   4800 |    2</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>​    与窗口函数相关的另一个重要概念是：对于每一行，其分区中都有一组行，称为窗口帧。有些窗口函数只作用于窗口帧中的行，而不是整个分区中的行。默认情况下，如果写了 ORDER BY，则<strong>窗口帧包括从分区起始行到当前行的所有行，以及根据 ORDER BY 子句与当前行相等的所有后续行</strong>。如果省略 ORDER BY，默认窗口帧由分区中的所有记录组成。</p>
+<blockquote>
+<p>order by的窗口帧：分区起始行 ~ 当前所有行 （包括与当前行相等的所有行）</p>
+</blockquote>
+<p>如:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> salary, <span class="built_in">sum</span>(salary) <span class="keyword">OVER</span> () <span class="keyword">FROM</span> empsalary;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> <span class="attr">salary</span> <span class="string">|  sum</span></span><br><span class="line"><span class="attr">--------+-------</span></span><br><span class="line">   <span class="attr">5200</span> <span class="string">| 47100</span></span><br><span class="line">   <span class="attr">5000</span> <span class="string">| 47100</span></span><br><span class="line">   <span class="attr">3500</span> <span class="string">| 47100</span></span><br><span class="line">   <span class="attr">4800</span> <span class="string">| 47100</span></span><br><span class="line">   <span class="attr">3900</span> <span class="string">| 47100</span></span><br><span class="line">   <span class="attr">4200</span> <span class="string">| 47100</span></span><br><span class="line">   <span class="attr">4500</span> <span class="string">| 47100</span></span><br><span class="line">   <span class="attr">4800</span> <span class="string">| 47100</span></span><br><span class="line">   <span class="attr">6000</span> <span class="string">| 47100</span></span><br><span class="line">   <span class="attr">5200</span> <span class="string">| 47100</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>由于 OVER 子句中没有 ORDER BY，所以窗口帧与分区相同，由于没有 PARTITION BY，所以分区是整个表</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> salary, <span class="built_in">sum</span>(salary) <span class="keyword">OVER</span> (<span class="keyword">ORDER</span> <span class="keyword">BY</span> salary) <span class="keyword">FROM</span> empsalary;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> <span class="attr">salary</span> <span class="string">|  sum</span></span><br><span class="line"><span class="attr">--------+-------</span></span><br><span class="line">   <span class="attr">3500</span> <span class="string">|  3500</span></span><br><span class="line">   <span class="attr">3900</span> <span class="string">|  7400</span></span><br><span class="line">   <span class="attr">4200</span> <span class="string">| 11600</span></span><br><span class="line">   <span class="attr">4500</span> <span class="string">| 16100</span></span><br><span class="line">   <span class="attr">4800</span> <span class="string">| 25700</span></span><br><span class="line">   <span class="attr">4800</span> <span class="string">| 25700</span></span><br><span class="line">   <span class="attr">5000</span> <span class="string">| 30700</span></span><br><span class="line">   <span class="attr">5200</span> <span class="string">| 41100</span></span><br><span class="line">   <span class="attr">5200</span> <span class="string">| 41100</span></span><br><span class="line">   <span class="attr">6000</span> <span class="string">| 47100</span></span><br></pre></td></tr></table></figure>
+
+<p>输出结果中，sum会根据order by累加</p>
+<p>​    当查询涉及多个窗口函数时，虽然可以为每个函数单独编写一个<code>OVER</code>子句，但如果多个函数需要相同的窗口行为，这种方法既重复又容易出错。更好的做法是，在<code>WINDOW</code>子句中为每个窗口行为命名，然后在后续的查询中引用它们<code>OVER</code>。例如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="built_in">sum</span>(salary) <span class="keyword">OVER</span> w, <span class="built_in">avg</span>(salary) <span class="keyword">OVER</span> w </span><br><span class="line">  <span class="keyword">FROM</span> empsalary </span><br><span class="line">  <span class="keyword">WINDOW</span> w <span class="keyword">AS</span> (<span class="keyword">PARTITION</span> <span class="keyword">BY</span> depname <span class="keyword">ORDER</span> <span class="keyword">BY</span> salary <span class="keyword">DESC</span>);</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h2><p>一个表<code>cities</code>和一个表<code>capitals</code>。首都也是城市，可以使用表继承的方法</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> cities ( </span><br><span class="line">  name text, </span><br><span class="line">  population <span class="type">real</span>, </span><br><span class="line">  elevation <span class="type">int</span> <span class="comment">-- (in ft) </span></span><br><span class="line">); </span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> capitals ( </span><br><span class="line">  state <span class="type">char</span>(<span class="number">2</span>) <span class="keyword">UNIQUE</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> </span><br><span class="line">) INHERITS (cities);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>在PostgreSQL中，一个表可以继承零个或多个其他表。</p>
+<p>查询父表时，默认会带着子表一起查询。也可以在写入表名时在尾部加上 *，以明确指定包括子表</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> name, elevation</span><br><span class="line">    <span class="keyword">FROM</span> cities<span class="operator">*</span></span><br><span class="line">    <span class="keyword">WHERE</span> elevation <span class="operator">&gt;</span> <span class="number">500</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>ONLY 表示查询只能在 cities 表上运行，而不在继承它的子表上运行</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> name, elevation</span><br><span class="line">    <span class="keyword">FROM</span> <span class="keyword">ONLY</span> cities</span><br><span class="line">    <span class="keyword">WHERE</span> elevation <span class="operator">&gt;</span> <span class="number">500</span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>继承不会自动将数据<code>INSERT</code>或<code>COPY</code>命令从继承层次结构中的其他表传播到其他表。</p>
+</blockquote>
+<ul>
+<li>一个表可以继承多个父表</li>
+<li>除非使用子句明确指定，否则父表上的所有检查约束和非空约束都会自动被其子表继承。其他类型的约束（唯一约束、主键约束和外键约束）则不会被继承。</li>
+</ul>
+<h1 id="值表达式"><a href="#值表达式" class="headerlink" title="值表达式"></a>值表达式</h1><ul>
+<li>位置参数</li>
+</ul>
+<p>函数定义时：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">FUNCTION</span> dept(text) <span class="keyword">RETURNS</span> dept</span><br><span class="line">    <span class="keyword">AS</span> $$ <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> dept <span class="keyword">WHERE</span> name <span class="operator">=</span> $<span class="number">1</span> $$</span><br><span class="line">    <span class="keyword">LANGUAGE</span> <span class="keyword">SQL</span>;</span><br></pre></td></tr></table></figure>
+
+<p>$1 表示引用第一个参数text</p>
+<ul>
+<li>排序表达式</li>
+</ul>
+<p>COLLATE子句会覆盖表达式的排序规则。</p>
+<p>如果未显式指定排序规则，则数据库系统要么从表达式中涉及的列派生排序规则，要么如果表达式中不涉及列，则默认为数据库的默认排序规则。</p>
+<p>COLLATE 子句的两个常见用途是覆盖 ORDER BY 子句中的排序顺序，以及重写具有本地敏感结果的函数或操作符调用的校对方式等</p>
+<p>如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> a, b, c <span class="keyword">FROM</span> tbl <span class="keyword">WHERE</span> ... <span class="keyword">ORDER</span> <span class="keyword">BY</span> a <span class="keyword">COLLATE</span> &quot;C&quot;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> tbl <span class="keyword">WHERE</span> a <span class="operator">&gt;</span> <span class="string">&#x27;foo&#x27;</span> <span class="keyword">COLLATE</span> &quot;C&quot;;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<ul>
+<li>标量子查询</li>
+</ul>
+<p>子查询中，返回结果仅为一行一列的查询，称为标量子查询</p>
+<p>如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> name, (<span class="keyword">SELECT</span> <span class="built_in">max</span>(pop) <span class="keyword">FROM</span> cities <span class="keyword">WHERE</span> cities.state <span class="operator">=</span> states.name)</span><br><span class="line">    <span class="keyword">FROM</span> states;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<ul>
+<li>数组构造函数</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">ARRAY</span>[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span><span class="operator">+</span><span class="number">4</span>];</span><br><span class="line">  <span class="keyword">array</span></span><br><span class="line"><span class="comment">---------</span></span><br><span class="line"> &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">7</span>&#125;</span><br><span class="line">(<span class="number">1</span> <span class="type">row</span>)</span><br></pre></td></tr></table></figure>
+
+<p>默认情况下，数组元素类型是成员表达式的通用类型，</p>
+<p>可以通过显式地将数组构造函数转换为所需的类型来覆盖这一点</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">ARRAY</span>[<span class="number">1</span>,<span class="number">2</span>,<span class="number">22.7</span>]::<span class="type">integer</span>[];</span><br><span class="line">  <span class="keyword">array</span></span><br><span class="line"><span class="comment">----------</span></span><br><span class="line"> &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">23</span>&#125;</span><br><span class="line">(<span class="number">1</span> <span class="type">row</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>也可以构建多维数组</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">ARRAY</span>[<span class="keyword">ARRAY</span>[<span class="number">1</span>,<span class="number">2</span>], <span class="keyword">ARRAY</span>[<span class="number">3</span>,<span class="number">4</span>]];</span><br><span class="line">     <span class="keyword">array</span></span><br><span class="line"><span class="comment">---------------</span></span><br><span class="line"> &#123;&#123;<span class="number">1</span>,<span class="number">2</span>&#125;,&#123;<span class="number">3</span>,<span class="number">4</span>&#125;&#125;</span><br><span class="line">(<span class="number">1</span> <span class="type">row</span>)</span><br><span class="line"><span class="comment">-- 内部数组的ARRAY可以省略，如下</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">ARRAY</span>[[<span class="number">1</span>,<span class="number">2</span>],[<span class="number">3</span>,<span class="number">4</span>]];</span><br></pre></td></tr></table></figure>
+
+
+
+<p>可以从子查询的结果中构建数组</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">ARRAY</span>(<span class="keyword">SELECT</span> oid <span class="keyword">FROM</span> pg_proc <span class="keyword">WHERE</span> proname <span class="keyword">LIKE</span> <span class="string">&#x27;bytea%&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>使用 ARRAY 创建的数组值的下标总是以 1 开头。</p>
+</blockquote>
+<ul>
+<li>表达式求值规则</li>
+</ul>
+<p>运算符或函数的输入不一定按从左到右或其他任何固定顺序求值。</p>
+<p>如果一个表达式的结果只需计算其中的部分即可确定，那么其他子表达式可能根本不会被计算</p>
+<p>例如：or</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="literal">true</span> <span class="keyword">OR</span> somefunc();</span><br><span class="line"><span class="comment">-- somefunc()不会被执行，即使调换顺序SELECT somefunc() OR true;</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h1 id="数据定义"><a href="#数据定义" class="headerlink" title="数据定义"></a>数据定义</h1><h2 id="生成列"><a href="#生成列" class="headerlink" title="生成列"></a>生成列</h2><p>​    生成列是一种特殊的列，它始终由其他列计算得出。</p>
+<p>​    生成列有两种类型：存储型和虚拟型。存储型生成列在写入（插入或更新）时计算，并像普通列一样占用存储空间。虚拟型生成列不占用存储空间，在读取时计算。因此，虚拟型生成列类似于视图，而存储型生成列类似于物化视图（区别在于它始终自动更新）。PostgreSQL 目前仅支持存储型生成列。</p>
+<ul>
+<li>创建虚拟列</li>
+</ul>
+<p><code>GENERATED ALWAYS AS</code></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> people (</span><br><span class="line">    ...,</span><br><span class="line">    height_cm <span class="type">numeric</span>,</span><br><span class="line">    height_in <span class="type">numeric</span> GENERATED ALWAYS <span class="keyword">AS</span> (height_cm <span class="operator">/</span> <span class="number">2.54</span>) STORED</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>关键字<code>STORED</code>用于指定生成列的存储类型</p>
+<p>生成的列不能直接写入。在 INSERT 或 UPDATE 命令中，不能为生成列指定值，但可以指定关键字 DEFAULT。</p>
+<ul>
+<li>生成表达式只能使用不可变函数，不能使用子查询，也不能以任何方式引用当前行以外的任何内容。</li>
+<li>生成表达式不能引用另一个生成的列。</li>
+<li>生成表达式不能引用系统列，除非<code>tableoid</code>……</li>
+<li>生成的列不能有列默认值或标识定义。</li>
+<li>生成的列不能作为分区键的一部分。</li>
+</ul>
+<h1 id="约束条件"><a href="#约束条件" class="headerlink" title="约束条件"></a>约束条件</h1><h2 id="检查约束"><a href="#检查约束" class="headerlink" title="检查约束"></a>检查约束</h2><p>​    检查约束是最通用的约束类型。它允许您指定某一列中的值必须满足布尔（真值）表达式。</p>
+<p>例如，要要求产品价格为正数，可以使用：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> products (</span><br><span class="line">    product_no <span class="type">integer</span>,</span><br><span class="line">    name text,</span><br><span class="line">    price <span class="type">numeric</span> <span class="keyword">CHECK</span> (price <span class="operator">&gt;</span> <span class="number">0</span>)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>还可以用<code>CONSTRAINT</code>关键字为约束单独命名。这样可以明确错误信息，并在需要更改时参考约束。语法如下:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> products (</span><br><span class="line">    product_no <span class="type">integer</span>,</span><br><span class="line">    name text,</span><br><span class="line">    price <span class="type">numeric</span> <span class="keyword">CONSTRAINT</span> positive_price <span class="keyword">CHECK</span> (price <span class="operator">&gt;</span> <span class="number">0</span>)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>同时，也可以引用多个列</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> products (</span><br><span class="line">    product_no <span class="type">integer</span>,</span><br><span class="line">    name text,</span><br><span class="line">    price <span class="type">numeric</span> <span class="keyword">CHECK</span> (price <span class="operator">&gt;</span> <span class="number">0</span>),</span><br><span class="line">    discounted_price <span class="type">numeric</span> <span class="keyword">CHECK</span> (discounted_price <span class="operator">&gt;</span> <span class="number">0</span>),</span><br><span class="line">    <span class="keyword">CHECK</span> (price <span class="operator">&gt;</span> discounted_price)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>前两个约束称为列约束，而第三个约束为表约束，因为它独立于任何列定义之外编写</p>
+<p>也可以写成：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> products ( </span><br><span class="line">    product_no <span class="type">integer</span>, </span><br><span class="line">    name text, </span><br><span class="line">    price <span class="type">numeric</span> <span class="keyword">CHECK</span> (price <span class="operator">&gt;</span> <span class="number">0</span>), </span><br><span class="line">    discounted_price <span class="type">numeric</span>, </span><br><span class="line">    <span class="keyword">CHECK</span> (discounted_price <span class="operator">&gt;</span> <span class="number">0</span> <span class="keyword">AND</span> price <span class="operator">&gt;</span> discounted_price) </span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>如果检查表达式的计算结果为真或空值，则检查约束得到满足</p>
+</blockquote>
+<h2 id="非空约束"><a href="#非空约束" class="headerlink" title="非空约束"></a>非空约束</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE products (</span><br><span class="line">    product_no integer NOT NULL,</span><br><span class="line">    name text NOT NULL,</span><br><span class="line">    price numeric</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>以列可以有多个约束条件</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> products ( </span><br><span class="line">    product_no <span class="type">integer</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span>, </span><br><span class="line">    name text <span class="keyword">NOT</span> <span class="keyword">NULL</span>, </span><br><span class="line">    price <span class="type">numeric</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> <span class="keyword">CHECK</span> (price <span class="operator">&gt;</span> <span class="number">0</span>) </span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="唯一约束"><a href="#唯一约束" class="headerlink" title="唯一约束"></a>唯一约束</h2><p>唯一性约束确保表中某一列或一组列所包含的数据在所有行中的唯一的。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> products (</span><br><span class="line">    product_no <span class="type">integer</span> <span class="keyword">UNIQUE</span>,</span><br><span class="line">    name text,</span><br><span class="line">    price <span class="type">numeric</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>同样，也可以使用<code>CONSTRAINT</code>关键字给唯一约束定义名称</p>
+<p>上述为列约束的写法，也可以以表约束的形式编写:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> products (</span><br><span class="line">    product_no <span class="type">integer</span>,</span><br><span class="line">    name text,</span><br><span class="line">    price <span class="type">numeric</span>,</span><br><span class="line">    <span class="keyword">UNIQUE</span> (product_no)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>要为多个列定义组合唯一约束时，需要写成表约束，并用逗号分隔列名</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> example (</span><br><span class="line">    a <span class="type">integer</span>,</span><br><span class="line">    b <span class="type">integer</span>,</span><br><span class="line">    c <span class="type">integer</span>,</span><br><span class="line">    <span class="keyword">UNIQUE</span> (a, c)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>添加唯一约束会自动在约束列上创建唯一的B树索引。</p>
+<p>默认情况下，两个空值在比较中不被视为相等。这意味着即使存在唯一性约束，也可能存储重复行，这些重复行至少在一个受约束的列中包含空值。可以通过添加<code>NULLS NOT DISTINCT</code>类似这样的子句来更改此行为：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> products ( </span><br><span class="line">    product_no <span class="type">integer</span> <span class="keyword">UNIQUE</span> NULLS <span class="keyword">NOT</span> <span class="keyword">DISTINCT</span> , </span><br><span class="line">    name text, </span><br><span class="line">    price <span class="type">numeric</span> </span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>唯一性约束默认行为为：NULLS DISTINCT。区分NULL，即多上数据中的NULL值，它们是唯一的，互不相等</p>
+</blockquote>
+<h2 id="主键约束"><a href="#主键约束" class="headerlink" title="主键约束"></a>主键约束</h2><p>唯一不能为空</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> products (</span><br><span class="line">    product_no <span class="type">integer</span> <span class="keyword">PRIMARY</span> KEY,</span><br><span class="line">    name text,</span><br><span class="line">    price <span class="type">numeric</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>可以设置联合主键</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> example ( </span><br><span class="line">    a <span class="type">integer</span>, </span><br><span class="line">    b <span class="type">integer</span>, </span><br><span class="line">    c <span class="type">integer</span>, <span class="keyword">PRIMARY</span> KEY (a, c) </span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>添加主键将自动在主键中列出的列或列组上创建唯一的 B 树索引，并强制标记该列<code>NOT NULL</code>。</p>
+<h2 id="外键约束"><a href="#外键约束" class="headerlink" title="外键约束"></a>外键约束</h2><p>外键约束规定，一个表中某一列（或一组列）的值必须与另一个表中某一行的值相匹配。这维护了两个相关表之间的<em>引用完整性。</em></p>
+<p>例如，已有产品表：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> products (</span><br><span class="line">    product_no <span class="type">integer</span> <span class="keyword">PRIMARY</span> KEY,</span><br><span class="line">    name text,</span><br><span class="line">    price <span class="type">numeric</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>创建订单表，并使用外键关联：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> orders ( </span><br><span class="line">    order_id <span class="type">integer</span> <span class="keyword">PRIMARY</span> KEY, </span><br><span class="line">    product_no <span class="type">integer</span> <span class="keyword">REFERENCES</span> products (product_no) , </span><br><span class="line">    quantity <span class="type">integer</span> </span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>orders表称为 引用表，produces表称为 被引用表</p>
+<p>也可以简写成：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> orders ( </span><br><span class="line">    order_id <span class="type">integer</span> <span class="keyword">PRIMARY</span> KEY, </span><br><span class="line">    product_no <span class="type">integer</span> <span class="keyword">REFERENCES</span> products , </span><br><span class="line">    quantity <span class="type">integer</span> </span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>在没有显示指明关联的列名时，默认关联被引用表的主键</p>
+</blockquote>
+<p>表约束写法：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> orders ( </span><br><span class="line">    order_id <span class="type">integer</span> <span class="keyword">PRIMARY</span> KEY, </span><br><span class="line">    product_no <span class="type">integer</span> , </span><br><span class="line">    quantity <span class="type">integer</span>,</span><br><span class="line">    <span class="keyword">FOREIGN</span> KEY (product_no) <span class="keyword">REFERENCES</span> products (product_no) </span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>外键使用的很少</p>
+<ol>
+<li>每次写入都要检查关联表是否存在对应键，带来性能开销</li>
+<li>分库分表场景下，外键无法跨实例关联</li>
+<li>增加DDL操作复杂度，rename表或者drop列时，需要先删除外键再重建</li>
+</ol>
+</blockquote>
+<h2 id="排除约束"><a href="#排除约束" class="headerlink" title="排除约束"></a>排除约束</h2><p>​    排除约束确保如果使用指定的运算符对任意两行数据在指定的列或表达式上进行比较，则至少有一个运算符比较结果会返回 false 或 null。语法如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE circles (</span><br><span class="line">    c circle,</span><br><span class="line">    EXCLUDE USING gist (c WITH &amp;&amp;)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h1 id="系统列"><a href="#系统列" class="headerlink" title="系统列"></a>系统列</h1><p>每个表都包含若干系统隐式定义的<em>系统列</em>。因此，这些列名不能用作用户自定义列的名称</p>
+<ul>
+<li><p><code>tableoid</code></p>
+<p>此列是包含该行的表的 OID。对于从分区表或继承层次结构中选择数据的查询，如果没有它，很难确定一行数据来自哪个表。<code>tableoid</code> 可以与 <code>pg_class</code> 的 oid 列连接来获取表名。</p>
+</li>
+<li><p><code>xmin</code></p>
+<p>此行版本插入事务的标识（事务 ID）。（行版本是行的一个特定状态；每次更新行都会为同一逻辑行创建一个新的行版本。）</p>
+</li>
+<li><p><code>cmin</code></p>
+<p>插入事务中的命令标识符（从零开始）。</p>
+</li>
+<li><p><code>xmax</code></p>
+<p>删除事务的标识（事务 ID），如果行版本未删除，则此列值为零。在可见行版本中，此列的值可能不为零。这通常表示删除事务尚未提交，或者删除尝试已被回滚。</p>
+</li>
+<li><p><code>cmax</code></p>
+<p>删除事务中的命令标识符，或零。</p>
+</li>
+<li><p><code>ctid</code></p>
+<p>行版本在其表中的物理位置。主键应用于标识逻辑行。</p>
+</li>
+</ul>
+<h1 id="模式"><a href="#模式" class="headerlink" title="模式"></a>模式</h1><p>数据库包含一个或多个命名模式，每个模式又包含表。</p>
+<p>模式还包含其他类型的命名对象，包括数据类型、函数和运算符。相同的对象名称可以在不同的模式中使用而不会冲突；与数据库不同，模式并非严格隔离：如果用户拥有相应的权限，则可以访问其所连接的数据库中任何模式中的对象。</p>
+<p><img src="/2025/12/29/PostgreSQL-15/typora-user-images\PostgreSQL\image-20251230174528559.png" alt="image-20251230174528559"></p>
+<h2 id="创建模式"><a href="#创建模式" class="headerlink" title="创建模式"></a>创建模式</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://www.postgresql.org/docs/15/sql-createschema.html">CREATE SCHEMA</a></li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> SCHEMA myschema;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>要在模式中创建或访问对象，请编写由模式名称和表名称组成的<em>限定名称，两者之间用点号分隔：</em></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">schema.table</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>创建数据库时，默认会创建一个名为<code>public</code>的模式。</p>
+</blockquote>
+<ul>
+<li>DROP SCHEMA … CASCADE</li>
+</ul>
+<p>删除模式，包括模式下的所有对象</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DROP</span> SCHEMA myschema CASCADE;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>可以通过模式，将用户权限划分开来。</p>
+</blockquote>
+<h2 id="模式搜索路径"><a href="#模式搜索路径" class="headerlink" title="模式搜索路径"></a>模式搜索路径</h2><p>限定名称编写起来很繁琐，但是不指定模式名称，只包含表名怎么确定访问的是哪里的表呢？</p>
+<p>系统通过搜索路径来确定要引用的表，搜索路径是一个要查找的模式列表。搜索路径中第一个匹配的表即为目标表，如果在搜索路径中找不到匹配项，即使数据库中其他模式中存在匹配的表名，系统也会报告错误。</p>
+<ul>
+<li>查看当前搜索路径</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> search_path;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>默认设置下会返回</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> search_path</span><br><span class="line"><span class="comment">--------------</span></span><br><span class="line"> &quot;$user&quot;, public</span><br></pre></td></tr></table></figure>
+
+<p>搜索路径中的第一个模式称为当前模式。</p>
+<p>第一个元素指定要搜索与当前用户同名的模式。如果不存在这样的模式，则忽略该条目。第二个元素指的是我们之前看到的公共模式。</p>
+<p>搜索路径中存在的第一个模式是创建新对象的默认位置。这就是为什么默认情况下对象创建在公共模式中的原因。</p>
+<p>当在任何其他上下文中引用对象而未指定模式（例如修改表、修改数据或执行查询命令）时，系统会遍历搜索路径，直到找到匹配的对象</p>
+<p>要将新模式添加到路径中，可以使用：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SET</span> search_path <span class="keyword">TO</span> myschema,public;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这样，在不指定模式的情况下，访问表时，他会首先访问myschema模式，因为他是第一个元素</p>
+</blockquote>
+<h2 id="模式和权限"><a href="#模式和权限" class="headerlink" title="模式和权限"></a>模式和权限</h2><p>默认情况下，用户无法访问他们不拥有的模式中的任何对象。要允许访问，模式的所有者必须授予相应的<code>USAGE</code>权限，默认情况下，所有用户都拥有<code>public</code>的权限</p>
+<h2 id="系统目录架构"><a href="#系统目录架构" class="headerlink" title="系统目录架构"></a>系统目录架构</h2><p>除了<code>public</code>用户模式之外，每个数据库都包含一个<code>pg_catalog</code>系统模式，其中包含系统表以及所有内置数据类型、函数和运算符。系统模式<code>pg_catalog</code>始终是搜索路径的一部分。</p>
+<p>如果引用路径中未显式指定系统模式，那么在搜索路径的模式之前，会先隐式地搜索它。</p>
+<blockquote>
+<p>由于系统表名称以 pg_ 开头，因此最好避免使用此类名称，以免和系统表命名发生冲突，因为会先搜索系统模式</p>
+</blockquote>
+<h1 id="表分区"><a href="#表分区" class="headerlink" title="表分区"></a>表分区</h1><p>分区是指将逻辑上是一个大表的数据存储分割成若干个较小的物理分区。分区可以带来以下几个好处：</p>
+<ul>
+<li>在某些情况下，查询性能可以得到显著提升，尤其是在表中大部分访问频繁的行都位于单个分区或少数几个分区中时。分区有效地替代了索引树的上层结构，使得索引中频繁使用的部分更有可能被加载到内存中。</li>
+<li>当查询或更新操作访问单个分区的很大一部分时，可以通过对该分区进行顺序扫描而不是使用索引来提高性能，因为顺序扫描需要对整个表进行分散的随机访问读取。</li>
+<li>如果分区设计中考虑了使用模式，则可以通过添加或删除分区来完成批量加载和删除。使用 DROP TABLE 删除单个分区或执行 ALTER TABLE DETACH PARTITION 比批量操作要快得多。这些命令还完全避免了批量 DELETE 造成的 VACUUM （数据库清理）开销。</li>
+<li>不常用的数据可以迁移到更便宜但速度较慢的存储介质上。</li>
+</ul>
+<p>PG内置支持以下几种分区</p>
+<ul>
+<li><p>Range Partitioning 范围分区</p>
+<p>表被划分为由关键列或列集定义的 “范围”，分配给不同分区的值范围之间没有重叠。例如，可以按日期范围或特定业务对象的标识符范围进行分区。每个范围的界限可以理解为下端包含，上端不包含。例如，如果一个分区的范围是从 1 到 10，而下一个分区的范围是从 10 到 20，那么值 10 就属于第二个分区，而不属于第一个分区。（左闭右开）</p>
+</li>
+<li><p>List Partitioning 列表分区</p>
+<p>通过明确列出每个分区中出现的键值来对表进行分区。</p>
+</li>
+<li><p>Hash Partitioning 哈希分区</p>
+<p>通过哈希取模来分区</p>
+</li>
+</ul>
+<h2 id="声明式分区"><a href="#声明式分区" class="headerlink" title="声明式分区"></a><strong>声明式分区</strong></h2><p>​    PG允许声明将表划分为多个分区。被划分后的表称为<em>分区表</em>。</p>
+<p>​    分区表本身是一个“虚拟”表，它本身没有存储空间。存储空间属于<em>各个分区</em>，这些分区是与分区表关联的普通表。</p>
+<p>​    每个分区存储由其<em>分区边界</em>定义的数据子集。插入到分区表中的所有行都会根据分区键列的值被路由到相应的分区。如果更新了某行的分区键，并且该行不再满足其原始分区的边界，则该行将被移动到另一个分区。</p>
+<p>​    分区本身可以定义为分区表，从而形成<em>子分区</em>。无法将普通表转换为分区表，反之亦然。但是，可以将现有的普通表或分区表添加为分区表的分区，或者从分区表中删除分区，使其成为独立表</p>
+<p>例如：</p>
+<ol>
+<li>要创建一个分区表，根据时间分区</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> measurement ( </span><br><span class="line">    city_id <span class="type">int</span> <span class="keyword">not</span> <span class="keyword">null</span>, </span><br><span class="line">    logdate <span class="type">date</span> <span class="keyword">not</span> <span class="keyword">null</span>, </span><br><span class="line">    peaktemp <span class="type">int</span>, </span><br><span class="line">    unitsales <span class="type">int</span> </span><br><span class="line">) <span class="keyword">PARTITION</span> <span class="keyword">BY</span> <span class="keyword">RANGE</span> (logdate);</span><br></pre></td></tr></table></figure>
+
+
+
+<ol start="2">
+<li>创建分区。</li>
+</ol>
+<p>每个分区的定义必须指定与父分区的分区方法和分区键相对应的边界</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> measurement_y2006m02 <span class="keyword">PARTITION</span> <span class="keyword">OF</span> measurement </span><br><span class="line">    <span class="keyword">FOR</span> <span class="keyword">VALUES</span> <span class="keyword">FROM</span> (<span class="string">&#x27;2006-02-01&#x27;</span>) <span class="keyword">TO</span> (<span class="string">&#x27;2006-03-01&#x27;</span>); </span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> measurement_y2006m03 <span class="keyword">PARTITION</span> <span class="keyword">OF</span> measurement </span><br><span class="line">    <span class="keyword">FOR</span> <span class="keyword">VALUES</span> <span class="keyword">FROM</span> (<span class="string">&#x27;2006-03-01&#x27;</span>) <span class="keyword">TO</span> (<span class="string">&#x27;2006-04-01&#x27;</span>); </span><br><span class="line"></span><br><span class="line">... </span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> measurement_y2007m11 <span class="keyword">PARTITION</span> <span class="keyword">OF</span> measurement </span><br><span class="line">    <span class="keyword">FOR</span> <span class="keyword">VALUES</span> <span class="keyword">FROM</span> (<span class="string">&#x27;2007-11-01&#x27;</span>) <span class="keyword">TO</span> (<span class="string">&#x27;2007-12-01&#x27;</span>); </span><br></pre></td></tr></table></figure>
+
+
+
+<p>在分区表上创建索引。这将自动在每个分区上创建匹配的索引，以后创建或附加的任何分区也将有这样的索引。在分区表上声明的索引或唯一约束是 “虚拟 ”的，这与分区表是 “虚拟 ”的一样：实际数据在各个分区表的子索引中。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> INDEX <span class="keyword">ON</span> measurement (logdate);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>声明式分区需要注意的点：</p>
+<ol>
+<li>分区必须与分区表具有完全相同的列集。</li>
+<li>要在分区表上创建唯一键或主键约束，分区键不得包含任何表达式或函数调用，<strong>约束列必须包含所有分区键列</strong>。存在这种限制是因为构成约束的各个索引只能直接在自己的分区内强制执行唯一性；因此，分区结构本身必须保证不同分区之间不存在重复。</li>
+</ol>
+<h2 id="分区维护"><a href="#分区维护" class="headerlink" title="分区维护"></a><strong>分区维护</strong></h2><p>我们常常需要删除存放旧数据的分区，并定期添加新分区来存放新数据。分区最重要的优势之一就在于，它允许我们通过操作分区结构来快速完成这项原本繁琐的任务，而无需实际移动大量数据。</p>
+<p>例如直接删除分区：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> measurement_y2006m02;</span><br></pre></td></tr></table></figure>
+
+<p>由于无需逐行删除记录，因此速度非常快</p>
+<p>更好的方法：从分区表中移除分区，但保留对其作为独立表的访问权限</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> measurement DETACH <span class="keyword">PARTITION</span> measurement_y2006m02; </span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> measurement DETACH <span class="keyword">PARTITION</span> measurement_y2006m02 CONCURRENTLY;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>添加新增区</p>
+<p>可以直接在分区表中创建一个空分区</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> measurement_y2008m02 <span class="keyword">PARTITION</span> <span class="keyword">OF</span> measurement </span><br><span class="line">    <span class="keyword">FOR</span> <span class="keyword">VALUES</span> <span class="keyword">FROM</span> (<span class="string">&#x27;2008-02-01&#x27;</span>) <span class="keyword">TO</span> (<span class="string">&#x27;2008-03-01&#x27;</span>) </span><br><span class="line">    TABLESPACE fasttablespace;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>更方便的做法，是先创建新表，然后再将其附加为分区。这样就可以在新数据出现在分区表之前对其进行加载、检查和转换。</p>
+<p>此外，ATTACH PARTITION 操作只需要分区表上的 SHARE UPDATE 独占锁，而不是 CREATE TABLE … PARTITION 所需的 ACCESS 独占锁。PARTITION OF 所要求的 ACCESS EXCLUSIVE 锁，因此它对分区表上的并发操作更友好</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> measurement_y2008m02</span><br><span class="line">  (<span class="keyword">LIKE</span> measurement INCLUDING DEFAULTS INCLUDING CONSTRAINTS)</span><br><span class="line">  TABLESPACE fasttablespace;</span><br><span class="line"></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> measurement_y2008m02 <span class="keyword">ADD</span> <span class="keyword">CONSTRAINT</span> y2008m02</span><br><span class="line">   <span class="keyword">CHECK</span> ( logdate <span class="operator">&gt;=</span> <span class="type">DATE</span> <span class="string">&#x27;2008-02-01&#x27;</span> <span class="keyword">AND</span> logdate <span class="operator">&lt;</span> <span class="type">DATE</span> <span class="string">&#x27;2008-03-01&#x27;</span> );</span><br><span class="line"></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> measurement ATTACH <span class="keyword">PARTITION</span> measurement_y2008m02</span><br><span class="line">    <span class="keyword">FOR</span> <span class="keyword">VALUES</span> <span class="keyword">FROM</span> (<span class="string">&#x27;2008-02-01&#x27;</span>) <span class="keyword">TO</span> (<span class="string">&#x27;2008-03-01&#x27;</span> );</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>运行<code>ATTACH PARTITION</code>命令前，建议<code>CHECK</code>在要附加的表上创建一个与预期分区约束相匹配的约束。这样，系统就可以跳过验证隐式分区约束所需的扫描，如果没有该<code>CHECK</code>约束，系统会在锁定该分区的同时扫描表以验证分区约束<code>ACCESS EXCLUSIVE</code>。ATTACH PARTITION 完成后可以删除多余的 CHECK 约束。</p>
+<p>如果被附加的表本身是一个分区表，那么它的每个子分区都将被递归锁定和扫描，直到遇到合适的 CHECK 约束或达到叶分区为止</p>
+</blockquote>
+<h2 id="使用继承进行分区"><a href="#使用继承进行分区" class="headerlink" title="使用继承进行分区"></a>使用继承进行分区</h2><p>某些情况下，使用继承的方式更灵活</p>
+<ul>
+<li>对于声明式分区，分区必须与分区表具有完全相同的列集；而对于表继承，子表可以具有父表中不存在的额外列。</li>
+<li>表继承允许多重继承。</li>
+<li>声明式分区仅支持范围分区、列表分区和哈希分区，而表继承允许用户以自己选择的方式划分数据。</li>
+</ul>
+<p>示例:</p>
+<ol>
+<li>创建父表</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> measurement (</span><br><span class="line">    city_id         <span class="type">int</span> <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line">    logdate         <span class="type">date</span> <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line">    peaktemp        <span class="type">int</span>,</span><br><span class="line">    unitsales       <span class="type">int</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+
+
+<ol start="2">
+<li>创建多个“子”表，每个子表都继承自该父表。这些表在各个方面都是普通的 PostgreSQL 表</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> measurement_y2006m02 (</span><br><span class="line">    <span class="keyword">CHECK</span> ( logdate <span class="operator">&gt;=</span> <span class="type">DATE</span> <span class="string">&#x27;2006-02-01&#x27;</span> <span class="keyword">AND</span> logdate <span class="operator">&lt;</span> <span class="type">DATE</span> <span class="string">&#x27;2006-03-01&#x27;</span> )</span><br><span class="line">) INHERITS (measurement);</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> measurement_y2006m03 (</span><br><span class="line">    <span class="keyword">CHECK</span> ( logdate <span class="operator">&gt;=</span> <span class="type">DATE</span> <span class="string">&#x27;2006-03-01&#x27;</span> <span class="keyword">AND</span> logdate <span class="operator">&lt;</span> <span class="type">DATE</span> <span class="string">&#x27;2006-04-01&#x27;</span> )</span><br><span class="line">) INHERITS (measurement);</span><br><span class="line"></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<ol start="3">
+<li>重定向</li>
+</ol>
+<p>我们希望将用户的INSERT INTO measurement语句，重定向到具体的子表中，可以在父表中创建触发器，通过触发器重定向到对应子表。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">OR</span> REPLACE <span class="keyword">FUNCTION</span> measurement_insert_trigger() </span><br><span class="line"><span class="keyword">RETURNS</span> <span class="keyword">TRIGGER</span> <span class="keyword">AS</span> $$ </span><br><span class="line"><span class="keyword">BEGIN</span> </span><br><span class="line">    IF ( NEW.logdate <span class="operator">&gt;=</span> <span class="type">DATE</span> <span class="string">&#x27;2006-02-01&#x27;</span> <span class="keyword">AND</span> </span><br><span class="line">         NEW.logdate <span class="operator">&lt;</span> <span class="type">DATE</span> <span class="string">&#x27;2006-03-01&#x27;</span> ) <span class="keyword">THEN</span> </span><br><span class="line">        <span class="keyword">INSERT</span> <span class="keyword">INTO</span> measurement_y2006m02 <span class="keyword">VALUES</span> (NEW.<span class="operator">*</span>); </span><br><span class="line">    ELSIF ( NEW.logdate <span class="operator">&gt;=</span> <span class="type">DATE</span> <span class="string">&#x27;2006-03-01&#x27;</span> <span class="keyword">AND</span> </span><br><span class="line">            NEW.logdate <span class="operator">&lt;</span> <span class="type">DATE</span> <span class="string">&#x27;2006-04-01&#x27;</span> ) <span class="keyword">THEN</span> </span><br><span class="line">        <span class="keyword">INSERT</span> <span class="keyword">INTO</span> measurement_y2006m03 <span class="keyword">VALUES</span> (NEW.<span class="operator">*</span>); </span><br><span class="line">    ... </span><br><span class="line">    ELSIF ( NEW.logdate <span class="operator">&gt;=</span> <span class="type">DATE</span> <span class="string">&#x27;2008-01-01&#x27;</span> <span class="keyword">AND</span> </span><br><span class="line">            NEW.logdate <span class="operator">&lt;</span> <span class="type">DATE</span> <span class="string">&#x27;2008-02-01&#x27;</span> ) <span class="keyword">THEN</span> </span><br><span class="line">        <span class="keyword">INSERT</span> <span class="keyword">INTO</span> measurement_y2008m01 <span class="keyword">VALUES</span> (NEW.<span class="operator">*</span>); </span><br><span class="line">    <span class="keyword">ELSE</span> </span><br><span class="line">        RAISE EXCEPTION <span class="string">&#x27;日期超出范围！&#x27;</span>; </span><br><span class="line">    <span class="keyword">END</span> IF; </span><br><span class="line">    <span class="keyword">RETURN</span> <span class="keyword">NULL</span>; </span><br><span class="line"><span class="keyword">END</span>; </span><br><span class="line">$$ </span><br><span class="line"><span class="keyword">LANGUAGE</span> plpgsql;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>另一种重定向到子表的方法是，再父表上设置规则，而不是用触发器</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> RULE measurement_insert_y2006m02 <span class="keyword">AS</span> </span><br><span class="line"><span class="keyword">ON</span> <span class="keyword">INSERT</span> <span class="keyword">TO</span> measurement <span class="keyword">WHERE</span> </span><br><span class="line">    ( logdate <span class="operator">&gt;=</span> <span class="type">DATE</span> <span class="string">&#x27;2006-02-01&#x27;</span> <span class="keyword">AND</span> logdate <span class="operator">&lt;</span> <span class="type">DATE</span> <span class="string">&#x27;2006-03-01&#x27;</span> ) </span><br><span class="line">DO INSTEAD </span><br><span class="line">    <span class="keyword">INSERT</span> <span class="keyword">INTO</span> measurement_y2006m02 <span class="keyword">VALUES</span> (NEW.<span class="operator">*</span>); </span><br><span class="line">... </span><br></pre></td></tr></table></figure>
+
+<p>但是开销比触发器大，而且如果数据没有包含日期，会将数据写入父表</p>
+<h2 id="继承分区维护"><a href="#继承分区维护" class="headerlink" title="继承分区维护"></a>继承分区维护</h2><p>要快速删除旧数据，只需删除不再需要的子表即可：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> tableName</span><br></pre></td></tr></table></figure>
+
+
+
+<p>要从继承层次结构表中删除子表，但保留对其本身的表的访问权限：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> child_table_name <span class="keyword">NO</span> INHERIT parent_table;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>要添加新的子表来处理新数据，先创建一个空的子表</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> measurement_y2008m02 ( </span><br><span class="line">    <span class="keyword">CHECK</span> ( logdate <span class="operator">&gt;=</span> <span class="type">DATE</span> <span class="string">&#x27;2008-02-01&#x27;</span> <span class="keyword">AND</span> logdate <span class="operator">&lt;</span> <span class="type">DATE</span> <span class="string">&#x27;2008-03-01&#x27;</span> ) </span><br><span class="line">) INHERITS (measurement);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>也可以先创建并填充新的子表，然后再将其添加到表层次结构中。这样，数据就可以在对父表进行查询之前进行加载、检查和转换。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> measurement_y2008m02 </span><br><span class="line">  (<span class="keyword">LIKE</span> measurement INCLUDING DEFAULTS INCLUDING CONSTRAINTS); </span><br><span class="line">  </span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> measurement_y2008m02 <span class="keyword">ADD</span> <span class="keyword">CONSTRAINT</span> y2008m02 </span><br><span class="line">   <span class="keyword">CHECK</span> ( logdate <span class="operator">&gt;=</span> <span class="type">DATE</span> <span class="string">&#x27;2008-02-01&#x27;</span> <span class="keyword">AND</span> logdate <span class="operator">&lt;</span> <span class="type">DATE</span> <span class="string">&#x27;2008-03-01&#x27;</span> ); </span><br><span class="line"></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> measurement_y2008m02 INHERIT measurement;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>继承分区注意：</p>
+<ul>
+<li>索引和外键约束适用于单个表，而不适用于其继承的子表，因此需要注意一些<a target="_blank" rel="noopener" href="https://www.postgresql.org/docs/15/ddl-inherit.html#DDL-INHERIT-CAVEATS">注意事项。</a></li>
+<li><code>INSERT</code>带有子句的语句<code>ON CONFLICT</code>不太可能按预期工作，因为<code>ON CONFLICT</code>只有在指定目标关系上出现唯一违规时才会执行操作，而不是在其子关系上执行操作。</li>
+<li>除非应用程序明确知道分区方案，否则需要使用触发器或规则将行路由到所需的子表。编写触发器可能很复杂，而且速度远低于声明式分区内部执行的元组路由。</li>
+</ul>
+<h2 id="分区修剪"><a href="#分区修剪" class="headerlink" title="分区修剪"></a>分区修剪</h2><p>​    分区修剪是一种查询优化技术，可以提高声明式分区表的性能</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SET</span> enable_partition_pruning <span class="operator">=</span> <span class="keyword">on</span>;  <span class="comment">-- 默认开启</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">FROM</span> measurement <span class="keyword">WHERE</span> logdate <span class="operator">&gt;=</span> <span class="type">DATE</span> <span class="string">&#x27;2008-01-01&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>​    如果没有分区修剪，上述查询会扫描表的每个分区<code>measurement</code>。启用分区修剪后，查询规划器会检查每个分区的定义，并证明该分区无需扫描，因为它不能包含任何满足查询 WHERE 子句的行。当规划器可以证明这一点时，它会从查询计划中排除（修剪）该分区。</p>
+<h2 id="分区和约束排除"><a href="#分区和约束排除" class="headerlink" title="分区和约束排除"></a>分区和约束排除</h2><p>​    <em>约束排除</em>是一种类似于分区剪枝的查询优化技术。虽然它主要用于使用传统继承方法实现的分区，但也可以用于其他用途，包括声明式分区。</p>
+<p>​    约束排除的工作原理与分区修剪非常相似，区别在于约束排除使用每个表的<code>CHECK</code>约束（这也是它名称的由来），而分区修剪使用表的分区边界，分区边界仅在声明式分区的情况下存在。另一个区别是，约束排除仅在执行计划时应用。</p>
+<p>​    约束排除使用 CHECK 约束，这使得它比分区修剪慢，有时可以用作一个优点：因为除了其内部分区边界之外，甚至可以在声明式分区表上定义约束，因此约束排除可能能够从查询计划中删除其他分区。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://c89757.github.io/2025/12/29/PostgreSQL-15/" title="PostgreSQL-15" target="_blank" rel="external">https://c89757.github.io/2025/12/29/PostgreSQL-15/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://gitee.com/c89757" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://gitee.com/c89757" target="_blank"><span class="text-dark">colin</span><small class="ml-1x">悟已往之不谏，知来者之可追</small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2026/01/28/%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6%E6%A8%A1%E5%9E%8B/" title="访问控制模型"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2025/08/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%A0%86%E5%A4%96%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/" title="记一次堆外内存泄漏"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/cofess" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/cofess" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle=tooltip data-placement=top><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2026 John Doe
+        
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+
+
+  <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>
+  <script>
+  //利用 FancyBox 实现点击图片放大
+  $(document).ready(function() {
+    $('article img').not('[hidden]').not('.panel-body img').each(function() {
+      var $image = $(this);
+      var imageCaption = $image.attr('alt');
+      var $imageWrapLink = $image.parent('a');
+      if ($imageWrapLink.length < 1) {
+        var src = this.getAttribute('src');
+        var idx = src.lastIndexOf('?');
+        if (idx != -1) {
+          src = src.substring(0, idx);
+        }
+        $imageWrapLink = $image.wrap('<a href="' + src + '"></a>').parent('a');
+      }
+      $imageWrapLink.attr('data-fancybox', 'images');
+      if (imageCaption) {
+        $imageWrapLink.attr('data-caption', imageCaption);
+      }
+    });
+    $().fancybox({
+      selector: '[data-fancybox="images"]',
+      hash: false,
+      loop: false,
+    });
+  });
+  </script>
+
+
+
+
+
+</body>
+</html>
