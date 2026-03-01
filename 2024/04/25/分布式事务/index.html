@@ -25,13 +25,13 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="ACIDAtomicity：原子性。要么全部执行，要么都不执行 Consistency：一致性。数据状态保持一致 Isolation：隔离性。事务之间互不干扰 Durability：持久性。事务提交后永久生效 分布式事务分类1.刚性事务  强一致性：各个业务操作必须在事务结束时全部成功，或者全部失败 XA模型 满足CAP理论的CP  2.柔性事务  保证最终一致性，事务结束后在可接受的时间范围内，">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://c89757.github.io/2024/04/25/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/typora-user-images/分布式事务/image-20260106185333867.png">
+<meta property="og:image" content="https://c89757.github.io/2024/04/25/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/image-20260106185333867.png">
 <meta property="article:published_time" content="2024-04-25T10:26:01.000Z">
-<meta property="article:modified_time" content="2026-01-29T14:01:00.038Z">
+<meta property="article:modified_time" content="2026-03-01T15:19:49.085Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="分布式">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://c89757.github.io/2024/04/25/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/typora-user-images/分布式事务/image-20260106185333867.png">
+<meta name="twitter:image" content="https://c89757.github.io/2024/04/25/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/image-20260106185333867.png">
   <!-- Canonical links -->
   <link rel="canonical" href="https://c89757.github.io/2024/04/25/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/index.html">
   
@@ -410,13 +410,22 @@
 <li>事务管理器（TM）：负责管理全局事务，分配全局事务ID，监测事务的执行速度，并负责事务的提交，回滚，失败恢复等。</li>
 </ul>
 <p>2PC（两阶段提交）是XA规范标准实现</p>
-<p><img src="/2024/04/25/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/typora-user-images\分布式事务\image-20260106185333867.png" alt="image-20260106185333867"></p>
+<br>
+
+<img src="/2024/04/25/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/image-20260106185333867.png" class>
+
+<br>
+
+
+
 <p>主要分为<code>prepare</code>阶段和<code>commit</code>阶段</p>
 <ol>
 <li>AP发起一个全局事务，并且创建一个全局事务ID</li>
 <li>TM发起prepare投票，RM对投票进行表决，此阶段数据库会锁定资源</li>
 <li>RM都同意后，TM发起commit提交。其中任何一个prepare时不同意，TM都会发起rollback</li>
 </ol>
+<br>
+
 <p>缺点：</p>
 <ol>
 <li>同步阻塞模型，并发度差</li>
